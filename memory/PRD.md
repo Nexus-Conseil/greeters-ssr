@@ -1,45 +1,53 @@
-# PRD — Greeters CMS: menu drag-and-drop + preview frontend
+# PRD — Greeters SSR migration fidèle
 
 ## Problème d’origine
-- Rendre le gestionnaire de menu plus fluide avec un réordonnancement visuel par glisser-déposer
-- Permettre de voir le preview du frontend du site pendant l’édition admin
+- Migrer fidèlement le site CSR `Nexus-Conseil/greeters` vers la base Next.js SSR locale.
+- Reprendre le **frontend public en priorité**, puis poursuivre page par page jusqu’au CMS/back-office.
+- Conserver le CMS/pages/menu déjà amorcé et le reconnecter progressivement au rendu public.
+
+## Source de vérité
+- Cible active : `/app/greeters`
+- Référence CSR auditée : clone local temporaire de `https://github.com/Nexus-Conseil/greeters`
 
 ## Décisions d’architecture
-- Gestionnaire de menu conservé dans `/admin/menu`
-- Réordonnancement visuel implémenté en drag-and-drop natif HTML5, sans dépendance externe
-- Preview frontend intégré directement dans le panneau admin via iframe + ouverture dans un nouvel onglet
-- Le preview reste piloté par un chemin public simple (`/`, `/galerie`, etc.) pour permettre une vérification rapide côté CMS
+- Le rendu public SSR reste dans Next.js App Router avec routes `/` et `/[slug]`.
+- Le header public lit le menu CMS existant via `getMenu()` avec fallback fidèle au site CSR.
+- Le contenu de l’accueil passe par un service de fallback (`lib/services/home-content.ts`) afin de garder une base visible même si le CMS/home sections n’est pas encore rempli.
+- Les assets critiques du site d’origine sont recopiés dans `/app/greeters/public/images/...` pour permettre une migration visuelle fidèle.
 
-## Implémenté
-- Cartes du menu rendues déplaçables visuellement avec poignée “Glisser”
-- États visuels ajoutés pour l’élément en cours de déplacement et la cible de drop
-- Le réordonnancement manuel précédent (Monter/Descendre) reste disponible en complément
-- Champ de preview frontend ajouté au gestionnaire de menu pour choisir un chemin public
-- Iframe de preview frontend ajoutée dans la colonne latérale de `/admin/menu`
-- Lien “Ouvrir le frontend” ajouté pour voir la page choisie dans un nouvel onglet
+## Implémenté le 2026-03-09
+- Migration visuelle de l’accueil public : topbar, sélecteur de langues, logo, navigation, hero, intro, section Greeters, visite, actualités, témoignages, galerie.
+- Refonte du shell public partagé : `Header`, `TopBar`, `Footer`, placeholders `/[slug]` harmonisés avec le nouveau style public.
+- Ajout d’un système de contenu fallback pour la home branchable plus tard au CMS/home sections.
+- Ajout/normalisation des `data-testid` sur tous les éléments interactifs et éléments critiques visibles.
+- Mise à jour du branding global (`metadata`, fontes, CSS public dédié `app/public-site.css`).
 
 ## Validation réalisée
-- `eslint` OK
-- `next build` OK
-- Vérification visuelle par screenshot : `/admin/menu` montre bien le drag-and-drop et le preview frontend intégré
-- Test manuel Playwright : ajout d’items, interaction drag-and-drop, changement du chemin de preview (`/galerie`), iframe frontend visible
+- `eslint` OK sur `/app/greeters`
+- `yarn tsc --noEmit` OK
+- Smoke test visuel local OK sur `http://127.0.0.1:3100`
+- Rapport de test frontend OK : `/app/test_reports/iteration_8.json`
+  - home, navigation, CTA topbar, carrousel témoignages, lightbox galerie, responsive mobile, routes placeholder publiques : PASS
+
+## Blocages connus
+- Intégration Gemini toujours **bloquée côté quota/facturation** tant que l’API Google ne répond pas sans `RESOURCE_EXHAUSTED`.
 
 ## P0
-- Ajouter un indicateur d’ordre plus explicite pendant le drop (ligne d’insertion)
-- Permettre la sauvegarde immédiate automatique après réordonnancement si souhaité
-- Brancher le preview frontend sur des contenus multilingues spécifiques si nécessaire
+- Porter la page publique suivante du site CSR (ex. `Qui sommes-nous ?` ou `Actualités`) avec contenu fidèle.
+- Connecter davantage le frontend public aux données CMS réelles au lieu du fallback statique.
+- Vérifier la cohérence multilingue réelle (subdomains / variantes preview) sur le shell public.
 
 ## P1
-- Ajouter un vrai drag-and-drop tactile/mobile
-- Prévisualiser un item de menu spécifique ou une URL externe dans un onglet séparé
-- Ajouter un historique/annulation des changements de menu
+- Brancher sitemap dynamique `/sitemap.xml` par langue.
+- Nettoyer les contenus/tests historiques en base si nécessaire.
+- Reprendre les écrans admin `/admin/pages/new` et `/admin/pages/[id]` pour coller au CMS source.
 
 ## P2
-- Faire évoluer le menu admin vers un mode arborescent si sous-menus requis
-- Ajouter diff visuel avant/après sauvegarde
+- Finaliser un gestionnaire de menu admin encore plus riche (drag-and-drop avancé / arborescence si besoin).
+- Ajouter les raffinements de parité visuelle restants page par page.
 
 ## Next tasks
-1. Ajouter une ligne d’insertion pendant le glisser-déposer
-2. Sauvegarder automatiquement l’ordre si vous le souhaitez
-3. Étendre le preview à des routes publiques multilingues ciblées
-4. Enrichir encore l’ergonomie du menu admin
+1. Migrer la prochaine page publique prioritaire depuis le CSR source.
+2. Brancher les sections d’accueil aux vraies données CMS/home sections.
+3. Poursuivre la parité frontend puis remonter vers l’édition admin des pages.
+4. Revenir sur Gemini uniquement après confirmation utilisateur que le quota/facturation est rétabli.
