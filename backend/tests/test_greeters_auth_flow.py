@@ -10,8 +10,8 @@ if not BASE_URL:
     pytest.skip("GREETERS_BASE_URL is not configured", allow_module_level=True)
 
 BASE_URL = BASE_URL.rstrip("/")
-VALID_EMAIL = "admin@greeters.local"
-VALID_PASSWORD = "AdminPass!12345"
+VALID_EMAIL = "contact@nexus-conseil.ch"
+VALID_PASSWORD = "Greeters&58!2026"
 INVALID_PASSWORD = "WrongPass123!"
 
 
@@ -20,6 +20,13 @@ def api_client():
     session = requests.Session()
     session.headers.update({"Content-Type": "application/json"})
     return session
+
+
+def _attach_session_cookie(api_client: requests.Session, response: requests.Response):
+    set_cookie = response.headers.get("set-cookie", "")
+    cookie_pair = set_cookie.split(";", 1)[0]
+    if cookie_pair.startswith("greeters_session="):
+        api_client.headers.update({"Cookie": cookie_pair})
 
 
 def test_me_returns_401_when_unauthenticated(api_client):
@@ -55,6 +62,7 @@ def test_login_accepts_valid_seeded_admin_and_sets_cookie(api_client):
     set_cookie = response.headers.get("set-cookie", "")
     assert "greeters_session=" in set_cookie
     assert "HttpOnly" in set_cookie
+    _attach_session_cookie(api_client, response)
 
 
 def test_me_returns_current_user_when_authenticated(api_client):
@@ -63,6 +71,7 @@ def test_me_returns_current_user_when_authenticated(api_client):
         json={"email": VALID_EMAIL, "password": VALID_PASSWORD},
     )
     assert login_response.status_code == 200
+    _attach_session_cookie(api_client, login_response)
 
     me_response = api_client.get(f"{BASE_URL}/api/auth/me")
     assert me_response.status_code == 200
@@ -82,6 +91,7 @@ def test_admin_route_protected_and_accessible_after_login(api_client):
         json={"email": VALID_EMAIL, "password": VALID_PASSWORD},
     )
     assert login_response.status_code == 200
+    _attach_session_cookie(api_client, login_response)
 
     authenticated = api_client.get(f"{BASE_URL}/admin")
     assert authenticated.status_code == 200
@@ -94,6 +104,7 @@ def test_logout_clears_session_and_me_returns_401(api_client):
         json={"email": VALID_EMAIL, "password": VALID_PASSWORD},
     )
     assert login_response.status_code == 200
+    _attach_session_cookie(api_client, login_response)
 
     logout_response = api_client.post(f"{BASE_URL}/api/auth/logout")
     assert logout_response.status_code == 200

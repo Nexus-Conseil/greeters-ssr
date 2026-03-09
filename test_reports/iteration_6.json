@@ -1,0 +1,64 @@
+{
+  "summary": "Retest backend+frontend du scope auth/pages/menu sur http://127.0.0.1:3100. Backend API regression suite passe (15/15). En UI, login admin + accès /admin/pages + création live passent, mais le flux d’édition révèle une mutation automatique du slug lors du changement de titre, ce qui perturbe la vérification et le comportement attendu d’URL stable.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "PageEditorForm",
+        "issue": "En édition, modifier le titre modifie aussi automatiquement le slug (slugTouched=false par défaut), ce qui change l’URL publique de la page sans action explicite sur le champ slug.",
+        "selector": "[data-testid='page-editor-title-input'], [data-testid='page-editor-slug-input']",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [
+      {
+        "flow": "Edition live depuis /admin/pages/[id] -> visibilité liste/menu/public",
+        "issue": "Après update du titre, la page n’est plus trouvée avec l’ancien slug en liste admin car le slug a été régénéré implicitement.",
+        "affected_selectors": [
+          "[data-testid='admin-pages-search-input']",
+          "[data-testid='page-editor-summary-slug']"
+        ]
+      },
+      {
+        "flow": "Login UI (1 run sur 3)",
+        "issue": "Un run Playwright a observé un échec transient de requête login (net::ERR_ABORTED), non systématique.",
+        "affected_selectors": [
+          "[data-testid='admin-login-submit-button']"
+        ]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_greeters_auth_flow.py",
+    "/app/backend/tests/test_greeters_live_pages_flow.py",
+    "/app/backend/tests/test_public_shell_routes.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Sur /admin/pages/[id], empêcher la régénération automatique du slug quand on édite uniquement le titre d’une page existante (ou exiger une action explicite utilisateur).",
+    "Stabiliser le flux UI d’édition puis retester e2e complet (login -> create -> edit -> menu -> page publique)."
+  ],
+  "critical_code_review_comments": [
+    "Root cause principal observé: dans PageEditorForm, onChange du champ titre recalcule le slug tant que slugTouched=false; en mode édition cela provoque un changement d’URL implicite.",
+    "Les tests API Python nécessitent une attache manuelle du cookie session depuis set-cookie pour les appels suivants en HTTP local (cookie Secure)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_greeters_auth_flow.py",
+    "/app/backend/tests/test_greeters_live_pages_flow.py",
+    "/app/test_reports/iteration_6.json"
+  ],
+  "success_rate": {
+    "backend": "100% (15/15)",
+    "frontend": "75% (login, accès admin, création live OK; édition e2e bloquée par mutation implicite du slug)"
+  },
+  "seed_data_creation": "Des pages de test UI/API ont été créées durant les runs (préfixes TEST UI LIVE / TEST Live Page).",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Ne pas réessayer les mêmes sélecteurs Playwright sans traiter le comportement de slug. Les 2 premiers runs ont confirmé login+create OK; blocage récurrent au moment de vérifier l’édition par ancien slug.",
+  "rca of the issue": "Reproduction: 1) login admin, 2) créer page slug fixe, 3) ouvrir /admin/pages/[id], 4) modifier uniquement le titre, 5) sauvegarder. Résultat: slug changé automatiquement, la page disparaît des filtres basés sur l’ancien slug et l’URL publique bascule. Mitigation: en mode édition initialiser slugTouched=true ou dissocier la synchro titre->slug des pages existantes.",
+  "mocked_api": "NO MOCKED APIs used"
+}
