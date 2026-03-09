@@ -1,0 +1,68 @@
+{
+  "summary": "Backend-only SSR validation executed against public URL from frontend/.env. Test run stopped after >50% failures (20/23 failed). Public endpoint appears to serve a different app (\"Hello World\") instead of the Greeters SSR backend.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "https://ssr-cms-rebuild.preview.emergentagent.com/",
+        "issue": "Public routes /, /galerie, /livre-dor, /faire-un-don, /actualites, /devenez-benevole, /qui-sommes-nous, /contact, /presse, /mentions-legales do not return Greeters SSR HTML (header-logo-link/data-testid markers missing).",
+        "priority": "CRITICAL"
+      },
+      {
+        "endpoint": "https://ssr-cms-rebuild.preview.emergentagent.com/api/health",
+        "issue": "Returns 404. API base currently returns {\"message\":\"Hello World\"}, indicating deployment/routing mismatch with expected FastAPI app.",
+        "priority": "CRITICAL"
+      },
+      {
+        "endpoint": "https://ssr-cms-rebuild.preview.emergentagent.com/api/contact/send",
+        "issue": "Returns 404; SSR contact submission integration not reachable on public endpoint.",
+        "priority": "HIGH"
+      },
+      {
+        "endpoint": "https://ssr-cms-rebuild.preview.emergentagent.com/images/logo_greeters.png and /documents/charte-2020.pdf",
+        "issue": "Mounted SSR static assets are not served (returned text/html app shell instead of image/pdf).",
+        "priority": "HIGH"
+      }
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "SSR public delivery",
+        "issue": "Ingress/public URL points to non-Greeters application; SSR/backend feature set cannot be validated end-to-end on user-facing URL.",
+        "affected_selectors": []
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/greeters/backend/tests/test_ssr_routes.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Fix deployment/ingress target so REACT_APP_BACKEND_URL points to Greeters backend with SSR router enabled.",
+    "After routing fix, re-run SSR route coverage and asset mount checks.",
+    "Ensure /api/contact/send is deployed and reachable from public domain.",
+    "If requirement is no-JS compatible SSR form posting, set contact form action directly to /api/contact/send in HTML (currently set via JS in template)."
+  ],
+  "critical_code_review_comments": [
+    "backend/database.py uses fallback DB name ('greeters_db') instead of failing fast when DB_NAME is missing (environment contract violation).",
+    "routes/ssr_pages.py has hardcoded BOOKING_URL constant instead of environment-based configuration.",
+    "templates/pages/contact.html sets form action to /api/contact first, then rewrites to /api/contact/send in JS; this breaks non-JS SSR form submission expectation."
+  ],
+  "updated_files": [
+    "/app/greeters/backend/tests/test_ssr_routes.py",
+    "/app/test_reports/iteration_1.json"
+  ],
+  "success_rate": {
+    "backend": "13% (3/23)",
+    "frontend": "N/A (backend-only request)"
+  },
+  "seed_data_creation": "None",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Hard failure likely due to wrong public deployment target. Verified with curl: /api/ => {\"message\":\"Hello World\"}, /api/health => 404. Re-run same pytest file after ingress/deployment correction.",
+  "rca of the issue": "RCA: Public URL configured in /app/frontend/.env does not expose the Greeters FastAPI SSR service. Because ingress serves another app shell + minimal API, almost all SSR and API tests fail. Repro: GET /api/ returns Hello World, GET /api/health returns 404, GET /contact returns generic app HTML without SSR contact form markers. Mitigation: correct domain-to-service routing and redeploy expected backend before retesting.",
+  "mocked_api": "NO MOCKED APIs used"
+}
