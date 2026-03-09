@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Spectral } from "next/font/google";
+import { Pacifico, Space_Grotesk, Spectral } from "next/font/google";
 
 import { getRequestLocale } from "@/lib/i18n/request";
 
 import "./globals.css";
+import "./public-site.css";
 
 const headingFont = Space_Grotesk({
   variable: "--font-heading",
@@ -16,9 +17,15 @@ const bodyFont = Spectral({
   weight: ["400", "500", "600", "700"],
 });
 
+const scriptFont = Pacifico({
+  variable: "--font-script",
+  subsets: ["latin"],
+  weight: "400",
+});
+
 export const metadata: Metadata = {
-  title: "Greeters Next Migration",
-  description: "Squelette Next.js initial pour la migration Greeters vers App Router.",
+  title: "Paris Greeters — Balades gratuites avec un local",
+  description: "Découvrez Paris autrement avec les Greeters : des balades gratuites, humaines et locales au cœur de la ville.",
 };
 
 export default async function RootLayout({
@@ -31,7 +38,7 @@ export default async function RootLayout({
   return (
     <html lang={locale}>
       <body
-        className={`${headingFont.variable} ${bodyFont.variable} app-shell`}
+        className={`${headingFont.variable} ${bodyFont.variable} ${scriptFont.variable} app-shell`}
         data-testid="app-root-layout"
       >
         {children}

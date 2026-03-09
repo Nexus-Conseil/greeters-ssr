@@ -57,10 +57,10 @@ export default async function PublicPlaceholderPage({ params }: PublicPlaceholde
 
   if (livePage) {
     return (
-      <main className="public-page" data-testid={`public-live-page-${slug}`}>
+      <main className="site-page" data-testid={`public-live-page-${slug}`}>
         <TopBar />
         <Header />
-        <div className="public-live-page" data-testid={`public-live-page-content-${slug}`}>
+        <div className="site-live-page" data-testid={`public-live-page-content-${slug}`}>
           <DynamicPageRenderer page={livePage} />
         </div>
         <Footer />
@@ -75,25 +75,25 @@ export default async function PublicPlaceholderPage({ params }: PublicPlaceholde
   }
 
   return (
-    <main className="public-page" data-testid={`public-placeholder-page-${slug}`}>
+    <main className="site-page" data-testid={`public-placeholder-page-${slug}`}>
       <TopBar />
       <Header />
-      <section className="landing-shell" data-testid={`public-placeholder-shell-${slug}`}>
-        <section className="hero-panel" data-testid={`public-placeholder-panel-${slug}`}>
-          <p className="eyebrow" data-testid={`public-placeholder-eyebrow-${slug}`}>
+      <section className="site-static-shell" data-testid={`public-placeholder-shell-${slug}`}>
+        <section className="site-static-card" data-testid={`public-placeholder-panel-${slug}`}>
+          <p className="site-static-eyebrow" data-testid={`public-placeholder-eyebrow-${slug}`}>
             Route publique préparée
           </p>
-          <h1 className="hero-title" data-testid={`public-placeholder-title-${slug}`}>
+          <h1 className="site-static-title" data-testid={`public-placeholder-title-${slug}`}>
             {content.title}
           </h1>
-          <p className="hero-copy" data-testid={`public-placeholder-description-${slug}`}>
+          <p className="site-static-description" data-testid={`public-placeholder-description-${slug}`}>
             {content.description}
           </p>
-          <div className="public-hero-actions" data-testid={`public-placeholder-actions-${slug}`}>
-            <Link href="/" className="secondary-button public-hero-button" data-testid={`public-placeholder-home-link-${slug}`}>
+          <div className="site-static-actions" data-testid={`public-placeholder-actions-${slug}`}>
+            <Link href="/" className="site-outline-link" data-testid={`public-placeholder-home-link-${slug}`}>
               Retour à l’accueil
             </Link>
-            <Link href="/admin" className="primary-button public-hero-button" data-testid={`public-placeholder-admin-link-${slug}`}>
+            <Link href="/admin" className="site-cta-button" data-testid={`public-placeholder-admin-link-${slug}`}>
               Ouvrir l’admin
             </Link>
           </div>
