@@ -1,61 +1,53 @@
-# PRD — Greeters reprise avec auth Supabase runtime stabilisée
+# PRD — Greeters CMS: sitemap multilingue, menu admin, IA Gemini
 
 ## Problème d’origine
-- Finaliser l’auth DB Supabase runtime
-- Valider les flux authentifiés réels : login admin, création/édition live, publication et affichage public/menu
-- Continuer le portage CMS Next.js dans `/app/greeters`
+- Créer un sitemap touristique structuré sur `/sitemap.xml`, un par langue via sous-domaines
+- Ne lister que les pages utiles aux touristes (accueil, pages internes, articles/blog)
+- Ajouter le lien sitemap dans le footer
+- Nettoyer les pages de validation live
+- Ajouter un vrai gestionnaire de menu admin
+- Intégrer le chat IA CMS qui génère des pages touristiques cohérentes mais variées avec Gemini
 
 ## Décisions d’architecture
-- Runtime Prisma conservé dans `lib/db/prisma.ts`
-- Base live Supabase branchée via **transaction pooler 6543**
-- `DATABASE_URL` configurée avec `pgbouncer=true&sslmode=no-verify` pour compatibilité Prisma/Supavisor
-- `DIRECT_DATABASE_URL` conservée à part, mais le runtime web s’appuie désormais sur le pooler transactionnel stable
-- Mode édition corrigé : le slug n’est plus auto-réécrit lors d’un simple changement de titre sur une page existante
+- Sitemap servi dynamiquement par `app/sitemap.xml/route.ts` en fonction du host/sous-domaine
+- Locales gérées par `lib/i18n/config.ts` et `lib/i18n/request.ts`
+- Pages métier rendues locales via champ `locale` + contrainte `(locale, slug)`
+- Menus séparés par langue via clé `main_menu:{locale}`
+- IA Gemini branchée côté serveur via Generative Language API et transformée en blocks CMS compatibles
 
 ## Implémenté
-- Diagnostic complet des trois chaînes DB :
-  - session pooler 5432 rejetait l’auth
-  - transaction pooler 6543 accepte la connexion
-  - direct host non joignable depuis cet environnement
-- Correction runtime Supabase/Prisma en `.env` : `DATABASE_URL` => transaction pooler + `pgbouncer=true`
-- Seed admin live validé pour `contact@nexus-conseil.ch`
-- Login admin réel validé (`/api/auth/login`, `/api/auth/me`, UI `/admin/login`)
-- Flux CMS live validés :
-  - création d’une page publiée en base réelle
-  - édition live d’une page existante
-  - mise à jour visible côté menu public
-  - rendu SSR public de la page publiée
-- Correction du bug d’édition relevé par testing agent : changement de titre sans mutation implicite du slug en mode édition
-- Pages de validation créées en live :
-  - `page-live-nexus-test`
-  - `page-ui-live-20260309-2`
+- Nettoyage live effectué : suppression des anciennes pages de validation créées pour les tests
+- Sitemap multilingue en place sur `/sitemap.xml` pour `greeters.paris`, `en.greeters.paris`, `de`, `es`, `it`, `ja`, `nl`, `pt-pt`, `zh-hans`
+- Sitemap filtré pour ne garder que les contenus à intérêt touristique (homepage + pages utiles + blog/articles)
+- Lien footer ajouté vers `/sitemap.xml`
+- Gestionnaire de menu admin réel livré dans `/admin/menu` : langue, ajout, renommage, visibilité, liens externes, ordre, sync depuis pages publiées
+- Support langue ajouté à l’édition de pages et aux APIs pages/menu/public
+- Chat IA Gemini livré dans `/admin/ai-pages` avec génération de brouillon, conversation, preview et création de page vers le CMS
+- Génération IA stabilisée : modèle `gemini-2.0-flash`, schéma simplifié, mapping automatique vers sections/blocs supportés
+- UX AI améliorée avec état de chargement visible pendant la génération
 
-## Vérifications réalisées
+## Validation réalisée
 - `next build` OK
-- login API réel 200
-- `/api/auth/me` avec cookie réel 200
-- `/api/pages` authentifié 200
-- création UI live `/admin/pages/new` OK
-- édition UI live `/admin/pages/[id]` OK
-- page publique SSR `/page-ui-live-20260309-2` affiche bien le contenu mis à jour
-- menu public affiche les entrées créées/publiées depuis le CMS
-- testing agent iteration 6 : le bug slug auto-muté a été identifié puis corrigé ensuite en self-test
+- Tests manuels + screenshots : footer sitemap, admin menu, studio IA avec brouillon généré visible
+- Testing agent iteration 7 : 7/7 tests backend passés sur sitemap/menu/IA/cleanup
+- Bug UI IA détecté par testing agent corrigé ensuite : loading state explicite pendant la génération
 
 ## P0
-- Nettoyer/normaliser les pages de validation créées pour les tests live
-- Ajouter un écran d’administration du menu (ordre, renommage, suppression) relié aux données live
-- Renforcer le rendu public pour les slugs multi-segments si requis par le backlog
+- Créer plusieurs vraies pages touristiques par langue pour nourrir les sitemaps réels
+- Étendre la génération IA à des articles/blog et pages internes multi-langues
+- Ajouter l’édition admin complète du menu par drag-and-drop si souhaité
 
 ## P1
-- Durcir le typage partagé du renderer CMS (remplacer les parties permissives restantes)
-- Ajouter uploads médias réels pour les blocs image
-- Étendre les tests E2E authentifiés de création/édition/publication
+- Ajouter routes publiques multi-segments si la stratégie éditoriale l’exige
+- Renforcer le typage strict du renderer CMS et des drafts IA
+- Ajouter upload d’images réel pour remplacer les URLs distantes générées par IA
 
 ## P2
-- Porter documents, contact, home sections avancées, IA/chatbot et migration de données métier
+- Étendre le workflow IA (itérations sur un même draft, régénération ciblée d’une section, tonalité par langue)
+- Ajouter tests E2E persistants sur génération IA + création CMS + visibilité sitemap
 
 ## Next tasks
-1. Nettoyer les pages/menu créés pour les validations live
-2. Ajouter la gestion admin complète du menu public
-3. Étendre l’éditeur à davantage de types de blocs et médias
-4. Couvrir le workflow complet par tests E2E persistants
+1. Générer/éditer les premières pages touristiques réelles par langue dans le CMS
+2. Ajouter un mode “Créer la page et publier” depuis le studio IA
+3. Enrichir le sitemap avec davantage de pages/blog multilingues réels
+4. Ajouter une gestion plus avancée du menu public par langue

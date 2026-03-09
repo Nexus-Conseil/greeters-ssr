@@ -114,6 +114,7 @@ export const AiPageStudio = () => {
           <div className="editor-panel" data-testid="ai-page-studio-history-panel">
             <p className="status-label" data-testid="ai-page-studio-history-label">Conversation</p>
             <div className="editor-stack" data-testid="ai-page-studio-messages-list">
+              {loading ? <p className="dashboard-empty-state" data-testid="ai-page-studio-loading-history">L’IA prépare une nouvelle proposition de page…</p> : null}
               {messages.length === 0 ? <p className="dashboard-empty-state" data-testid="ai-page-studio-empty-history">Aucune génération pour le moment.</p> : null}
               {messages.map((message) => (
                 <article className={`editor-card ${message.role === "assistant" ? "is-ai-message" : ""}`} key={message.id} data-testid={`ai-page-studio-message-${message.id}`}>
@@ -128,15 +129,16 @@ export const AiPageStudio = () => {
         <aside className="editor-sidebar" data-testid="ai-page-studio-preview-column">
           <div className="editor-panel" data-testid="ai-page-studio-summary-panel">
             <p className="status-label" data-testid="ai-page-studio-summary-label">Brouillon généré</p>
+            {loading ? <p className="dashboard-empty-state" data-testid="ai-page-studio-loading-summary">Génération du brouillon en cours…</p> : null}
             {draft ? (
               <>
                 <p className="dashboard-row-title" data-testid="ai-page-studio-summary-title">{draft.title}</p>
                 <p className="dashboard-row-meta" data-testid="ai-page-studio-summary-slug">/{draft.slug}</p>
                 <p className="dashboard-row-meta" data-testid="ai-page-studio-summary-sections">{draft.sections.length} section(s) · {draft.sections.reduce((total, section) => total + section.blocks.length, 0)} bloc(s)</p>
               </>
-            ) : (
+            ) : !loading ? (
               <p className="dashboard-empty-state" data-testid="ai-page-studio-summary-empty">Le brouillon IA apparaîtra ici.</p>
-            )}
+            ) : null}
           </div>
         </aside>
       </div>
