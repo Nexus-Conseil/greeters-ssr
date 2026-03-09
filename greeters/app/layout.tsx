@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Spectral } from "next/font/google";
+
+import { getRequestLocale } from "@/lib/i18n/request";
+
 import "./globals.css";
 
 const headingFont = Space_Grotesk({
@@ -18,13 +21,15 @@ export const metadata: Metadata = {
   description: "Squelette Next.js initial pour la migration Greeters vers App Router.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getRequestLocale();
+
   return (
-    <html lang="fr">
+    <html lang={locale}>
       <body
         className={`${headingFont.variable} ${bodyFont.variable} app-shell`}
         data-testid="app-root-layout"

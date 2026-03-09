@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { LOCALE_LABELS, SUPPORTED_LOCALES } from "@/lib/i18n/config";
 import { createEmptyBlock, createEmptyPage, createEmptySection, normalizePagePayload, slugifyTitle } from "./editor-utils";
 import { PagePreviewModal } from "./PagePreviewModal";
 import { SectionEditor } from "./SectionEditor";
@@ -100,6 +101,7 @@ export const PageEditorForm = ({ pageId }: { pageId?: string }) => {
         </div>
         <div className="dashboard-row-actions" data-testid="page-editor-header-actions">
           <Link href="/admin/pages" className="secondary-button dashboard-inline-button" data-testid="page-editor-back-link">Retour aux pages</Link>
+          {!pageId ? <Link href="/admin/ai-pages" className="secondary-button dashboard-inline-button" data-testid="page-editor-ai-link">Générer via IA</Link> : null}
           <button type="button" className="secondary-button dashboard-inline-button" onClick={() => setPreviewOpen(true)} data-testid="page-editor-preview-button">Prévisualiser</button>
           {canOpenHistory ? <button type="button" className="secondary-button dashboard-inline-button" onClick={() => setHistoryOpen(true)} data-testid="page-editor-history-button">Historique</button> : null}
           <button type="button" className="primary-button dashboard-inline-button" onClick={() => void handleSubmit()} disabled={saving} data-testid="page-editor-save-button">{saving ? "Enregistrement..." : pageId ? "Mettre à jour" : "Créer la page"}</button>
@@ -113,6 +115,7 @@ export const PageEditorForm = ({ pageId }: { pageId?: string }) => {
           <div className="editor-panel" data-testid="page-editor-basics-panel">
             <div className="editor-grid">
               <label className="dashboard-field dashboard-field-full"><span data-testid="page-editor-title-label">Titre</span><input value={form.title} onChange={(event) => setForm((current) => ({ ...current, title: event.target.value, slug: slugTouched ? current.slug : slugifyTitle(event.target.value) }))} data-testid="page-editor-title-input" /></label>
+              <label className="dashboard-field"><span data-testid="page-editor-locale-label">Langue</span><select value={form.locale} onChange={(event) => setForm((current) => ({ ...current, locale: event.target.value as EditorPage["locale"] }))} data-testid="page-editor-locale-select">{SUPPORTED_LOCALES.map((locale) => <option key={locale} value={locale}>{LOCALE_LABELS[locale]}</option>)}</select></label>
               <label className="dashboard-field"><span data-testid="page-editor-slug-label">Slug</span><input value={form.slug} onChange={(event) => { setSlugTouched(true); setForm((current) => ({ ...current, slug: slugifyTitle(event.target.value) })); }} data-testid="page-editor-slug-input" /></label>
               <label className="dashboard-field"><span data-testid="page-editor-status-label">Statut demandé</span><select value={form.status || "draft"} onChange={(event) => setForm((current) => ({ ...current, status: event.target.value as EditorPage["status"] }))} data-testid="page-editor-status-select"><option value="draft">Brouillon</option><option value="pending">En attente</option><option value="published">Publié</option><option value="archived">Archivé</option></select></label>
               <label className="dashboard-field dashboard-field-full"><span data-testid="page-editor-meta-description-label">Description SEO</span><textarea rows={3} value={form.metaDescription} onChange={(event) => setForm((current) => ({ ...current, metaDescription: event.target.value }))} data-testid="page-editor-meta-description-input" /></label>

@@ -5,6 +5,7 @@ import { DynamicPageRenderer } from "@/components/cms/DynamicPageRenderer";
 import { Footer } from "@/components/public/layout/Footer";
 import { Header } from "@/components/public/layout/Header";
 import { TopBar } from "@/components/public/layout/TopBar";
+import { getRequestLocale } from "@/lib/i18n/request";
 import { findPublicPageBySlug } from "@/lib/services/pages";
 
 const PUBLIC_PLACEHOLDERS: Record<string, { title: string; description: string }> = {
@@ -52,7 +53,7 @@ type PublicPlaceholderPageProps = {
 
 export default async function PublicPlaceholderPage({ params }: PublicPlaceholderPageProps) {
   const { slug } = await params;
-  const livePage = await findPublicPageBySlug(slug).catch(() => null);
+  const livePage = await findPublicPageBySlug(slug, await getRequestLocale()).catch(() => null);
 
   if (livePage) {
     return (

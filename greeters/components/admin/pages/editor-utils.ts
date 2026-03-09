@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from "@/lib/i18n/config";
+
 import type { EditorBlock, EditorBlockType, EditorPage, EditorSection } from "./editor-types";
 
 function createId(prefix: string) {
@@ -52,6 +54,7 @@ export function createEmptySection(order: number): EditorSection {
 
 export function createEmptyPage(): EditorPage {
   return {
+    locale: DEFAULT_LOCALE,
     title: "",
     slug: "",
     metaDescription: "",
@@ -70,6 +73,7 @@ export function normalizePagePayload(input: Partial<EditorPage> & { sections?: A
   return {
     ...base,
     ...input,
+    locale: input.locale ?? base.locale,
     metaDescription: input.metaDescription ?? base.metaDescription,
     metaKeywords: input.metaKeywords ?? base.metaKeywords,
     menuLabel: input.menuLabel ?? base.menuLabel,

@@ -3,13 +3,17 @@ import { prisma } from "@/lib/db/prisma";
 import { type PageStatus, type Prisma } from "@prisma/client";
 
 type ListPagesInput = {
+  locale?: string;
   status?: PageStatus;
   skip?: number;
   limit?: number;
 };
 
 export async function listPages(input: ListPagesInput = {}) {
-  const where: Prisma.PageWhereInput = input.status ? { status: input.status } : {};
+  const where: Prisma.PageWhereInput = {
+    ...(input.locale ? { locale: input.locale } : {}),
+    ...(input.status ? { status: input.status } : {}),
+  };
 
   return prisma.page.findMany({
     where,
@@ -19,9 +23,12 @@ export async function listPages(input: ListPagesInput = {}) {
   });
 }
 
-export async function listPublishedPages(limit = 1000) {
+export async function listPublishedPages(limit = 1000, locale?: string) {
   return prisma.page.findMany({
-    where: { status: "PUBLISHED" },
+    where: {
+      status: "PUBLISHED",
+      ...(locale ? { locale } : {}),
+    },
     orderBy: [{ menuOrder: "asc" }, { updatedAt: "desc" }, { createdAt: "desc" }],
     take: limit,
   });
@@ -31,8 +38,15 @@ export async function findPageById(id: string) {
   return prisma.page.findUnique({ where: { id } });
 }
 
-export async function findPageBySlug(slug: string) {
-  return prisma.page.findUnique({ where: { slug } });
+export async function findPageBySlug(slug: string, locale: string) {
+  return prisma.page.findUnique({
+    where: {
+      locale_slug: {
+        locale,
+        slug,
+      },
+    },
+  });
 }
 
 export async function listPagesByIds(ids: string[]) {
@@ -62,12 +76,12 @@ export async function deletePageRecord(id: string) {
 
 export async function countPagesByStatus() {
   const grouped = await prisma.page.groupBy({
-    by: ["status"],
+    by: ["status", "locale"],
     _count: { _all: true },
   });
 
   return grouped.reduce<Record<string, number>>((accumulator, entry) => {
-    accumulator[entry.status] = entry._count._all;
+    accumulator[`${entry.locale}:${entry.status}`] = entry._count._all;
     return accumulator;
   }, {});
 }

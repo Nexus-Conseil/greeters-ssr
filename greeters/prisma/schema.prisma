@@ -26,6 +26,11 @@ enum PreviewStatus {
   EXPIRED   @map("expired")
 }
 
+enum AiChatRole {
+  USER      @map("user")
+  ASSISTANT @map("assistant")
+}
+
 model User {
   id           String          @id @default(uuid()) @db.Uuid
   email        String          @unique
@@ -70,8 +75,9 @@ model PasswordReset {
 
 model Page {
   id               String       @id @default(uuid()) @db.Uuid
+  locale           String       @default("fr")
   title            String
-  slug             String       @unique
+  slug             String
   metaDescription  String?      @map("meta_description")
   metaKeywords     String?      @map("meta_keywords")
   sections         Json         @default("[]")
@@ -87,8 +93,9 @@ model Page {
   updatedAt        DateTime?    @map("updated_at") @db.Timestamptz(6)
   versions         PageVersion[]
 
-  @@index([slug])
-  @@index([status])
+  @@unique([locale, slug])
+  @@index([locale, slug])
+  @@index([locale, status])
   @@index([isInMenu, menuOrder])
   @@map("pages")
 }
@@ -184,4 +191,32 @@ model PageEdit {
   @@index([pageId])
   @@index([createdAt])
   @@map("page_edits")
+}
+
+model AiChatSession {
+  id             String          @id @default(uuid()) @db.Uuid
+  createdBy      String          @map("created_by") @db.Uuid
+  locale         String          @default("fr")
+  title          String?
+  latestDraft    Json?           @map("latest_draft")
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime        @default(now()) @map("updated_at") @db.Timestamptz(6)
+  messages       AiChatMessage[]
+
+  @@index([createdBy, createdAt])
+  @@index([locale, updatedAt])
+  @@map("ai_chat_sessions")
+}
+
+model AiChatMessage {
+  id          String      @id @default(uuid()) @db.Uuid
+  sessionId   String      @map("session_id") @db.Uuid
+  role        AiChatRole
+  content     String
+  generatedPage Json?     @map("generated_page")
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  session     AiChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+  @@map("ai_chat_messages")
 }

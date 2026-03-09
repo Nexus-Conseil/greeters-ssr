@@ -4,8 +4,11 @@ import Link from "next/link";
 import type { Route } from "next";
 import { useEffect, useMemo, useState } from "react";
 
+import { LOCALE_LABELS, SUPPORTED_LOCALES } from "@/lib/i18n/config";
+
 type PageItem = {
   id: string;
+  locale: keyof typeof LOCALE_LABELS;
   title: string;
   slug: string;
   status: "draft" | "pending" | "published" | "archived";
@@ -27,6 +30,7 @@ export const PagesTable = () => {
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [localeFilter, setLocaleFilter] = useState("all");
   const [deleteTarget, setDeleteTarget] = useState<PageItem | null>(null);
 
   async function fetchPages() {
@@ -59,9 +63,10 @@ export const PagesTable = () => {
         page.title.toLowerCase().includes(query.toLowerCase()) ||
         page.slug.toLowerCase().includes(query.toLowerCase());
       const matchesStatus = statusFilter === "all" || page.status === statusFilter;
-      return matchesQuery && matchesStatus;
+      const matchesLocale = localeFilter === "all" || page.locale === localeFilter;
+      return matchesQuery && matchesStatus && matchesLocale;
     });
-  }, [pages, query, statusFilter]);
+  }, [localeFilter, pages, query, statusFilter]);
 
   async function handleDelete() {
     if (!deleteTarget) {
@@ -133,6 +138,22 @@ export const PagesTable = () => {
             <option value="archived">Archivés</option>
           </select>
         </label>
+
+        <label className="dashboard-field" data-testid="admin-pages-locale-field">
+          <span data-testid="admin-pages-locale-label">Langue</span>
+          <select
+            value={localeFilter}
+            onChange={(event) => setLocaleFilter(event.target.value)}
+            data-testid="admin-pages-locale-select"
+          >
+            <option value="all">Toutes</option>
+            {SUPPORTED_LOCALES.map((locale) => (
+              <option key={locale} value={locale}>
+                {LOCALE_LABELS[locale]}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       {error ? (
@@ -160,6 +181,9 @@ export const PagesTable = () => {
                   </p>
                   <p className="dashboard-row-meta" data-testid={`admin-pages-row-slug-${page.id}`}>
                     /{page.slug === "/" ? "" : page.slug}
+                  </p>
+                  <p className="dashboard-inline-note" data-testid={`admin-pages-row-locale-${page.id}`}>
+                    {LOCALE_LABELS[page.locale]}
                   </p>
                 </div>
 

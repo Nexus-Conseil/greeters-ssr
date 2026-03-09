@@ -1,3 +1,5 @@
+import type { AppLocale } from "@/lib/i18n/config";
+
 export type EditorBlockType = "heading" | "text" | "image" | "button";
 
 export type EditorBlock = {
@@ -19,6 +21,7 @@ export type EditorSection = {
 
 export type EditorPage = {
   id?: string;
+  locale: AppLocale;
   title: string;
   slug: string;
   metaDescription: string;

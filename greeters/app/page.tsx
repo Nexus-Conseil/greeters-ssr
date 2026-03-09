@@ -4,6 +4,7 @@ import { DynamicPageRenderer } from "@/components/cms/DynamicPageRenderer";
 import { Footer } from "@/components/public/layout/Footer";
 import { Header } from "@/components/public/layout/Header";
 import { TopBar } from "@/components/public/layout/TopBar";
+import { getRequestLocale } from "@/lib/i18n/request";
 import { findPublicPageBySlug } from "@/lib/services/pages";
 
 const NEXT_STEPS = [
@@ -27,7 +28,8 @@ const NEXT_STEPS = [
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const homepage = await findPublicPageBySlug("/").catch(() => null);
+  const locale = await getRequestLocale();
+  const homepage = await findPublicPageBySlug("/", locale).catch(() => null);
 
   if (homepage) {
     return (

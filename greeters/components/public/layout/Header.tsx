@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 
+import { getRequestLocale } from "@/lib/i18n/request";
 import { getMenu } from "@/lib/services/menu";
 
 const FALLBACK_NAV = [
@@ -16,7 +17,8 @@ function toTestId(href: string) {
 }
 
 export const Header = async () => {
-  const navigation = await getMenu()
+  const locale = await getRequestLocale();
+  const navigation = await getMenu(locale)
     .then((menu) =>
       menu.items.map((item) => ({
         href: item.href,

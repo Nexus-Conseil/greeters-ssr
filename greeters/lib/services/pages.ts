@@ -28,6 +28,7 @@ import {
 } from "@/lib/repositories/pages";
 import { listUsersByIds } from "@/lib/repositories/users";
 import { syncMenuFromPublishedPages } from "@/lib/services/menu";
+import { normalizeLocale, type AppLocale } from "@/lib/i18n/config";
 
 export type CmsBlock = {
   id: string;
@@ -47,6 +48,7 @@ export type CmsSection = {
 };
 
 export type PageInput = {
+  locale: AppLocale;
   title: string;
   slug: string;
   metaDescription: string | null;
@@ -234,6 +236,7 @@ function parseStatus(input: unknown) {
 
 function parsePageInput(input: unknown): PageInput {
   const candidate = asRecord(input, "Le corps de requête est invalide.");
+  const locale = normalizeLocale(typeof candidate.locale === "string" ? candidate.locale : undefined);
   const title = coerceString(candidate.title);
   const slug = normalizeSlug(coerceString(candidate.slug));
 
@@ -246,6 +249,7 @@ function parsePageInput(input: unknown): PageInput {
   }
 
   return {
+    locale,
     title,
     slug,
     metaDescription: parseOptionalString(candidate.metaDescription ?? candidate.meta_description),
@@ -267,6 +271,10 @@ function parsePageUpdateInput(input: unknown): PageUpdateInput {
       throw new PagesServiceError(400, "Le titre ne peut pas être vide.");
     }
     payload.title = title;
+  }
+
+  if ("locale" in candidate) {
+    payload.locale = normalizeLocale(typeof candidate.locale === "string" ? candidate.locale : undefined);
   }
 
   if ("slug" in candidate) {
@@ -314,8 +322,9 @@ function parsePageUpdateInput(input: unknown): PageUpdateInput {
   return payload;
 }
 
-function serializeContent(page: Pick<Page, "title" | "slug" | "metaDescription" | "metaKeywords" | "sections" | "isInMenu" | "menuOrder" | "menuLabel">): PageInput {
+function serializeContent(page: Pick<Page, "locale" | "title" | "slug" | "metaDescription" | "metaKeywords" | "sections" | "isInMenu" | "menuOrder" | "menuLabel">): PageInput {
   return {
+    locale: normalizeLocale(page.locale),
     title: page.title,
     slug: page.slug,
     metaDescription: page.metaDescription,
@@ -347,6 +356,7 @@ function serializeVersionContent(version: Pick<PageVersion, "content">): PageInp
 
 function toJsonValue(content: PageInput) {
   return {
+    locale: content.locale,
     title: content.title,
     slug: content.slug,
     metaDescription: content.metaDescription,
@@ -358,8 +368,8 @@ function toJsonValue(content: PageInput) {
   } as Prisma.InputJsonValue;
 }
 
-async function ensureSlugAvailable(slug: string, currentPageId?: string) {
-  const existing = await findPageBySlug(slug);
+async function ensureSlugAvailable(slug: string, locale: AppLocale, currentPageId?: string) {
+  const existing = await findPageBySlug(slug, locale);
 
   if (existing && existing.id !== currentPageId) {
     throw new PagesServiceError(400, "Ce slug est déjà utilisé.");
@@ -392,13 +402,13 @@ export function parsePageStatusFilter(input: string | null) {
   return STATUS_FROM_API[parsed];
 }
 
-export async function getPagesList(input: { status?: PageStatus; skip?: number; limit?: number }) {
+export async function getPagesList(input: { locale?: AppLocale; status?: PageStatus; skip?: number; limit?: number }) {
   const pages = await listPages(input);
   return pages.map(serializePage);
 }
 
-export async function getPublicPages() {
-  const pages = await listPublishedPages();
+export async function getPublicPages(locale: AppLocale) {
+  const pages = await listPublishedPages(1000, locale);
   return pages.map(serializePage);
 }
 
@@ -412,9 +422,9 @@ export async function getPageByIdOrThrow(pageId: string) {
   return serializePage(page);
 }
 
-export async function getPublicPageBySlugOrThrow(slug: string) {
+export async function getPublicPageBySlugOrThrow(slug: string, locale: AppLocale) {
   const normalizedSlug = normalizeSlug(slug);
-  const page = await findPageBySlug(normalizedSlug);
+  const page = await findPageBySlug(normalizedSlug, locale);
 
   if (!page || page.status !== PageStatus.PUBLISHED) {
     throw new PagesServiceError(404, "Page non trouvée.");
@@ -423,9 +433,9 @@ export async function getPublicPageBySlugOrThrow(slug: string) {
   return serializePage(page);
 }
 
-export async function findPublicPageBySlug(slug: string) {
+export async function findPublicPageBySlug(slug: string, locale: AppLocale) {
   const normalizedSlug = normalizeSlug(slug);
-  const page = await findPageBySlug(normalizedSlug);
+  const page = await findPageBySlug(normalizedSlug, locale);
 
   if (!page || page.status !== PageStatus.PUBLISHED) {
     return null;
@@ -442,9 +452,10 @@ export async function createPage(input: unknown, user: AuthUser) {
     throw new AuthError(403, "Les éditeurs ne peuvent pas créer la page d’accueil.");
   }
 
-  await ensureSlugAvailable(payload.slug);
+  await ensureSlugAvailable(payload.slug, payload.locale);
 
   const page = await createPageRecord({
+    locale: payload.locale,
     title: payload.title,
     slug: payload.slug,
     metaDescription: payload.metaDescription,
@@ -471,7 +482,7 @@ export async function createPage(input: unknown, user: AuthUser) {
 
   await upsertPageContentRecord(page.id, toJsonValue(payload));
 
-  await syncMenuFromPublishedPages(user.id);
+  await syncMenuFromPublishedPages(user.id, payload.locale);
 
   return serializePage(page);
 }
@@ -488,13 +499,15 @@ export async function updatePage(pageId: string, input: unknown, user: AuthUser)
   }
 
   const updates = parsePageUpdateInput(input);
+  const targetLocale = updates.locale ?? normalizeLocale(page.locale);
 
   if (updates.slug) {
-    await ensureSlugAvailable(updates.slug, pageId);
+    await ensureSlugAvailable(updates.slug, targetLocale, pageId);
   }
 
   const currentContent = serializeContent(page);
   const mergedContent: PageInput = {
+    locale: targetLocale,
     title: updates.title ?? currentContent.title,
     slug: updates.slug ?? currentContent.slug,
     metaDescription: updates.metaDescription ?? currentContent.metaDescription,
@@ -508,6 +521,7 @@ export async function updatePage(pageId: string, input: unknown, user: AuthUser)
   const nextStatus = resolveNextStatus(user, page.status, updates.status);
 
   const updatedPage = await updatePageRecord(pageId, {
+    locale: mergedContent.locale,
     title: mergedContent.title,
     slug: mergedContent.slug,
     metaDescription: mergedContent.metaDescription,
@@ -535,7 +549,11 @@ export async function updatePage(pageId: string, input: unknown, user: AuthUser)
 
   await upsertPageContentRecord(pageId, toJsonValue(mergedContent));
 
-  await syncMenuFromPublishedPages(user.id);
+  await syncMenuFromPublishedPages(user.id, normalizeLocale(page.locale));
+
+  if (normalizeLocale(page.locale) !== mergedContent.locale) {
+    await syncMenuFromPublishedPages(user.id, mergedContent.locale);
+  }
 
   return serializePage(updatedPage);
 }
@@ -556,7 +574,7 @@ export async function removePage(pageId: string, user: AuthUser) {
   await deletePageContentByPageId(pageId);
   await deleteVersionsForPage(pageId);
   await deletePageRecord(pageId);
-  await syncMenuFromPublishedPages(user.id);
+  await syncMenuFromPublishedPages(user.id, normalizeLocale(page.locale));
 
   return { message: "Page supprimée avec succès." };
 }
@@ -656,7 +674,7 @@ export async function approvePendingChange(versionId: string, user: AuthUser) {
 
   await upsertPageContentRecord(version.pageId, toJsonValue(content));
 
-  await syncMenuFromPublishedPages(user.id);
+  await syncMenuFromPublishedPages(user.id, content.locale);
 
   return { message: "Modifications approuvées et publiées." };
 }
@@ -717,7 +735,7 @@ export async function rejectPendingChange(versionId: string, reason: string | nu
     });
   }
 
-  await syncMenuFromPublishedPages(user.id);
+  await syncMenuFromPublishedPages(user.id, normalizeLocale(page.locale));
 
   return {
     message: "Modifications rejetées.",
@@ -804,7 +822,7 @@ export async function rollbackPage(pageId: string, versionNumber: number, user: 
 
   await upsertPageContentRecord(pageId, toJsonValue(content));
 
-  await syncMenuFromPublishedPages(user.id);
+  await syncMenuFromPublishedPages(user.id, content.locale);
 
   return {
     message: `Page restaurée à partir de la version ${versionNumber}.`,
@@ -816,9 +834,9 @@ export async function getPagesDashboardMetrics() {
   const counts = await countPagesByStatus();
 
   return {
-    draft: counts.DRAFT ?? 0,
-    pending: counts.PENDING ?? 0,
-    published: counts.PUBLISHED ?? 0,
-    archived: counts.ARCHIVED ?? 0,
+    draft: Object.entries(counts).filter(([key]) => key.endsWith(":DRAFT")).reduce((total, [, value]) => total + value, 0),
+    pending: Object.entries(counts).filter(([key]) => key.endsWith(":PENDING")).reduce((total, [, value]) => total + value, 0),
+    published: Object.entries(counts).filter(([key]) => key.endsWith(":PUBLISHED")).reduce((total, [, value]) => total + value, 0),
+    archived: Object.entries(counts).filter(([key]) => key.endsWith(":ARCHIVED")).reduce((total, [, value]) => total + value, 0),
   };
 }

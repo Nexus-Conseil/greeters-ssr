@@ -7,6 +7,7 @@ const FOOTER_LINKS = [
   { href: "/presse", label: "Presse", testId: "presse" },
   { href: "/contact", label: "Contact", testId: "contact" },
   { href: "/mentions-legales", label: "Mentions légales", testId: "mentions-legales" },
+  { href: "/sitemap.xml", label: "Sitemap touristique", testId: "sitemap" },
 ];
 
 export const Footer = () => {
