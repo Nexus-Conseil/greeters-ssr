@@ -2,11 +2,11 @@ import Link from "next/link";
 import type { Route } from "next";
 
 const FOOTER_LINKS = [
-  { href: "/qui-sommes-nous", label: "Qui sommes-nous" },
-  { href: "/devenez-benevole", label: "Devenez bénévole" },
-  { href: "/presse", label: "Presse" },
-  { href: "/contact", label: "Contact" },
-  { href: "/mentions-legales", label: "Mentions légales" },
+  { href: "/qui-sommes-nous", label: "Qui sommes-nous", testId: "qui-sommes-nous" },
+  { href: "/devenez-benevole", label: "Devenez bénévole", testId: "devenez-benevole" },
+  { href: "/presse", label: "Presse", testId: "presse" },
+  { href: "/contact", label: "Contact", testId: "contact" },
+  { href: "/mentions-legales", label: "Mentions légales", testId: "mentions-legales" },
 ];
 
 export const Footer = () => {
@@ -31,7 +31,7 @@ export const Footer = () => {
                 key={link.href}
                 href={link.href as Route}
                 className="public-footer-link"
-                data-testid={`public-footer-link-${link.label.toLowerCase().replace(/[^a-z]+/g, "-")}`}
+                data-testid={`public-footer-link-${link.testId}`}
               >
                 {link.label}
               </Link>

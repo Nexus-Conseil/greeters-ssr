@@ -1,44 +1,43 @@
-# PRD — État de reprise après audit + exécution des lots 00 à 02
+# PRD — Reprise Greeters après lots 03 à 05 (socle)
 
 ## Problème d’origine
-- Identifier la vraie source Greeters
-- Corriger l’écart entre la doc et le code réel
-- Définir puis démarrer une vraie migration Next.js à partir du produit React/FastAPI existant
+- Reprendre la migration Greeters en s’appuyant sur le handoff `/app/README_DEV.md`
+- Continuer après les lots 00 à 02 dans `/app/greeters`
+- Avancer sur les repositories/services métier, les APIs pages P0 et le shell admin/public
 
-## Décisions verrouillées
-- Nouvelle cible dans `/app/greeters`
-- Next.js App Router + TypeScript
-- Supabase PostgreSQL + Prisma
-- Réécriture one-shot
-- Auth moderne côté serveur avec `proxy.ts`
-- Pas de Google Maps
-- Pas de SunEditor
+## Décisions d’architecture
+- Cible maintenue : `/app/greeters`
+- Stack maintenue : Next.js App Router + TypeScript + Prisma + Supabase/PostgreSQL
+- Session serveur HTTP-only conservée avec `proxy.ts`
+- Portage P0 structuré par couches : repositories Prisma → services métier → routes API → shell UI
+- Shell public/admin lancé sans casser l’auth déjà en place
 
 ## Implémenté
-- Audit complet du repo source et des écarts documentaires
-- Production des documents de planification et de portage
-- Création du squelette Next.js dans `/app/greeters`
-- Schéma Prisma initial + migration SQL + seed admin
-- Application de la migration SQL initiale côté Supabase
-- Lot 02 complet : login/logout/me, session HTTP-only, proxy admin, `/admin/login`, `/admin`
-- Validation build/lint + validation auth E2E
-
-## Ce qui fonctionne déjà
-- L’app Next.js compile et build
-- La DB Prisma est branchée au runtime
-- Le seed admin fonctionne via variables d’environnement
-- Login admin et dashboard protégé fonctionnent
+- Synchronisation locale du repo `greeters-ssr` dans `/app` et reprise du repo source métier `greeters`
+- Repositories Prisma ajoutés pour users, sessions, password resets, pages, versions, page contents, previews, edits, menu, documents et home sections
+- Services métier ajoutés pour pages et menu, plus bases utilitaires documents/page-editor/contact
+- APIs Next.js ajoutées : `/api/health`, `/api/pages`, `/api/pages/[id]`, `/api/pages/public`, `/api/pages/by-slug/[slug]`, pending approve/reject, versions, rollback
+- Shell admin/public démarré : layout admin avec sidebar, dashboard, liste pages, validations, accueil public, top bar, header/footer, placeholders publics mono-segment
+- Refactor auth partiel : login/session branchés sur les nouveaux repositories users/sessions
+- Validation réalisée : `yarn install`, `yarn prisma:generate`, `eslint`, `next build`, smoke UI + API scope demandé, rapport `/app/test_reports/iteration_4.json`
 
 ## P0
-- Créer les repositories/services métier
-- Porter les APIs pages P0
-- Démarrer le vrai shell admin/public
+- Brancher un vrai `DATABASE_URL` / `AUTH_SECRET` de projet pour tester les routes pages connectées à Prisma en environnement réel
+- Porter le formulaire création/édition de page et l’historique de versions côté UI
+- Connecter le shell public au vrai menu CMS et aux pages publiées
 
 ## P1
-- Porter le CRUD pages complet
-- Porter le workflow pending/versions/rollback
-- Commencer les pages publiques SSR
+- Porter le CRUD pages complet avec éditeur de sections/blocs
+- Finaliser le workflow pending / reject / rollback côté interface
+- Ajouter les routes publiques dynamiques SSR pour les pages CMS
 
 ## P2
-- Porter menu, documents/uploads, users admin, IA, contact, chatbot
-- Préparer la migration Mongo → Supabase des données métier
+- Porter menu avancé, documents/uploads, users admin, contact, IA, chatbot
+- Préparer les scripts de migration de données Mongo → Supabase
+- Renforcer les métriques dashboard et la couverture de tests métier authentifiés
+
+## Next tasks
+1. Créer les écrans `/admin/pages/new` et `/admin/pages/[id]`
+2. Brancher le menu public sur `lib/services/menu.ts`
+3. Ajouter les route handlers menu/documents/contact selon le backlog
+4. Préparer un seed/admin réel pour les tests d’authentification bout en bout

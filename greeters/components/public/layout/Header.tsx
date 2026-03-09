@@ -2,11 +2,11 @@ import Link from "next/link";
 import type { Route } from "next";
 
 const PUBLIC_NAV = [
-  { href: "/", label: "Accueil" },
-  { href: "/galerie", label: "Galerie" },
-  { href: "/livre-dor", label: "Livre d’or" },
-  { href: "/actualites", label: "Actualités" },
-  { href: "/contact", label: "Contact" },
+  { href: "/", label: "Accueil", testId: "accueil" },
+  { href: "/galerie", label: "Galerie", testId: "galerie" },
+  { href: "/livre-dor", label: "Livre d’or", testId: "livre-dor" },
+  { href: "/actualites", label: "Actualités", testId: "actualites" },
+  { href: "/contact", label: "Contact", testId: "contact" },
 ];
 
 export const Header = () => {
@@ -27,7 +27,7 @@ export const Header = () => {
             key={item.href}
             href={item.href as Route}
             className="public-header-link"
-            data-testid={`public-header-link-${item.label.toLowerCase().replace(/[^a-z]+/g, "-")}`}
+            data-testid={`public-header-link-${item.testId}`}
           >
             {item.label}
           </Link>
