@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { DynamicPageRenderer } from "@/components/cms/DynamicPageRenderer";
+import { Footer } from "@/components/public/layout/Footer";
+import { Header } from "@/components/public/layout/Header";
+import { TopBar } from "@/components/public/layout/TopBar";
+import { findPublicPageBySlug } from "@/lib/services/pages";
+
 const PUBLIC_PLACEHOLDERS: Record<string, { title: string; description: string }> = {
   galerie: {
     title: "Galerie",
@@ -36,6 +42,8 @@ const PUBLIC_PLACEHOLDERS: Record<string, { title: string; description: string }
   },
 };
 
+export const dynamic = "force-dynamic";
+
 type PublicPlaceholderPageProps = {
   params: Promise<{
     slug: string;
@@ -44,6 +52,21 @@ type PublicPlaceholderPageProps = {
 
 export default async function PublicPlaceholderPage({ params }: PublicPlaceholderPageProps) {
   const { slug } = await params;
+  const livePage = await findPublicPageBySlug(slug).catch(() => null);
+
+  if (livePage) {
+    return (
+      <main className="public-page" data-testid={`public-live-page-${slug}`}>
+        <TopBar />
+        <Header />
+        <div className="public-live-page" data-testid={`public-live-page-content-${slug}`}>
+          <DynamicPageRenderer page={livePage} />
+        </div>
+        <Footer />
+      </main>
+    );
+  }
+
   const content = PUBLIC_PLACEHOLDERS[slug];
 
   if (!content) {
@@ -51,26 +74,31 @@ export default async function PublicPlaceholderPage({ params }: PublicPlaceholde
   }
 
   return (
-    <main className="landing-shell" data-testid={`public-placeholder-page-${slug}`}>
-      <section className="hero-panel" data-testid={`public-placeholder-panel-${slug}`}>
-        <p className="eyebrow" data-testid={`public-placeholder-eyebrow-${slug}`}>
-          Route publique préparée
-        </p>
-        <h1 className="hero-title" data-testid={`public-placeholder-title-${slug}`}>
-          {content.title}
-        </h1>
-        <p className="hero-copy" data-testid={`public-placeholder-description-${slug}`}>
-          {content.description}
-        </p>
-        <div className="public-hero-actions" data-testid={`public-placeholder-actions-${slug}`}>
-          <Link href="/" className="secondary-button public-hero-button" data-testid={`public-placeholder-home-link-${slug}`}>
-            Retour à l’accueil
-          </Link>
-          <Link href="/admin" className="primary-button public-hero-button" data-testid={`public-placeholder-admin-link-${slug}`}>
-            Ouvrir l’admin
-          </Link>
-        </div>
+    <main className="public-page" data-testid={`public-placeholder-page-${slug}`}>
+      <TopBar />
+      <Header />
+      <section className="landing-shell" data-testid={`public-placeholder-shell-${slug}`}>
+        <section className="hero-panel" data-testid={`public-placeholder-panel-${slug}`}>
+          <p className="eyebrow" data-testid={`public-placeholder-eyebrow-${slug}`}>
+            Route publique préparée
+          </p>
+          <h1 className="hero-title" data-testid={`public-placeholder-title-${slug}`}>
+            {content.title}
+          </h1>
+          <p className="hero-copy" data-testid={`public-placeholder-description-${slug}`}>
+            {content.description}
+          </p>
+          <div className="public-hero-actions" data-testid={`public-placeholder-actions-${slug}`}>
+            <Link href="/" className="secondary-button public-hero-button" data-testid={`public-placeholder-home-link-${slug}`}>
+              Retour à l’accueil
+            </Link>
+            <Link href="/admin" className="primary-button public-hero-button" data-testid={`public-placeholder-admin-link-${slug}`}>
+              Ouvrir l’admin
+            </Link>
+          </div>
+        </section>
       </section>
+      <Footer />
     </main>
   );
 }

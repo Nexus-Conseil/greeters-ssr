@@ -39,10 +39,32 @@ function parseMenuItems(input: unknown): MenuItem[] {
 
 export async function getMenu() {
   const menu = await getMainMenuRecord();
+  const menuItems = parseMenuItems(menu?.items);
+
+  if (menuItems.length === 0) {
+    const publishedPages = await listPublishedPages();
+
+    return {
+      id: menu?.id ?? "main_menu",
+      items: publishedPages
+        .filter((page) => page.isInMenu)
+        .map((page) => ({
+          id: page.id,
+          label: page.menuLabel || page.title,
+          href: page.slug === "/" ? "/" : `/${page.slug}`,
+          isExternal: false,
+          order: page.menuOrder,
+          isVisible: true,
+        }))
+        .sort((left, right) => left.order - right.order),
+      updatedBy: menu?.updatedBy ?? null,
+      updatedAt: menu?.updatedAt?.toISOString() ?? null,
+    };
+  }
 
   return {
     id: menu?.id ?? "main_menu",
-    items: parseMenuItems(menu?.items),
+    items: menuItems,
     updatedBy: menu?.updatedBy ?? null,
     updatedAt: menu?.updatedAt?.toISOString() ?? null,
   };

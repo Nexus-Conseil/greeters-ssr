@@ -65,3 +65,12 @@ def test_admin_login_route_renders_login_form(api_client):
     assert 'data-testid="admin-login-page"' in html
     assert 'data-testid="admin-login-email-input"' in html
     assert 'data-testid="admin-login-submit-button"' in html
+
+
+def test_admin_new_page_route_redirects_to_login_without_session(api_client):
+    response = api_client.get(f"{BASE_URL}/admin/pages/new", allow_redirects=False)
+
+    assert response.status_code == 307
+    location = response.headers.get("location", "")
+    assert location.startswith("/admin/login?redirect=")
+    assert "%2Fadmin%2Fpages%2Fnew" in location

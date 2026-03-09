@@ -27,7 +27,7 @@ import {
   updatePageRecord,
 } from "@/lib/repositories/pages";
 import { listUsersByIds } from "@/lib/repositories/users";
-import { getMenu, updateMenu } from "@/lib/services/menu";
+import { syncMenuFromPublishedPages } from "@/lib/services/menu";
 
 export type CmsBlock = {
   id: string;
@@ -378,16 +378,6 @@ function resolveNextStatus(user: AuthUser, currentStatus: PageStatus, requestedS
   return currentStatus;
 }
 
-async function syncMenuForPageRemoval(pageId: string, slug: string, userId: string) {
-  const menu = await getMenu();
-  const href = slug === "/" ? "/" : `/${slug}`;
-  const nextItems = menu.items.filter((item) => item.id !== pageId && item.href !== href);
-
-  if (nextItems.length !== menu.items.length) {
-    await updateMenu(nextItems, userId);
-  }
-}
-
 export function parsePageStatusFilter(input: string | null) {
   if (!input) {
     return undefined;
@@ -433,6 +423,17 @@ export async function getPublicPageBySlugOrThrow(slug: string) {
   return serializePage(page);
 }
 
+export async function findPublicPageBySlug(slug: string) {
+  const normalizedSlug = normalizeSlug(slug);
+  const page = await findPageBySlug(normalizedSlug);
+
+  if (!page || page.status !== PageStatus.PUBLISHED) {
+    return null;
+  }
+
+  return serializePage(page);
+}
+
 export async function createPage(input: unknown, user: AuthUser) {
   const payload = parsePageInput(input);
   const initialStatus = isAdminRole(user.role) ? PageStatus.PUBLISHED : PageStatus.PENDING;
@@ -469,6 +470,8 @@ export async function createPage(input: unknown, user: AuthUser) {
   });
 
   await upsertPageContentRecord(page.id, toJsonValue(payload));
+
+  await syncMenuFromPublishedPages(user.id);
 
   return serializePage(page);
 }
@@ -532,6 +535,8 @@ export async function updatePage(pageId: string, input: unknown, user: AuthUser)
 
   await upsertPageContentRecord(pageId, toJsonValue(mergedContent));
 
+  await syncMenuFromPublishedPages(user.id);
+
   return serializePage(updatedPage);
 }
 
@@ -551,7 +556,7 @@ export async function removePage(pageId: string, user: AuthUser) {
   await deletePageContentByPageId(pageId);
   await deleteVersionsForPage(pageId);
   await deletePageRecord(pageId);
-  await syncMenuForPageRemoval(pageId, page.slug, user.id);
+  await syncMenuFromPublishedPages(user.id);
 
   return { message: "Page supprimée avec succès." };
 }
@@ -651,6 +656,8 @@ export async function approvePendingChange(versionId: string, user: AuthUser) {
 
   await upsertPageContentRecord(version.pageId, toJsonValue(content));
 
+  await syncMenuFromPublishedPages(user.id);
+
   return { message: "Modifications approuvées et publiées." };
 }
 
@@ -709,6 +716,8 @@ export async function rejectPendingChange(versionId: string, reason: string | nu
       updatedAt: new Date(),
     });
   }
+
+  await syncMenuFromPublishedPages(user.id);
 
   return {
     message: "Modifications rejetées.",
@@ -794,6 +803,8 @@ export async function rollbackPage(pageId: string, versionNumber: number, user: 
   });
 
   await upsertPageContentRecord(pageId, toJsonValue(content));
+
+  await syncMenuFromPublishedPages(user.id);
 
   return {
     message: `Page restaurée à partir de la version ${versionNumber}.`,

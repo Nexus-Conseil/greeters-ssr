@@ -1,8 +1,10 @@
 import Link from "next/link";
 
+import { DynamicPageRenderer } from "@/components/cms/DynamicPageRenderer";
 import { Footer } from "@/components/public/layout/Footer";
 import { Header } from "@/components/public/layout/Header";
 import { TopBar } from "@/components/public/layout/TopBar";
+import { findPublicPageBySlug } from "@/lib/services/pages";
 
 const NEXT_STEPS = [
   {
@@ -22,7 +24,24 @@ const NEXT_STEPS = [
   },
 ];
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const homepage = await findPublicPageBySlug("/").catch(() => null);
+
+  if (homepage) {
+    return (
+      <main className="public-page" data-testid="public-home-page-live">
+        <TopBar />
+        <Header />
+        <div className="public-live-page" data-testid="public-home-live-content">
+          <DynamicPageRenderer page={homepage} />
+        </div>
+        <Footer />
+      </main>
+    );
+  }
+
   return (
     <main className="public-page" data-testid="public-home-page">
       <TopBar />

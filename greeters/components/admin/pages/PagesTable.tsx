@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import type { Route } from "next";
 import { useEffect, useMemo, useState } from "react";
 
 type PageItem = {
@@ -95,9 +97,14 @@ export const PagesTable = () => {
             Cette vue s’appuie sur les nouvelles routes Next.js pour lister et piloter le contenu du site.
           </p>
         </div>
-        <button className="secondary-button dashboard-inline-button" onClick={() => void fetchPages()} data-testid="admin-pages-refresh-button">
-          Actualiser
-        </button>
+        <div className="dashboard-row-actions" data-testid="admin-pages-header-actions">
+          <Link href="/admin/pages/new" className="primary-button dashboard-inline-button" data-testid="admin-pages-new-link">
+            Nouvelle page
+          </Link>
+          <button className="secondary-button dashboard-inline-button" onClick={() => void fetchPages()} data-testid="admin-pages-refresh-button">
+            Actualiser
+          </button>
+        </div>
       </div>
 
       <div className="dashboard-toolbar" data-testid="admin-pages-toolbar">
@@ -174,6 +181,9 @@ export const PagesTable = () => {
                 </div>
 
                 <div className="dashboard-row-actions" data-testid={`admin-pages-row-actions-${page.id}`}>
+                  <Link href={`/admin/pages/${page.id}` as Route} className="secondary-button dashboard-inline-button" data-testid={`admin-pages-edit-button-${page.id}`}>
+                    Éditer
+                  </Link>
                   {page.status === "published" ? (
                     <a
                       href={page.slug === "/" ? "/" : `/${page.slug}`}
