@@ -17,37 +17,42 @@
 
 ## Implémenté le 2026-03-09
 - Migration visuelle de l’accueil public : topbar, sélecteur de langues, logo, navigation, hero, intro, section Greeters, visite, actualités, témoignages, galerie.
-- Refonte du shell public partagé : `Header`, `TopBar`, `Footer`, placeholders `/[slug]` harmonisés avec le nouveau style public.
+- Migration des pages publiques : `/qui-sommes-nous`, `/actualites`, `/galerie`, `/livre-dor`, `/faire-un-don`, `/devenez-benevole`, `/contact`, `/presse`, `/mentions-legales`.
+- Ajout du redirect `/mention-legale` → `/mentions-legales` pour coller au comportement CSR.
+- Refonte du shell public partagé : `Header`, `TopBar`, `Footer`, layout public réutilisable et composants dédiés par page.
 - Ajout d’un système de contenu fallback pour la home branchable plus tard au CMS/home sections.
+- Ajout d’un audit de parité live/CSR/SSR : `/app/AUDIT_PARITE_PAGES_PUBLIQUES_GREETERS.md`.
 - Ajout/normalisation des `data-testid` sur tous les éléments interactifs et éléments critiques visibles.
 - Mise à jour du branding global (`metadata`, fontes, CSS public dédié `app/public-site.css`).
 
 ## Validation réalisée
 - `eslint` OK sur `/app/greeters`
 - `yarn tsc --noEmit` OK
-- Smoke test visuel local OK sur `http://127.0.0.1:3100`
 - Rapport de test frontend OK : `/app/test_reports/iteration_8.json`
-  - home, navigation, CTA topbar, carrousel témoignages, lightbox galerie, responsive mobile, routes placeholder publiques : PASS
+  - accueil, navigation, CTA topbar, carrousel témoignages, lightbox galerie, responsive mobile : PASS
+- Rapport de test frontend OK : `/app/test_reports/iteration_9.json`
+  - toutes les pages publiques migrées + redirect + galerie/lightbox + livre d’or + formulaire contact UI : PASS
 
 ## Blocages connus
 - Intégration Gemini toujours **bloquée côté quota/facturation** tant que l’API Google ne répond pas sans `RESOURCE_EXHAUSTED`.
 
 ## P0
-- Porter la page publique suivante du site CSR (ex. `Qui sommes-nous ?` ou `Actualités`) avec contenu fidèle.
 - Connecter davantage le frontend public aux données CMS réelles au lieu du fallback statique.
-- Vérifier la cohérence multilingue réelle (subdomains / variantes preview) sur le shell public.
+- Vérifier la cohérence multilingue réelle (subdomains / variantes preview) sur toutes les pages publiques.
+- Remplacer le flux de contact **MOCKÉ** par un vrai envoi email ou une persistance métier.
 
 ## P1
 - Brancher sitemap dynamique `/sitemap.xml` par langue.
 - Nettoyer les contenus/tests historiques en base si nécessaire.
 - Reprendre les écrans admin `/admin/pages/new` et `/admin/pages/[id]` pour coller au CMS source.
+- Brancher les documents/pages publiques sur des contenus éditables depuis le CMS si souhaité.
 
 ## P2
 - Finaliser un gestionnaire de menu admin encore plus riche (drag-and-drop avancé / arborescence si besoin).
 - Ajouter les raffinements de parité visuelle restants page par page.
 
 ## Next tasks
-1. Migrer la prochaine page publique prioritaire depuis le CSR source.
-2. Brancher les sections d’accueil aux vraies données CMS/home sections.
-3. Poursuivre la parité frontend puis remonter vers l’édition admin des pages.
+1. Brancher les pages publiques et l’accueil aux vraies données CMS au lieu du fallback statique.
+2. Implémenter un vrai traitement du formulaire de contact.
+3. Reprendre la parité CMS/admin (création/édition pages, menu, workflow).
 4. Revenir sur Gemini uniquement après confirmation utilisateur que le quota/facturation est rétabli.
