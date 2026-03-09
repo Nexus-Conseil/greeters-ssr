@@ -1,57 +1,61 @@
-# PRD — Reprise Greeters après portage éditeur/pages SSR
+# PRD — Greeters reprise avec auth Supabase runtime stabilisée
 
 ## Problème d’origine
-- Continuer la migration Greeters dans `/app/greeters`
-- Porter les repositories/services métier, les APIs pages, le shell admin/public
-- Ajouter l’éditeur de pages sections/blocs, les écrans admin `/admin/pages/new` et `/admin/pages/[id]`
-- Connecter le menu public aux données CMS et rendre les pages publiques SSR dynamiques
-- Brancher les écrans live sur PostgreSQL Supabase projet
+- Finaliser l’auth DB Supabase runtime
+- Valider les flux authentifiés réels : login admin, création/édition live, publication et affichage public/menu
+- Continuer le portage CMS Next.js dans `/app/greeters`
 
 ## Décisions d’architecture
-- Stack conservée : Next.js App Router + TypeScript + Prisma + Supabase/PostgreSQL
-- Couches maintenues : repositories Prisma → services → route handlers → UI/admin/public
-- Pages publiques SSR servies côté App Router avec fallback public si la DB n’est pas accessible
-- Menu public connecté au service CMS `getMenu()` avec fallback sur pages publiées puis navigation statique
-- Éditeur CMS admin construit en client-side pour composer sections/blocs puis sauvegarder via APIs Next
+- Runtime Prisma conservé dans `lib/db/prisma.ts`
+- Base live Supabase branchée via **transaction pooler 6543**
+- `DATABASE_URL` configurée avec `pgbouncer=true&sslmode=no-verify` pour compatibilité Prisma/Supavisor
+- `DIRECT_DATABASE_URL` conservée à part, mais le runtime web s’appuie désormais sur le pooler transactionnel stable
+- Mode édition corrigé : le slug n’est plus auto-réécrit lors d’un simple changement de titre sur une page existante
 
 ## Implémenté
-- `.env` projet ajouté dans `/app/greeters` avec URLs Supabase, `AUTH_SECRET`, seed admin
-- Repositories/services P0 déjà posés complétés par la synchronisation menu depuis les pages publiées
-- APIs ajoutées/complétées : menu GET/PUT + sync, pages CRUD/public/pending/versions/rollback
-- Éditeur complet de pages livré :
-  - `/admin/pages/new`
-  - `/admin/pages/[id]`
-  - composition sections/blocs (titre, texte, image URL, bouton)
-  - gestion SEO/menu
-  - prévisualisation live
-  - historique de versions avec rollback
-- Vue `/admin/pages` enrichie avec création + édition
-- Rendu CMS public ajouté avec `DynamicPageRenderer`
-- Menu public branché au CMS via `Header` serveur
-- Pages publiques SSR dynamiques mono-segment activées via `app/[slug]/page.tsx`
-- Home SSR connectée au slug `/` si une page publique existe, sinon fallback shell
-- Tests/validation réalisés : ESLint, `next build`, screenshots public/login/redirect, testing agent iteration_5 OK sur scope non authentifié
+- Diagnostic complet des trois chaînes DB :
+  - session pooler 5432 rejetait l’auth
+  - transaction pooler 6543 accepte la connexion
+  - direct host non joignable depuis cet environnement
+- Correction runtime Supabase/Prisma en `.env` : `DATABASE_URL` => transaction pooler + `pgbouncer=true`
+- Seed admin live validé pour `contact@nexus-conseil.ch`
+- Login admin réel validé (`/api/auth/login`, `/api/auth/me`, UI `/admin/login`)
+- Flux CMS live validés :
+  - création d’une page publiée en base réelle
+  - édition live d’une page existante
+  - mise à jour visible côté menu public
+  - rendu SSR public de la page publiée
+- Correction du bug d’édition relevé par testing agent : changement de titre sans mutation implicite du slug en mode édition
+- Pages de validation créées en live :
+  - `page-live-nexus-test`
+  - `page-ui-live-20260309-2`
 
-## Blocage actuel
-- Le branchement live Supabase n’est pas finalisé : Prisma runtime répond toujours `Authentication failed against the database server` sur le pooler avec les credentials fournis
-- Conséquence : les flux authentifiés CMS connectés à la vraie DB (login réel, create/edit live, versions live) ne sont pas encore validables bout en bout
+## Vérifications réalisées
+- `next build` OK
+- login API réel 200
+- `/api/auth/me` avec cookie réel 200
+- `/api/pages` authentifié 200
+- création UI live `/admin/pages/new` OK
+- édition UI live `/admin/pages/[id]` OK
+- page publique SSR `/page-ui-live-20260309-2` affiche bien le contenu mis à jour
+- menu public affiche les entrées créées/publiées depuis le CMS
+- testing agent iteration 6 : le bug slug auto-muté a été identifié puis corrigé ensuite en self-test
 
 ## P0
-- Corriger définitivement l’auth Prisma ↔ Supabase pooler/runtime avec les bons credentials DB ou la bonne chaîne de connexion
-- Re-tester login admin réel puis création/édition/publication de page sur la base projet
-- Ajouter un rendu public multi-segments si le contenu CMS le requiert
+- Nettoyer/normaliser les pages de validation créées pour les tests live
+- Ajouter un écran d’administration du menu (ordre, renommage, suppression) relié aux données live
+- Renforcer le rendu public pour les slugs multi-segments si requis par le backlog
 
 ## P1
-- Ajouter upload média réel / document storage pour les blocs image
-- Finaliser l’administration du menu avec réordonnancement manuel et liens externes
-- Renforcer le typage strict du renderer CMS et des payloads sections/blocs
+- Durcir le typage partagé du renderer CMS (remplacer les parties permissives restantes)
+- Ajouter uploads médias réels pour les blocs image
+- Étendre les tests E2E authentifiés de création/édition/publication
 
 ## P2
-- Porter contact, documents, home sections avancées, IA/chatbot et migrations de données métier
-- Ajouter davantage de tests E2E authentifiés CMS
+- Porter documents, contact, home sections avancées, IA/chatbot et migration de données métier
 
 ## Next tasks
-1. Recevoir/valider la chaîne Supabase DB exacte qui authentifie réellement Prisma au runtime
-2. Tester `contact@nexus-conseil.ch` sur `/admin/login` en live puis créer une première page CMS
-3. Vérifier la publication d’une page et sa remontée automatique dans le menu public
-4. Étendre le renderer dynamique aux cas multi-segments si nécessaire
+1. Nettoyer les pages/menu créés pour les validations live
+2. Ajouter la gestion admin complète du menu public
+3. Étendre l’éditeur à davantage de types de blocs et médias
+4. Couvrir le workflow complet par tests E2E persistants
