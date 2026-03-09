@@ -30,7 +30,7 @@ export const PageEditorForm = ({ pageId }: { pageId?: string }) => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(Boolean(pageId));
   const [saving, setSaving] = useState(false);
-  const [slugTouched, setSlugTouched] = useState(false);
+  const [slugTouched, setSlugTouched] = useState(Boolean(pageId));
   const [expandedSectionId, setExpandedSectionId] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
