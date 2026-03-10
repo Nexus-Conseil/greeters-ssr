@@ -67,8 +67,8 @@ export const GreetersSection = ({
                 </p>
               ))}
             </div>
-            <a href={bookingUrl} target="_blank" rel="noreferrer" className="site-cta-button site-cta-button-inline" data-testid="public-home-greeters-cta-button">
-              {ctaText}
+            <a href={bookingUrl} target="_blank" rel="noreferrer" className="site-cta-button site-cta-button-inline site-glow-button" data-testid="public-home-greeters-cta-button">
+              <span className="site-glow-button-label">{ctaText}</span>
             </a>
           </div>
         </div>

@@ -39,13 +39,38 @@ type HeaderClientProps = {
   navigation: SiteNavigationItem[];
 };
 
+const MenuGlyph = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M4 7h16v2H4V7Zm0 4h16v2H4v-2Zm0 4h16v2H4v-2Z" fill="currentColor" />
+  </svg>
+);
+
+const CloseGlyph = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="m6.4 5 5.6 5.6L17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4 6.4 5Z" fill="currentColor" />
+  </svg>
+);
+
 export const HeaderClient = ({ currentLocale, navigation }: HeaderClientProps) => {
   const pathname = usePathname() ?? "/";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showMenuText, setShowMenuText] = useState(false);
 
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setShowMenuText((previous) => !previous);
+    }, 3000);
+
+    return () => window.clearInterval(interval);
+  }, [mobileMenuOpen]);
 
   const resolvedNavigation = useMemo(() => {
     return navigation
@@ -103,7 +128,20 @@ export const HeaderClient = ({ currentLocale, navigation }: HeaderClientProps) =
           aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
           data-testid="public-site-mobile-menu-button"
         >
-          {mobileMenuOpen ? "Fermer" : "Menu"}
+          {mobileMenuOpen ? (
+            <span className="site-mobile-toggle-close" data-testid="public-site-mobile-menu-close-icon">
+              <CloseGlyph />
+            </span>
+          ) : (
+            <span className="site-mobile-toggle-shell">
+              <span className={`site-mobile-toggle-icon${showMenuText ? " is-hidden" : ""}`} data-testid="public-site-mobile-menu-open-icon">
+                <MenuGlyph />
+              </span>
+              <span className={`site-mobile-toggle-label${showMenuText ? " is-visible" : ""}`} data-testid="public-site-mobile-menu-label">
+                MENU
+              </span>
+            </span>
+          )}
         </button>
       </div>
 
