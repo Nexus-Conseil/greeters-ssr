@@ -666,7 +666,7 @@ export async function createPage(input: unknown, user: AuthUser) {
   });
   await cleanupOrphanedManagedImages();
 
-  return serializePage(page);
+  return getPageByIdOrThrow(page.id);
 }
 
 export async function updatePage(pageId: string, input: unknown, user: AuthUser) {
