@@ -1,21 +1,10 @@
 import type { Metadata } from "next";
-import { Pacifico, Space_Grotesk, Spectral } from "next/font/google";
+import { Pacifico } from "next/font/google";
 
 import { getRequestLocale } from "@/lib/i18n/request";
 
 import "./globals.css";
 import "./public-site.css";
-
-const headingFont = Space_Grotesk({
-  variable: "--font-heading",
-  subsets: ["latin"],
-});
-
-const bodyFont = Spectral({
-  variable: "--font-body",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
 
 const scriptFont = Pacifico({
   variable: "--font-script",
@@ -39,7 +28,7 @@ export default async function RootLayout({
   return (
     <html lang={locale}>
       <body
-        className={`${headingFont.variable} ${bodyFont.variable} ${scriptFont.variable} app-shell`}
+        className={`${scriptFont.variable} app-shell`}
         data-testid="app-root-layout"
       >
         {children}

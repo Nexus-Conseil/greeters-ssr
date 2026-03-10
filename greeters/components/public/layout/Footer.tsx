@@ -38,7 +38,7 @@ export const Footer = async () => {
           <div className="site-partners-track">
             {[...PARTNERS, ...PARTNERS].map((partner, index) => (
               <a key={`${partner.id}-${index}`} href={partner.link} target="_blank" rel="noreferrer" className="site-partner-link" data-testid={`public-site-footer-partner-${partner.id}-${index}`}>
-                <Image src={partner.logo} alt={partner.name} width={200} height={72} sizes="200px" className="site-partner-logo" />
+                <Image src={partner.logo} alt={partner.name} width={200} height={72} sizes="200px" quality={100} className="site-partner-logo" />
               </a>
             ))}
           </div>

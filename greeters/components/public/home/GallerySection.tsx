@@ -32,7 +32,7 @@ export const GallerySection = ({ title, items }: GallerySectionProps) => {
                 onClick={() => setActiveIndex(index)}
                 data-testid={`public-home-gallery-card-${item.id}`}
               >
-                <Image src={item.src} alt={item.title} width={480} height={480} sizes="(max-width: 640px) calc(100vw - 1rem), (max-width: 900px) 50vw, 25vw" className="site-gallery-image" data-testid={`public-home-gallery-image-${item.id}`} />
+                <Image src={item.src} alt={item.title} width={480} height={480} sizes="(max-width: 640px) calc(100vw - 1rem), (max-width: 900px) 50vw, 25vw" quality={100} className="site-gallery-image" data-testid={`public-home-gallery-image-${item.id}`} />
                 <span className="site-gallery-overlay">
                   <strong>{item.title}</strong>
                   <small>{item.date}</small>
@@ -63,7 +63,7 @@ export const GallerySection = ({ title, items }: GallerySectionProps) => {
               ‹
             </button>
             <div className="site-lightbox-media">
-              <Image src={items[activeIndex].src} alt={items[activeIndex].title} width={1200} height={900} sizes={PUBLIC_IMAGE_SIZES_ATTR} className="site-lightbox-image" data-testid="public-home-gallery-lightbox-image" />
+              <Image src={items[activeIndex].src} alt={items[activeIndex].title} width={1200} height={900} sizes={PUBLIC_IMAGE_SIZES_ATTR} quality={100} className="site-lightbox-image" data-testid="public-home-gallery-lightbox-image" />
               <div className="site-lightbox-copy" data-testid="public-home-gallery-lightbox-copy">
                 <strong>{items[activeIndex].title}</strong>
                 <span>{items[activeIndex].date}</span>

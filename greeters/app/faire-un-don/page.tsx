@@ -80,7 +80,7 @@ export default async function FaireUnDonPage() {
             <p className="site-note-centered" data-testid="faire-un-don-note">Les Greeters de Paris est une association loi 1901 à but non lucratif. Merci de votre soutien !</p>
 
             <div className="site-illustration-card" data-testid="faire-un-don-image-card">
-              <Image src="/images/uploads/greeters-balade-2.jpg" alt="Balade avec les Greeters de Paris" width={1200} height={800} sizes={PUBLIC_IMAGE_SIZES_ATTR} className="site-illustration-image" data-testid="faire-un-don-image" />
+              <Image src="/images/uploads/greeters-balade-2.jpg" alt="Balade avec les Greeters de Paris" width={1200} height={800} sizes={PUBLIC_IMAGE_SIZES_ATTR} quality={100} className="site-illustration-image" data-testid="faire-un-don-image" />
             </div>
         </div>}
       </>

@@ -26,7 +26,7 @@ export const VisitSection = ({ title, paragraphs, image, imageAlt }: VisitSectio
           </div>
         </div>
         <div className="site-media-card" data-testid="public-home-visit-image-wrapper">
-          <Image src={image} alt={imageAlt} width={1920} height={1280} sizes={PUBLIC_IMAGE_SIZES_ATTR} className="site-media-image" data-testid="public-home-visit-image" />
+          <Image src={image} alt={imageAlt} width={1920} height={1280} sizes={PUBLIC_IMAGE_SIZES_ATTR} quality={100} className="site-media-image" data-testid="public-home-visit-image" />
         </div>
       </div>
     </section>

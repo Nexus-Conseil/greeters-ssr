@@ -42,7 +42,7 @@ export default async function PressePage() {
               <div className="site-gallery-grid site-gallery-grid-page">
                 {PRESS_PHOTOS.map((photo) => (
                   <a key={photo.id} href={photo.src} target="_blank" rel="noreferrer" className="site-gallery-card" data-testid={`presse-photo-link-${photo.id}`}>
-                    <Image src={photo.src} alt={photo.title} width={520} height={520} sizes="(max-width: 640px) calc(100vw - 1rem), (max-width: 900px) 50vw, 25vw" className="site-gallery-image" data-testid={`presse-photo-image-${photo.id}`} />
+                    <Image src={photo.src} alt={photo.title} width={520} height={520} sizes="(max-width: 640px) calc(100vw - 1rem), (max-width: 900px) 50vw, 25vw" quality={100} className="site-gallery-image" data-testid={`presse-photo-image-${photo.id}`} />
                     <span className="site-gallery-overlay">
                       <strong>{photo.title}</strong>
                       <small>{photo.date}</small>

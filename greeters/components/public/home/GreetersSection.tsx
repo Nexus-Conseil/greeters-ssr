@@ -54,7 +54,7 @@ export const GreetersSection = ({
       <section className="site-section" data-testid="public-home-greeters-section">
         <div className="site-container site-two-column">
           <div className="site-media-card" data-testid="public-home-greeters-image-wrapper">
-            <Image src={image} alt={imageAlt} width={800} height={532} sizes={PUBLIC_IMAGE_SIZES_ATTR} className="site-media-image" data-testid="public-home-greeters-image" />
+            <Image src={image} alt={imageAlt} width={800} height={532} sizes={PUBLIC_IMAGE_SIZES_ATTR} quality={100} className="site-media-image" data-testid="public-home-greeters-image" />
           </div>
           <div className="site-copy-column" data-testid="public-home-greeters-copy">
             <h2 className="site-section-title site-section-title-left" data-testid="public-home-greeters-title">
