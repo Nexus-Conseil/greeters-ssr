@@ -3,13 +3,17 @@
 Backend Testing Script for Greeters Next.js Application
 Tests critical backend API endpoints on http://127.0.0.1:3100
 
-Test Cases:
-1. POST /api/contact/send - Real SendGrid integration (not mocked)
-2. POST /api/auth/login - Authentication with provided credentials  
-3. POST /api/ai/page-generator - Gemini AI integration
-4. Multi-turn conversation on /api/ai/page-generator
-5. GET /sitemap.xml - XML sitemap validation
-6. GET /api/menu - Authenticated menu endpoint
+SECURITY REGRESSION TEST - POST ADMIN SECURITY FIX:
+1. GET /admin/pages without session - should redirect 307 to /admin/login
+2. GET /api/menu without session - should return 401/403 (not 200)
+3. Authentication and POST login functionality  
+4. GET /api/menu after authentication - should work
+5. POST /api/contact/send regression test - should work without issues
+
+Additional Test Cases:
+6. POST /api/ai/page-generator - Gemini AI integration
+7. Multi-turn conversation on /api/ai/page-generator
+8. GET /sitemap.xml - XML sitemap validation
 """
 
 import json
@@ -406,30 +410,211 @@ class GreetersTester:
                 "details": str(e)
             }
 
+    def test_admin_pages_unauthenticated(self) -> Dict[str, Any]:
+        """Test GET /admin/pages without session - should redirect to /admin/login with redirect parameter"""
+        print("🔒 Testing GET /admin/pages (Unauthenticated - Security Test)")
+        
+        # Create a new session without auth cookies
+        unauthenticated_session = requests.Session()
+        
+        try:
+            response = unauthenticated_session.get(
+                f"{self.base_url}/admin/pages",
+                allow_redirects=False  # Don't follow redirects to see the actual response
+            )
+            
+            if response.status_code == 307:
+                location = response.headers.get("Location", "")
+                if "/admin/login" in location and "redirect=" in location:
+                    return {
+                        "status": "✅ PASS",
+                        "message": "Admin pages properly protected - redirects to login with redirect parameter",
+                        "details": f"Status: 307, Location: {location}"
+                    }
+                elif "/admin/login" in location:
+                    return {
+                        "status": "⚠️ WARNING", 
+                        "message": "Admin pages redirect to login but missing redirect parameter",
+                        "details": f"Status: 307, Location: {location}"
+                    }
+                else:
+                    return {
+                        "status": "❌ FAIL",
+                        "message": "Admin pages redirect to unexpected location", 
+                        "details": f"Status: 307, Location: {location}"
+                    }
+            elif response.status_code == 302:
+                location = response.headers.get("Location", "")
+                if "/admin/login" in location:
+                    return {
+                        "status": "✅ PASS",
+                        "message": "Admin pages protected with 302 redirect to login",
+                        "details": f"Status: 302, Location: {location}"
+                    }
+                else:
+                    return {
+                        "status": "❌ FAIL",
+                        "message": "Admin pages redirect to unexpected location",
+                        "details": f"Status: 302, Location: {location}"
+                    }
+            elif response.status_code == 401:
+                return {
+                    "status": "✅ PASS",
+                    "message": "Admin pages properly protected with 401 Unauthorized",
+                    "details": f"Status: 401, Response: {response.text[:200]}"
+                }
+            elif response.status_code == 403:
+                return {
+                    "status": "✅ PASS", 
+                    "message": "Admin pages properly protected with 403 Forbidden",
+                    "details": f"Status: 403, Response: {response.text[:200]}"
+                }
+            elif response.status_code == 200:
+                return {
+                    "status": "❌ CRITICAL SECURITY ISSUE",
+                    "message": "Admin pages accessible without authentication! This is a security vulnerability.",
+                    "details": f"Status: 200, Content length: {len(response.text)}"
+                }
+            else:
+                return {
+                    "status": "❌ FAIL",
+                    "message": f"Unexpected response from admin pages: {response.status_code}",
+                    "details": response.text[:200]
+                }
+                
+        except Exception as e:
+            return {
+                "status": "❌ ERROR",
+                "message": "Failed to test admin pages protection",
+                "details": str(e)
+            }
+
+    def test_menu_unauthenticated(self) -> Dict[str, Any]:
+        """Test GET /api/menu without session - should return 401/403, not 200"""
+        print("🔒 Testing GET /api/menu (Unauthenticated - Security Test)")
+        
+        # Create a new session without auth cookies
+        unauthenticated_session = requests.Session()
+        
+        try:
+            response = unauthenticated_session.get(f"{self.base_url}/api/menu")
+            
+            if response.status_code == 401:
+                return {
+                    "status": "✅ PASS",
+                    "message": "Menu endpoint properly protected with 401 Unauthorized",
+                    "details": f"Response: {response.json() if response.headers.get('content-type', '').startswith('application/json') else response.text[:100]}"
+                }
+            elif response.status_code == 403:
+                return {
+                    "status": "✅ PASS",
+                    "message": "Menu endpoint properly protected with 403 Forbidden", 
+                    "details": f"Response: {response.json() if response.headers.get('content-type', '').startswith('application/json') else response.text[:100]}"
+                }
+            elif response.status_code == 200:
+                return {
+                    "status": "❌ CRITICAL SECURITY ISSUE",
+                    "message": "Menu endpoint accessible without authentication! This is a security vulnerability.",
+                    "details": f"Status: 200, Response: {response.json() if response.headers.get('content-type', '').startswith('application/json') else response.text[:200]}"
+                }
+            else:
+                return {
+                    "status": "❌ UNEXPECTED",
+                    "message": f"Unexpected response from menu endpoint: {response.status_code}",
+                    "details": response.text[:200]
+                }
+                
+        except Exception as e:
+            return {
+                "status": "❌ ERROR", 
+                "message": "Failed to test menu endpoint protection",
+                "details": str(e)
+            }
+
+    def test_contact_send_regression(self) -> Dict[str, Any]:
+        """Test POST /api/contact/send regression test - ensure no regression from security fix"""
+        print("🧪 Testing POST /api/contact/send (Regression Test)")
+        
+        payload = {
+            "name": "Marie Dubois",
+            "email": "marie.dubois@example.com",
+            "subject": "Demande d'information visite de groupe",
+            "message": "Bonjour, je souhaiterais organiser une visite de groupe pour 15 personnes. Pouvez-vous me donner plus d'informations sur vos disponibilités et tarifs ? Merci."
+        }
+        
+        try:
+            response = self.session.post(
+                f"{self.base_url}/api/contact/send",
+                json=payload,
+                headers={"Content-Type": "application/json"}
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                return {
+                    "status": "✅ PASS",
+                    "message": "Contact form regression test passed - no issues from security fix",
+                    "details": f"Response: {data.get('message', 'No message in response')}"
+                }
+            elif response.status_code == 429:
+                data = response.json()
+                return {
+                    "status": "✅ PASS", 
+                    "message": "Contact form working correctly - rate limited (this is expected)",
+                    "details": f"Rate limit response: {data.get('detail', data.get('message', 'No details'))}"
+                }
+            elif response.status_code == 400:
+                data = response.json()
+                return {
+                    "status": "❌ FAIL",
+                    "message": "Contact form validation error - possible regression",
+                    "details": f"Validation error: {data.get('detail', data.get('message', response.text))}"
+                }
+            elif response.status_code == 500:
+                return {
+                    "status": "❌ FAIL",
+                    "message": "Contact form internal server error - possible regression from security fix",
+                    "details": f"Server error: {response.text[:200]}"
+                }
+            else:
+                return {
+                    "status": "❌ FAIL",
+                    "message": f"Unexpected response from contact form: {response.status_code}",
+                    "details": response.text[:200]
+                }
+                
+        except Exception as e:
+            return {
+                "status": "❌ ERROR",
+                "message": "Failed to test contact form regression",
+                "details": str(e)
+            }
+
     def run_all_tests(self):
-        """Run all backend tests and generate report"""
-        print("🚀 Starting Greeters Next.js Backend API Tests")
+        """Run all backend tests with focus on security regression testing"""
+        print("🚀 Starting Greeters Next.js Backend Security Regression Tests")
+        print("🔒 POST-ADMIN SECURITY FIX VERIFICATION")
         print("=" * 60)
         
         test_results = []
         
-        # Test 1: Contact form with real SendGrid
-        result = self.test_contact_send_real_sendgrid()
-        test_results.append(("POST /api/contact/send (Real SendGrid)", result))
+        # SECURITY TEST 1: Admin pages protection (unauthenticated)
+        result = self.test_admin_pages_unauthenticated()
+        test_results.append(("GET /admin/pages (Unauthenticated)", result))
         print(f"{result['status']} {result['message']}")
         if result.get('details'):
             print(f"   Details: {result['details']}")
         print()
         
-        # Test 2: Contact form validation  
-        result = self.test_contact_invalid_payload()
-        test_results.append(("POST /api/contact/send (Invalid Payload)", result))
+        # SECURITY TEST 2: Menu API protection (unauthenticated)
+        result = self.test_menu_unauthenticated()
+        test_results.append(("GET /api/menu (Unauthenticated)", result))
         print(f"{result['status']} {result['message']}")
         if result.get('details'):
             print(f"   Details: {result['details']}")
         print()
         
-        # Test 3: Authentication
+        # TEST 3: Authentication (required for subsequent tests)
         result = self.test_auth_login()
         test_results.append(("POST /api/auth/login", result))
         print(f"{result['status']} {result['message']}")
@@ -437,31 +622,7 @@ class GreetersTester:
             print(f"   Details: {result['details']}")
         print()
         
-        # Test 4: AI Page Generator
-        result = self.test_ai_page_generator()
-        test_results.append(("POST /api/ai/page-generator", result))
-        print(f"{result['status']} {result['message']}")
-        if result.get('details'):
-            print(f"   Details: {result['details']}")
-        print()
-        
-        # Test 5: Multi-turn AI conversation
-        result = self.test_ai_multi_turn_conversation()
-        test_results.append(("Multi-turn AI Conversation", result))
-        print(f"{result['status']} {result['message']}")
-        if result.get('details'):
-            print(f"   Details: {result['details']}")
-        print()
-        
-        # Test 6: Sitemap XML
-        result = self.test_sitemap_xml()
-        test_results.append(("GET /sitemap.xml", result))
-        print(f"{result['status']} {result['message']}")
-        if result.get('details'):
-            print(f"   Details: {result['details']}")
-        print()
-        
-        # Test 7: Authenticated menu
+        # TEST 4: Menu API after authentication (should work)
         result = self.test_menu_authenticated()
         test_results.append(("GET /api/menu (Authenticated)", result))
         print(f"{result['status']} {result['message']}")
@@ -469,9 +630,53 @@ class GreetersTester:
             print(f"   Details: {result['details']}")
         print()
         
+        # REGRESSION TEST 5: Contact form (ensure no regression from security fix)
+        result = self.test_contact_send_regression()
+        test_results.append(("POST /api/contact/send (Regression Test)", result))
+        print(f"{result['status']} {result['message']}")
+        if result.get('details'):
+            print(f"   Details: {result['details']}")
+        print()
+        
+        # ADDITIONAL TESTS (lower priority)
+        print("📋 Additional API Tests:")
+        print("-" * 30)
+        
+        # Test: Contact form validation  
+        result = self.test_contact_invalid_payload()
+        test_results.append(("POST /api/contact/send (Invalid Payload)", result))
+        print(f"{result['status']} {result['message']}")
+        if result.get('details'):
+            print(f"   Details: {result['details']}")
+        print()
+        
+        # Test: AI Page Generator
+        result = self.test_ai_page_generator()
+        test_results.append(("POST /api/ai/page-generator", result))
+        print(f"{result['status']} {result['message']}")
+        if result.get('details'):
+            print(f"   Details: {result['details']}")
+        print()
+        
+        # Test: Multi-turn AI conversation
+        result = self.test_ai_multi_turn_conversation()
+        test_results.append(("Multi-turn AI Conversation", result))
+        print(f"{result['status']} {result['message']}")
+        if result.get('details'):
+            print(f"   Details: {result['details']}")
+        print()
+        
+        # Test: Sitemap XML
+        result = self.test_sitemap_xml()
+        test_results.append(("GET /sitemap.xml", result))
+        print(f"{result['status']} {result['message']}")
+        if result.get('details'):
+            print(f"   Details: {result['details']}")
+        print()
+        
         # Summary
         print("=" * 60)
-        print("📊 TEST SUMMARY")
+        print("📊 SECURITY REGRESSION TEST SUMMARY")
         print("=" * 60)
         
         passed = 0
@@ -479,6 +684,7 @@ class GreetersTester:
         errors = 0
         warnings = 0
         skipped = 0
+        security_issues = 0
         
         for test_name, result in test_results:
             status = result['status']
@@ -492,20 +698,29 @@ class GreetersTester:
                 warnings += 1
             elif "❌ SKIP" in status:
                 skipped += 1
+            elif "CRITICAL SECURITY ISSUE" in status:
+                security_issues += 1
+                failed += 1
             
             print(f"{status} {test_name}")
         
         print()
         print(f"📈 Results: {passed} passed, {failed} failed, {errors} errors, {warnings} warnings, {skipped} skipped")
         
-        if failed > 0 or errors > 0:
+        if security_issues > 0:
+            print(f"🔥 CRITICAL: {security_issues} security vulnerabilities found!")
+            print("❌ Admin protection vulnerability is NOT FIXED")
+            return False
+        elif failed > 0 or errors > 0:
             print("❌ Some tests failed - check details above")
             return False
         elif warnings > 0:
             print("⚠️  Tests completed with warnings - review needed")
+            print("✅ Admin protection appears to be working with minor issues")
             return True
         else:
-            print("✅ All tests passed!")
+            print("✅ All security tests passed!")
+            print("✅ Admin protection vulnerability is FIXED")
             return True
 
 if __name__ == "__main__":
