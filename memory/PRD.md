@@ -25,6 +25,12 @@
 - Ajout/normalisation des `data-testid` sur tous les éléments interactifs et éléments critiques visibles.
 - Mise à jour du branding global (`metadata`, fontes, CSS public dédié `app/public-site.css`).
 
+## Implémenté le 2026-03-10
+- Intégration réelle de SendGrid sur `POST /api/contact/send` via `@sendgrid/mail` avec validation, `replyTo`, message HTML/texte et messages d’erreur en français.
+- Le flux contact n’est plus **MOCKÉ** : il remonte maintenant l’erreur fournisseur réelle quand SendGrid bloque l’envoi (quota/crédit dépassé sur la clé actuelle).
+- Ajout d’un mécanisme de surcharge CMS pour toutes les pages publiques nommées (`contact`, `qui-sommes-nous`, `actualites`, `galerie`, `livre-dor`, `faire-un-don`, `devenez-benevole`, `presse`, `mentions-legales`) : si une page CMS publiée existe avec le même slug, elle remplace le fallback statique.
+- Vérification de P2 Gemini : la génération de page IA fonctionne de nouveau avec la clé actuelle, y compris en conversation multi-tour avec `sessionId` persistant.
+
 ## Validation réalisée
 - `eslint` OK sur `/app/greeters`
 - `yarn tsc --noEmit` OK
@@ -32,27 +38,35 @@
   - accueil, navigation, CTA topbar, carrousel témoignages, lightbox galerie, responsive mobile : PASS
 - Rapport de test frontend OK : `/app/test_reports/iteration_9.json`
   - toutes les pages publiques migrées + redirect + galerie/lightbox + livre d’or + formulaire contact UI : PASS
+- Smoke UI Playwright local OK sur `/contact` : le formulaire affiche bien l’erreur réelle SendGrid côté interface.
+- Rapport de test complet OK : `/app/test_reports/iteration_10.json`
+  - contact réel non mocké, surcharge CMS des pages publiques, accès admin, sitemap : PASS
+- Tests backend complémentaires OK via agent dédié
+  - login admin, `/api/contact/send`, `/api/ai/page-generator`, multi-tour `sessionId`, `/api/menu`, `/sitemap.xml` : PASS
 
 ## Blocages connus
-- Intégration Gemini toujours **bloquée côté quota/facturation** tant que l’API Google ne répond pas sans `RESOURCE_EXHAUSTED`.
+- Le compte SendGrid configuré répond actuellement avec un dépassement de quota/crédit (`Maximum credits exceeded`) : l’intégration est branchée mais la délivrabilité dépend désormais du rétablissement côté compte SendGrid.
 
 ## P0
 - Connecter davantage le frontend public aux données CMS réelles au lieu du fallback statique.
 - Vérifier la cohérence multilingue réelle (subdomains / variantes preview) sur toutes les pages publiques.
-- Remplacer le flux de contact **MOCKÉ** par un vrai envoi email ou une persistance métier.
+- Finaliser la délivrabilité du flux contact maintenant que l’intégration réelle est en place (quota/crédit SendGrid à rétablir côté compte).
+- Brancher plus finement l’accueil et les contenus publics sur les données CMS éditoriales réelles plutôt que sur le fallback statique quand les tables sont vides.
 
 ## P1
 - Brancher sitemap dynamique `/sitemap.xml` par langue.
 - Nettoyer les contenus/tests historiques en base si nécessaire.
 - Reprendre les écrans admin `/admin/pages/new` et `/admin/pages/[id]` pour coller au CMS source.
 - Brancher les documents/pages publiques sur des contenus éditables depuis le CMS si souhaité.
+- Vérifier route par route quelles pages publiques nommées doivent être préremplies dans le CMS pour exploiter immédiatement la surcharge dynamique.
 
 ## P2
 - Finaliser un gestionnaire de menu admin encore plus riche (drag-and-drop avancé / arborescence si besoin).
 - Ajouter les raffinements de parité visuelle restants page par page.
+- Décider si la génération IA doit rester sur le prompt/format actuel ou être enrichie (templates, édition incrémentale, garde-fous éditoriaux).
 
 ## Next tasks
-1. Brancher les pages publiques et l’accueil aux vraies données CMS au lieu du fallback statique.
-2. Implémenter un vrai traitement du formulaire de contact.
-3. Reprendre la parité CMS/admin (création/édition pages, menu, workflow).
-4. Revenir sur Gemini uniquement après confirmation utilisateur que le quota/facturation est rétabli.
+1. Rétablir le quota/crédit du compte SendGrid ou fournir une clé opérationnelle pour rendre le formulaire contact réellement délivrable.
+2. Préremplir/éditer dans le CMS les pages publiques nommées prioritaires afin de profiter du nouveau mécanisme de surcharge dynamique.
+3. Approfondir la parité CMS/admin (`/admin/pages/new`, `/admin/pages/[id]`, workflow éditorial, menus) par comparaison au site/source de référence.
+4. Vérifier la cohérence multilingue et sitemap par domaine/langue sur les variantes publiques.
