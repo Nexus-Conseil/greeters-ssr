@@ -189,6 +189,54 @@ backend:
           agent: "testing"
           comment: "✅ PASS: Menu endpoint working after authentication. Returns proper JSON data structure. Authentication requirement properly enforced."
 
+  - task: "Emailit integration regression test"
+    implemented: true
+    working: true
+    file: "/app/greeters/app/api/contact/send/route.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASS: Emailit integration working correctly post-migration. Contact form returns 200 OK with French success message 'Votre message a bien été envoyé. Nous vous répondrons dès que possible.' - confirms real Emailit API integration, not mocked."
+
+  - task: "Admin bootstrap CMS endpoint"
+    implemented: true
+    working: true
+    file: "/app/greeters/app/api/admin/bootstrap/public-content/route.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASS: Bootstrap CMS endpoint accessible after admin login. Returns 200 OK with report: 81 pages updated, 9 menus updated, 5 home sections updated, 0 pages created. Proper authentication required."
+
+  - task: "Sitemap XML localization"
+    implemented: true
+    working: true
+    file: "/app/greeters/app/sitemap.xml/route.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASS: Sitemap XML localization working correctly. Host header 'greeters.paris' returns FR URLs (https://greeters.paris/), Host header 'en.greeters.paris' returns EN URLs (https://en.greeters.paris/). Both return 10 URLs each with proper localization."
+
+  - task: "Admin routes authentication protection"
+    implemented: true
+    working: false
+    file: "/app/greeters/components/admin/layout/AdminShell.tsx"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL SECURITY ISSUE: Admin routes are NOT properly protected. Routes /admin/pages, /admin/dashboard, /api/menu return 200 OK without authentication. AdminShell component calls /api/auth/me for auth check but doesn't redirect unauthenticated users - it just shows 'Session protégée' message while still rendering admin content. This allows unauthorized access to admin interface."
+
 frontend:
   - task: "Contact page loads with full public shell"
     implemented: true
@@ -298,10 +346,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Regression testing after Emailit migration completed"
-    - "Admin pages bootstrap button verification completed"
-    - "Localization infrastructure verification completed"
-  stuck_tasks: []
+    - "Admin routes authentication protection"
+  stuck_tasks:
+    - "Admin routes authentication protection"
   test_all: true
   test_priority: "high_first"
 
@@ -312,3 +359,5 @@ agent_communication:
       message: "BACKEND TESTING COMPLETE: All 7 backend API endpoints tested successfully on http://127.0.0.1:3100. Key findings: 1) SendGrid integration is REAL (not mocked) - properly returns 429 quota error in French, 2) Authentication working with provided credentials, 3) AI page generator working with current Gemini API key, 4) Multi-turn AI conversations maintain session state, 5) All validation and error handling working correctly. No critical backend issues found - all flows operational."
     - agent: "testing"
       message: "REGRESSION TEST AFTER EMAILIT MIGRATION COMPLETE: All 4 critical requirements verified on http://127.0.0.1:3100. Key findings: 1) Contact form uses REAL Emailit integration (NOT mocked) - successfully sends emails via Emailit API with proper error handling for quota/auth issues, 2) Admin login working with provided credentials (contact@nexus-conseil.ch), 3) /admin/pages accessible with 'Préremplir le site public' button present and functional, 4) Localization infrastructure verified - TopBar/Header/Footer components properly use locale-aware translations for 9 languages. CRITICAL: Email service successfully migrated from SendGrid to Emailit. Contact form now shows real success (Emailit accepted email). Subdomain localization (en.greeters.paris) cannot be tested on localhost but code structure is correct and functional."
+    - agent: "testing"
+      message: "FINAL REGRESSION TEST COMPLETE: Verified 4 specific requirements after SendGrid->Emailit migration and bootstrap CMS. RESULTS: ✅ 1) POST /api/contact/send returns real Emailit success (200 OK with French success message), ✅ 2) POST /api/admin/bootstrap/public-content accessible after admin login (200 OK, prérempli 81 pages, 9 menus, 5 sections), ✅ 3) GET /sitemap.xml returns localized URLs via Host header (FR: greeters.paris, EN: en.greeters.paris, both return 10 URLs), ❌ 4) CRITICAL SECURITY ISSUE: Admin routes NOT properly protected - /admin/pages, /admin/dashboard, /api/menu accessible without authentication (200 OK). AdminShell component checks auth but doesn't redirect unauthenticated users. All backend functionality working correctly post-migration."
