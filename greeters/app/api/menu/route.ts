@@ -7,6 +7,8 @@ import { getMenu, updateMenu } from "@/lib/services/menu";
 
 export async function GET(request: Request) {
   try {
+    await requireAdminApiUser();
+
     const { searchParams } = new URL(request.url);
     const locale = normalizeLocale(searchParams.get("locale"));
     return NextResponse.json(await getMenu(locale));

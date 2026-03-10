@@ -66,8 +66,33 @@ export const AdminShell = ({ children }: { children: ReactNode }) => {
     }
   }
 
+  const shouldRedirectToLogin = pathname !== "/admin/login" && !loading && !user;
+
+  useEffect(() => {
+    if (!shouldRedirectToLogin) {
+      return;
+    }
+
+    const redirectPath = pathname && pathname !== "/admin" ? `?redirect=${encodeURIComponent(pathname)}` : "";
+    window.location.replace(`/admin/login${redirectPath}`);
+  }, [pathname, router, shouldRedirectToLogin]);
+
   if (pathname === "/admin/login") {
     return <>{children}</>;
+  }
+
+  if (shouldRedirectToLogin) {
+    return (
+      <div className="dashboard-shell" data-testid="admin-shell-redirecting-layout">
+        <div className="dashboard-main" data-testid="admin-shell-redirecting-main">
+          <section className="dashboard-content" data-testid="admin-shell-redirecting-content">
+            <div className="dashboard-alert" data-testid="admin-shell-redirecting-message">
+              Redirection vers l’écran de connexion…
+            </div>
+          </section>
+        </div>
+      </div>
+    );
   }
 
   return (
