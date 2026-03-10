@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 
-import { validateContactPayload } from "@/lib/services/contact";
+import { ContactServiceError, sendContactEmail, validateContactPayload } from "@/lib/services/contact";
+
+export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   try {
     const payload = validateContactPayload(await request.json());
+    await sendContactEmail(payload);
 
     console.info("Contact form submission received", {
       name: payload.name,
@@ -13,10 +16,18 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({
-      message:
-        "Votre message a été reçu. La livraison email n'est pas encore configurée dans cet environnement de migration, mais le formulaire est bien branché côté interface.",
+      message: "Votre message a bien été envoyé. Nous vous répondrons dès que possible.",
     });
   } catch (error) {
+    if (error instanceof ContactServiceError) {
+      return NextResponse.json(
+        {
+          detail: error.message,
+        },
+        { status: error.statusCode },
+      );
+    }
+
     return NextResponse.json(
       {
         detail: error instanceof Error ? error.message : "Le formulaire de contact est invalide.",

@@ -3,22 +3,22 @@
   "backend_issues": {
     "critical": [
       {
-        "endpoint": "https://csr-to-ssr-1.preview.emergentagent.com/",
+        "endpoint": "https://greeters-ssr-test.preview.emergentagent.com/",
         "issue": "Public routes /, /galerie, /livre-dor, /faire-un-don, /actualites, /devenez-benevole, /qui-sommes-nous, /contact, /presse, /mentions-legales do not return Greeters SSR HTML (header-logo-link/data-testid markers missing).",
         "priority": "CRITICAL"
       },
       {
-        "endpoint": "https://csr-to-ssr-1.preview.emergentagent.com/api/health",
+        "endpoint": "https://greeters-ssr-test.preview.emergentagent.com/api/health",
         "issue": "Returns 404. API base currently returns {\"message\":\"Hello World\"}, indicating deployment/routing mismatch with expected FastAPI app.",
         "priority": "CRITICAL"
       },
       {
-        "endpoint": "https://csr-to-ssr-1.preview.emergentagent.com/api/contact/send",
+        "endpoint": "https://greeters-ssr-test.preview.emergentagent.com/api/contact/send",
         "issue": "Returns 404; SSR contact submission integration not reachable on public endpoint.",
         "priority": "HIGH"
       },
       {
-        "endpoint": "https://csr-to-ssr-1.preview.emergentagent.com/images/logo_greeters.png and /documents/charte-2020.pdf",
+        "endpoint": "https://greeters-ssr-test.preview.emergentagent.com/images/logo_greeters.png and /documents/charte-2020.pdf",
         "issue": "Mounted SSR static assets are not served (returned text/html app shell instead of image/pdf).",
         "priority": "HIGH"
       }
