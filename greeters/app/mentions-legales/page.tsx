@@ -2,21 +2,22 @@ import type { Metadata } from "next";
 
 import { PublicPageShell } from "@/components/public/layout/PublicPageShell";
 import { PageTitleBand } from "@/components/public/pages/PageTitleBand";
-import { getPublicPageOverrideContent } from "@/lib/services/public-page-override";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
 
 export const metadata: Metadata = {
   title: "Mentions légales — Paris Greeters",
 };
 
 export default async function MentionsLegalesPage() {
-  const cmsContent = await getPublicPageOverrideContent("mentions-legales", "mentions-legales-public-page-cms-content");
+  const locale = await getRequestLocale();
+  const title = getLocalizedPageTitle(locale, "mentions-legales");
 
   return (
     <PublicPageShell testId="mentions-legales-public-page">
-      {cmsContent ?? (
-        <>
-          <PageTitleBand title="Mentions légales" testId="mentions-legales-public-page-title" />
-          <div className="site-container site-content-section" data-testid="mentions-legales-public-page-content">
+      <>
+        <PageTitleBand title={title} testId="mentions-legales-public-page-title" />
+        <div className="site-container site-content-section" data-testid="mentions-legales-public-page-content">
             <section className="site-info-panel" data-testid="mentions-legales-editor-panel">
               <h2 className="site-card-title">Éditeur, conception et réalisation</h2>
               <p><strong>Association « Parisien d'un jour – Paris Greeters »</strong></p>
@@ -46,9 +47,8 @@ export default async function MentionsLegalesPage() {
               <h2 className="site-card-title">Hébergement</h2>
               <p>Ce site est hébergé par Nexus Conseil.</p>
             </section>
-          </div>
-        </>
-      )}
+        </div>
+      </>
     </PublicPageShell>
   );
 }

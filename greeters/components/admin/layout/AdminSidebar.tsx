@@ -29,10 +29,10 @@ export const AdminSidebar = ({ userName, userRole, onLogout, loggingOut }: Admin
           Greeters CMS
         </p>
         <h2 className="dashboard-sidebar-title" data-testid="admin-sidebar-title">
-          Shell admin Next.js
+          Back-office éditorial
         </h2>
         <p className="dashboard-sidebar-copy" data-testid="admin-sidebar-copy">
-          Navigation prête pour le portage progressif du CMS métier.
+          Publication, workflow, menu et contenus publics dans une même interface.
         </p>
       </div>
 

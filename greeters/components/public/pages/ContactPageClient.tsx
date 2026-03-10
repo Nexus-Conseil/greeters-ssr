@@ -16,7 +16,7 @@ const INITIAL_STATE: FormState = {
   message: "",
 };
 
-export const ContactPageClient = () => {
+export const ContactPageClient = ({ introText }: { introText: string }) => {
   const [formData, setFormData] = useState<FormState>(INITIAL_STATE);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -51,7 +51,7 @@ export const ContactPageClient = () => {
   return (
     <div className="site-container site-content-section" data-testid="contact-page-content">
       <div className="site-info-panel" data-testid="contact-page-intro-panel">
-        Si vous souhaitez savoir où en est votre demande, y apporter des modifications, obtenir un remboursement de votre don ou obtenir plus d'informations sur Parisien d'un jour – Paris Greeters, envoyez-nous un message via le formulaire de contact.
+        {introText}
       </div>
 
       <form className="site-contact-form" onSubmit={handleSubmit} data-testid="contact-page-form">

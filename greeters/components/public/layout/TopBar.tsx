@@ -2,23 +2,27 @@
 
 import { useEffect, useState } from "react";
 
+import { SUPPORTED_LOCALES, type AppLocale } from "@/lib/i18n/config";
+import { getPublicCopy } from "@/lib/i18n/site-copy";
 import { getBookingUrl } from "@/lib/public-site-data";
 
-export const TopBar = () => {
+export const TopBar = ({ initialLocale = "fr" }: { initialLocale?: AppLocale }) => {
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [bookingUrl, setBookingUrl] = useState(getBookingUrl("fr"));
+  const [bookingUrl, setBookingUrl] = useState(getBookingUrl(initialLocale));
+  const [bookingLabel, setBookingLabel] = useState(getPublicCopy(initialLocale).bookingCta);
 
   useEffect(() => {
     const onScroll = () => setShowBackToTop(window.scrollY > 280);
     const host = window.location.hostname;
     const path = host.split(".")[0];
-    const locale = ["fr", "en", "de", "es", "it", "ja", "nl", "pt-pt", "zh-hans"].includes(path) ? path : "fr";
+    const locale = (SUPPORTED_LOCALES as readonly string[]).includes(path) ? (path as AppLocale) : initialLocale;
 
     onScroll();
-    setBookingUrl(getBookingUrl(locale as Parameters<typeof getBookingUrl>[0]));
+    setBookingUrl(getBookingUrl(locale));
+    setBookingLabel(getPublicCopy(locale).bookingCta);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [initialLocale]);
 
   return (
     <>
@@ -30,7 +34,7 @@ export const TopBar = () => {
           className="site-topbar-button"
           data-testid="public-site-topbar-cta-button"
         >
-          Réserver une balade
+          {bookingLabel}
         </a>
       </div>
       <div className="site-topbar-spacer" data-testid="public-site-topbar-spacer" />

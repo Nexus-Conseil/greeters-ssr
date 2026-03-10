@@ -4,22 +4,22 @@ import type { Route } from "next";
 const DASHBOARD_CARDS = [
   {
     key: "repositories",
-    title: "Repositories métier",
-    description: "Base Prisma centralisée pour users, sessions, pages, versions, menu, documents et home sections.",
+    title: "Pages & contenu public",
+    description: "Éditez les pages publiées, préremplissez le site public et vérifiez les statuts par langue.",
     href: "/admin/pages",
     cta: "Voir les pages",
   },
   {
     key: "workflow",
     title: "Workflow d’approbation",
-    description: "Routes API prêtes pour les brouillons éditeur, validations admin et rollback de versions.",
+    description: "Validez les nouvelles versions, suivez les soumissions en attente et restaurez une version publiée si nécessaire.",
     href: "/admin/pending",
     cta: "Ouvrir les validations",
   },
   {
     key: "public-shell",
-    title: "Shell public",
-    description: "Enveloppe publique posée pour la future migration SSR des pages et composants de contenu.",
+    title: "Menu & rendu public",
+    description: "Contrôlez la navigation publique, les variantes multilingues et le rendu du site visible par les visiteurs.",
     href: "/",
     cta: "Voir l’accueil",
   },
@@ -30,13 +30,13 @@ export const AdminDashboard = () => {
     <main className="dashboard-content" data-testid="admin-dashboard-page">
       <section className="dashboard-hero" data-testid="admin-dashboard-hero">
         <p className="eyebrow" data-testid="admin-dashboard-eyebrow">
-          Lot 03 → 05 en cours
+          CMS Greeters opérationnel
         </p>
         <h1 className="admin-title" data-testid="admin-dashboard-title">
-          Le shell admin peut maintenant piloter le portage des pages Greeters.
+          Le back-office pilote maintenant les pages, le menu et les validations du site public.
         </h1>
         <p className="admin-copy" data-testid="admin-dashboard-description">
-          Les fondations métier, les routes pages P0 et les premiers écrans de navigation sont alignés pour accélérer la suite du CMS.
+          Utilisez cet espace pour publier les contenus par langue, synchroniser la navigation et suivre les évolutions éditoriales du site Greeters.
         </p>
       </section>
 

@@ -50,9 +50,8 @@ export const HeaderClient = ({ currentLocale, navigation }: HeaderClientProps) =
   const resolvedNavigation = useMemo(() => {
     return navigation
       .filter((item) => item.isVisible)
-      .filter((item) => !(item.href === "/devenez-benevole" && currentLocale !== "fr"))
       .sort((left, right) => left.order - right.order);
-  }, [currentLocale, navigation]);
+  }, [navigation]);
 
   return (
     <header className="site-header" data-testid="public-site-header">

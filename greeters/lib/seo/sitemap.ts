@@ -13,32 +13,8 @@ type CategorizedSitemap = {
   blogArticles: CategorizedEntry[];
 };
 
-const EXCLUDED_SEGMENTS = [
-  "contact",
-  "mentions-legales",
-  "cookies",
-  "cookie",
-  "privacy",
-  "confidentialite",
-  "legal",
-  "cgu",
-  "cgv",
-  "presse",
-  "press",
-  "qui-sommes-nous",
-  "about",
-  "devenez-benevole",
-  "benevole",
-  "volunteer",
-];
-
 function isBlogArticle(page: PageResponse) {
   return page.slug.startsWith("actualites/") || page.slug.startsWith("blog/");
-}
-
-function isExcluded(page: PageResponse) {
-  const haystack = `${page.slug} ${page.title}`.toLowerCase();
-  return EXCLUDED_SEGMENTS.some((segment) => haystack.includes(segment));
 }
 
 function toEntry(page: PageResponse): CategorizedEntry {
@@ -63,7 +39,7 @@ export async function getTourismSitemap(locale: AppLocale): Promise<CategorizedS
   };
 
   pages.forEach((page) => {
-    if (page.slug === "/" || isExcluded(page)) {
+    if (page.slug === "/") {
       return;
     }
 

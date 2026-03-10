@@ -3,21 +3,22 @@ import Image from "next/image";
 
 import { PublicPageShell } from "@/components/public/layout/PublicPageShell";
 import { PageTitleBand } from "@/components/public/pages/PageTitleBand";
-import { getPublicPageOverrideContent } from "@/lib/services/public-page-override";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
 
 export const metadata: Metadata = {
   title: "Faire un don — Paris Greeters",
 };
 
 export default async function FaireUnDonPage() {
-  const cmsContent = await getPublicPageOverrideContent("faire-un-don", "faire-un-don-public-page-cms-content");
+  const locale = await getRequestLocale();
+  const title = getLocalizedPageTitle(locale, "faire-un-don");
 
   return (
     <PublicPageShell testId="faire-un-don-public-page">
-      {cmsContent ?? (
-        <>
-          <PageTitleBand title="Faire un don" testId="faire-un-don-public-page-title" />
-          <div className="site-container site-content-section" data-testid="faire-un-don-public-page-content">
+      <>
+        <PageTitleBand title={title} testId="faire-un-don-public-page-title" />
+        <div className="site-container site-content-section" data-testid="faire-un-don-public-page-content">
             <section className="site-info-panel" data-testid="faire-un-don-intro-panel">
               <h2 className="site-card-title">Soutenez les Greeters de Paris</h2>
               <p>Vous avez été satisfait de votre balade avec un bénévole de « Parisien d'un jour – Paris Greeters », alors n'hésitez pas à nous soutenir. <strong>Notre association fonctionne uniquement grâce aux dons.</strong></p>
@@ -71,9 +72,8 @@ export default async function FaireUnDonPage() {
             <div className="site-illustration-card" data-testid="faire-un-don-image-card">
               <Image src="/images/uploads/greeters-balade-2.jpg" alt="Balade avec les Greeters de Paris" width={1200} height={800} className="site-illustration-image" data-testid="faire-un-don-image" />
             </div>
-          </div>
-        </>
-      )}
+        </div>
+      </>
     </PublicPageShell>
   );
 }

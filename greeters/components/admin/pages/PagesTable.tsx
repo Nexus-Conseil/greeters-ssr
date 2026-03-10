@@ -28,10 +28,12 @@ export const PagesTable = () => {
   const [pages, setPages] = useState<PageItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [localeFilter, setLocaleFilter] = useState("all");
   const [deleteTarget, setDeleteTarget] = useState<PageItem | null>(null);
+  const [bootstrapping, setBootstrapping] = useState(false);
 
   async function fetchPages() {
     setLoading(true);
@@ -88,6 +90,43 @@ export const PagesTable = () => {
     }
   }
 
+  async function handleBootstrap() {
+    setBootstrapping(true);
+    setError("");
+    setNotice("");
+
+    try {
+      const response = await fetch("/api/admin/bootstrap/public-content", {
+        method: "POST",
+      });
+      const payload = (await response.json()) as {
+        detail?: string;
+        message?: string;
+        report?: {
+          homeSectionsUpdated: number;
+          pagesCreated: number;
+          pagesUpdated: number;
+          menusUpdated: number;
+        };
+      };
+
+      if (!response.ok) {
+        throw new Error(payload.detail ?? "Préremplissage impossible.");
+      }
+
+      setNotice(
+        payload.report
+          ? `${payload.message ?? "Préremplissage terminé."} ${payload.report.pagesCreated} créations, ${payload.report.pagesUpdated} mises à jour, ${payload.report.menusUpdated} menus synchronisés.`
+          : payload.message ?? "Préremplissage terminé.",
+      );
+      await fetchPages();
+    } catch (bootstrapError) {
+      setError(bootstrapError instanceof Error ? bootstrapError.message : "Préremplissage impossible.");
+    } finally {
+      setBootstrapping(false);
+    }
+  }
+
   return (
     <section className="dashboard-content" data-testid="admin-pages-page">
       <div className="dashboard-section-header" data-testid="admin-pages-header">
@@ -96,13 +135,16 @@ export const PagesTable = () => {
             Pages P0
           </p>
           <h1 className="admin-title" data-testid="admin-pages-title">
-            Vue d’ensemble des pages migrées.
+            Gérer le contenu public et le workflow éditorial.
           </h1>
           <p className="admin-copy" data-testid="admin-pages-description">
-            Cette vue s’appuie sur les nouvelles routes Next.js pour lister et piloter le contenu du site.
+            Filtrez les pages par langue, republiez les contenus du site public et ouvrez les écrans d’édition/validation depuis un point central.
           </p>
         </div>
         <div className="dashboard-row-actions" data-testid="admin-pages-header-actions">
+          <button className="secondary-button dashboard-inline-button" onClick={() => void handleBootstrap()} disabled={bootstrapping} data-testid="admin-pages-bootstrap-button">
+            {bootstrapping ? "Préremplissage..." : "Préremplir le site public"}
+          </button>
           <Link href="/admin/pages/new" className="primary-button dashboard-inline-button" data-testid="admin-pages-new-link">
             Nouvelle page
           </Link>
@@ -159,6 +201,12 @@ export const PagesTable = () => {
       {error ? (
         <div className="dashboard-alert" data-testid="admin-pages-error-message">
           {error}
+        </div>
+      ) : null}
+
+      {notice ? (
+        <div className="dashboard-success" data-testid="admin-pages-success-message">
+          {notice}
         </div>
       ) : null}
 

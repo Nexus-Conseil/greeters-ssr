@@ -2,23 +2,24 @@ import type { Metadata } from "next";
 import Image from "next/image";
 
 import { PublicPageShell } from "@/components/public/layout/PublicPageShell";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
 import { VOLUNTEER_BENEFITS, VOLUNTEER_REQUIREMENTS } from "@/lib/public-pages-data";
-import { getPublicPageOverrideContent } from "@/lib/services/public-page-override";
 
 export const metadata: Metadata = {
   title: "Devenez bénévole — Paris Greeters",
 };
 
 export default async function DevenezBenevolePage() {
-  const cmsContent = await getPublicPageOverrideContent("devenez-benevole", "devenez-benevole-public-page-cms-content");
+  const locale = await getRequestLocale();
+  const title = getLocalizedPageTitle(locale, "devenez-benevole");
 
   return (
     <PublicPageShell testId="devenez-benevole-public-page">
-      {cmsContent ?? (
-        <>
+      <>
           <section className="site-title-band site-title-band-hero" data-testid="devenez-benevole-hero-band">
             <div className="site-container site-centered-stack">
-              <h1 className="site-title-band-heading" data-testid="devenez-benevole-title">Devenez Greeter bénévole</h1>
+              <h1 className="site-title-band-heading" data-testid="devenez-benevole-title">{title}</h1>
               <p className="site-title-band-subtitle" data-testid="devenez-benevole-subtitle">Partagez votre passion pour Paris avec des visiteurs du monde entier</p>
             </div>
           </section>
@@ -59,8 +60,7 @@ export default async function DevenezBenevolePage() {
               <a href="https://docs.google.com/forms/d/1R4Q85pNX60rDTLkwO24WYH6nAH2VEd13SvfAEVzgLd0/viewform" target="_blank" rel="noreferrer" className="site-cta-button" data-testid="devenez-benevole-cta-link">Postuler pour devenir Greeter</a>
             </section>
           </div>
-        </>
-      )}
+      </>
     </PublicPageShell>
   );
 }

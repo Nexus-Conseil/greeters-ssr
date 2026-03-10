@@ -1,5 +1,3 @@
-import sgMail, { type MailDataRequired } from "@sendgrid/mail";
-
 export type ContactPayload = {
   name: string;
   email: string;
@@ -18,6 +16,7 @@ export class ContactServiceError extends Error {
 }
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAILIT_API_URL = "https://api.emailit.com/v2/emails";
 
 function escapeHtml(value: string) {
   return value
@@ -29,36 +28,36 @@ function escapeHtml(value: string) {
 }
 
 function getContactConfig() {
-  const apiKey = process.env.SENDGRID_API_KEY;
-  const fromEmail = process.env.SENDGRID_FROM_EMAIL;
-  const toEmail = process.env.SENDGRID_TO_EMAIL;
+  const apiKey = process.env.EMAILIT_API_KEY;
+  const fromEmail = process.env.CONTACT_FROM_EMAIL;
+  const fromName = process.env.CONTACT_FROM_NAME;
+  const toEmail = process.env.CONTACT_TO_EMAIL;
 
-  if (!apiKey || !fromEmail || !toEmail) {
+  if (!apiKey || !fromEmail || !fromName || !toEmail) {
     throw new ContactServiceError(
       500,
       "La configuration email du formulaire de contact est incomplète.",
     );
   }
 
-  return { apiKey, fromEmail, toEmail };
+  return { apiKey, fromEmail, fromName, toEmail };
 }
 
-function buildContactMail(payload: ContactPayload, fromEmail: string, toEmail: string): MailDataRequired {
+function buildContactRequestBody(
+  payload: ContactPayload,
+  fromEmail: string,
+  fromName: string,
+  toEmail: string,
+) {
   const safeName = escapeHtml(payload.name);
   const safeEmail = escapeHtml(payload.email);
   const safeSubject = escapeHtml(payload.subject);
   const safeMessage = escapeHtml(payload.message).replaceAll("\n", "<br />");
 
   return {
-    to: toEmail,
-    from: {
-      email: fromEmail,
-      name: "Paris Greeters",
-    },
-    replyTo: {
-      email: payload.email,
-      name: payload.name,
-    },
+    from: `${fromName} <${fromEmail}>`,
+    to: [toEmail],
+    reply_to: `${payload.name} <${payload.email}>`,
     subject: `[Paris Greeters] ${payload.subject}`,
     text: [
       "Nouvelle demande depuis le formulaire de contact Paris Greeters",
@@ -80,26 +79,36 @@ function buildContactMail(payload: ContactPayload, fromEmail: string, toEmail: s
         </div>
       </div>
     `,
+    tracking: {
+      loads: false,
+      clicks: false,
+    },
   };
 }
 
-function getSendGridErrorMessage(error: unknown) {
-  if (!(error instanceof Error)) {
-    return "Erreur SendGrid inconnue.";
+function getEmailitErrorMessage(payload: unknown, fallback: string) {
+  if (!payload || typeof payload !== "object") {
+    return fallback;
   }
 
-  const sendGridError = error as Error & {
-    response?: {
-      body?: {
-        errors?: Array<{
-          message?: string;
-        }>;
-      };
-    };
+  const candidate = payload as {
+    message?: string;
+    error?: string;
+    detail?: string;
+    errors?: Array<{
+      message?: string;
+    }>;
   };
 
-  const firstApiMessage = sendGridError.response?.body?.errors?.[0]?.message;
-  return firstApiMessage ?? error.message;
+  return candidate.message ?? candidate.error ?? candidate.detail ?? candidate.errors?.[0]?.message ?? fallback;
+}
+
+function parseMaybeJson(value: string) {
+  try {
+    return JSON.parse(value) as unknown;
+  } catch {
+    return null;
+  }
 }
 
 function toUserFacingContactError(message: string) {
@@ -108,14 +117,21 @@ function toUserFacingContactError(message: string) {
   if (normalized.includes("credit") || normalized.includes("quota") || normalized.includes("rate limit")) {
     return new ContactServiceError(
       429,
-      "L'envoi email est temporairement indisponible : le compte SendGrid a atteint son quota/crédit.",
+      "L'envoi email est temporairement indisponible : le compte Emailit a atteint son quota ou sa limite d'envoi.",
     );
   }
 
-  if (normalized.includes("forbidden") || normalized.includes("unauthorized") || normalized.includes("permission")) {
+  if (normalized.includes("forbidden") || normalized.includes("unauthorized") || normalized.includes("permission") || normalized.includes("invalid api key")) {
     return new ContactServiceError(
       502,
-      "L'envoi email est refusé par SendGrid. Vérifiez la clé API et l'expéditeur configuré.",
+      "L'envoi email est refusé par Emailit. Vérifiez la clé API et l'expéditeur configuré.",
+    );
+  }
+
+  if (normalized.includes("domain") || normalized.includes("sender") || normalized.includes("from")) {
+    return new ContactServiceError(
+      502,
+      "L'adresse d'expédition Emailit n'est pas acceptée. Vérifiez la configuration du domaine expéditeur.",
     );
   }
 
@@ -146,16 +162,31 @@ export function validateContactPayload(input: unknown): ContactPayload {
 }
 
 export async function sendContactEmail(payload: ContactPayload) {
-  const { apiKey, fromEmail, toEmail } = getContactConfig();
-
-  sgMail.setApiKey(apiKey);
+  const { apiKey, fromEmail, fromName, toEmail } = getContactConfig();
 
   try {
-    await sgMail.send(buildContactMail(payload, fromEmail, toEmail));
-  } catch (error) {
-    const errorMessage = getSendGridErrorMessage(error);
+    const response = await fetch(EMAILIT_API_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(buildContactRequestBody(payload, fromEmail, fromName, toEmail)),
+    });
 
-    console.error("Échec SendGrid pour le formulaire de contact", {
+    const rawBody = await response.text();
+    const parsedBody = rawBody ? parseMaybeJson(rawBody) : null;
+
+    if (!response.ok) {
+      throw new ContactServiceError(
+        response.status >= 400 ? response.status : 502,
+        getEmailitErrorMessage(parsedBody, rawBody || "Réponse Emailit inconnue."),
+      );
+    }
+  } catch (error) {
+    const errorMessage = error instanceof ContactServiceError ? error.message : error instanceof Error ? error.message : "Erreur Emailit inconnue.";
+
+    console.error("Échec Emailit pour le formulaire de contact", {
       message: errorMessage,
       email: payload.email,
       subject: payload.subject,

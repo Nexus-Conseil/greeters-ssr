@@ -15,7 +15,7 @@ export default async function Home() {
   if (homepage) {
     return (
       <main className="site-page" data-testid="public-home-page-live">
-        <TopBar />
+        <TopBar initialLocale={locale} />
         <Header />
         <div className="site-live-page" data-testid="public-home-live-content">
           <DynamicPageRenderer page={homepage} />
@@ -27,7 +27,7 @@ export default async function Home() {
 
   return (
     <main className="site-page" data-testid="public-home-page">
-      <TopBar />
+      <TopBar initialLocale={locale} />
       <Header />
       <HomePage locale={locale} />
       <Footer />

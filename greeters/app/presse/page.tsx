@@ -3,22 +3,23 @@ import Image from "next/image";
 
 import { PublicPageShell } from "@/components/public/layout/PublicPageShell";
 import { PageTitleBand } from "@/components/public/pages/PageTitleBand";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
 import { PRESS_PHOTOS } from "@/lib/public-pages-data";
-import { getPublicPageOverrideContent } from "@/lib/services/public-page-override";
 
 export const metadata: Metadata = {
   title: "Presse — Paris Greeters",
 };
 
 export default async function PressePage() {
-  const cmsContent = await getPublicPageOverrideContent("presse", "presse-public-page-cms-content");
+  const locale = await getRequestLocale();
+  const title = getLocalizedPageTitle(locale, "presse");
 
   return (
     <PublicPageShell testId="presse-public-page">
-      {cmsContent ?? (
-        <>
-          <PageTitleBand title="Presse" testId="presse-public-page-title" />
-          <div className="site-container site-content-section" data-testid="presse-public-page-content">
+      <>
+        <PageTitleBand title={title} testId="presse-public-page-title" />
+        <div className="site-container site-content-section" data-testid="presse-public-page-content">
             <section className="site-highlight-panel" data-testid="presse-kit-panel">
               <h2 className="site-card-title">Dossier de presse</h2>
               <a href="/documents/a428d596_dossier-de-presse-FFG-2020.pdf" target="_blank" rel="noreferrer" className="site-inline-link" data-testid="presse-kit-link">
@@ -47,9 +48,8 @@ export default async function PressePage() {
               <p>Pour toute demande d'information ou d'interview, contactez notre service presse :</p>
               <a href="mailto:presse@parisgreeters.fr" className="site-inline-link" data-testid="presse-contact-link">presse@parisgreeters.fr</a>
             </section>
-          </div>
-        </>
-      )}
+        </div>
+      </>
     </PublicPageShell>
   );
 }
