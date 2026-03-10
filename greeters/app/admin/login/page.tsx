@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import { redirect } from "next/navigation";
 
 import { getCurrentUser } from "@/lib/auth/current-user";
@@ -9,14 +10,13 @@ type LoginPageProps = {
 };
 
 export default async function AdminLoginPage({ searchParams }: LoginPageProps) {
+  const params = await searchParams;
+  const redirectTo = typeof params.redirect === "string" ? params.redirect : "/admin";
   const user = await getCurrentUser();
 
   if (user) {
-    redirect("/admin");
+    redirect(redirectTo as Route);
   }
-
-  const params = await searchParams;
-  const redirectTo = typeof params.redirect === "string" ? params.redirect : "/admin";
 
   return <LoginForm redirectTo={redirectTo} />;
 }
