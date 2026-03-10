@@ -8,7 +8,7 @@ export const GuestbookPageClient = ({ items }: { items: Testimonial[] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   return (
-    <div className="site-container site-content-section" data-testid="guestbook-page-content">
+    <div className="site-content-shell-narrow site-content-section" data-testid="guestbook-page-content">
       <div className="site-guestbook-list" data-testid="guestbook-page-list">
         {items.map((item, index) => (
           <article key={item.id} className={`site-guestbook-card${index === currentIndex ? " is-active" : ""}`} data-testid={`guestbook-page-card-${item.id}`}>

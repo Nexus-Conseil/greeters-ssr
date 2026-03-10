@@ -26,7 +26,7 @@ export default async function MentionsLegalesPage() {
       <>
         <StructuredDataScript page={seoPage ?? { title, slug: "mentions-legales", metaDescription: "Mentions légales Paris Greeters" }} locale={locale} path="mentions-legales" />
         <PageTitleBand title={title} testId="mentions-legales-public-page-title" />
-        {seoPage ? <div className="site-container site-content-section" data-testid="mentions-legales-public-page-cms-content"><DynamicPageRenderer page={seoPage} /></div> : <div className="site-container site-content-section" data-testid="mentions-legales-public-page-content">
+        {seoPage ? <div className="site-content-shell-narrow site-content-section" data-testid="mentions-legales-public-page-cms-content"><DynamicPageRenderer page={seoPage} /></div> : <div className="site-content-shell-narrow site-content-section" data-testid="mentions-legales-public-page-content">
             <section className="site-info-panel" data-testid="mentions-legales-editor-panel">
               <h2 className="site-card-title">Éditeur, conception et réalisation</h2>
               <p><strong>Association « Parisien d'un jour – Paris Greeters »</strong></p>

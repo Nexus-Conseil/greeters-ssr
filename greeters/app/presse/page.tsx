@@ -28,7 +28,7 @@ export default async function PressePage() {
       <>
         <StructuredDataScript page={seoPage ?? { title, slug: "presse", metaDescription: "Presse Paris Greeters" }} locale={locale} path="presse" />
         <PageTitleBand title={title} testId="presse-public-page-title" />
-        {seoPage ? <div className="site-container site-content-section" data-testid="presse-public-page-cms-content"><DynamicPageRenderer page={seoPage} /></div> : <div className="site-container site-content-section" data-testid="presse-public-page-content">
+        {seoPage ? <div className="site-content-shell-narrow site-content-section" data-testid="presse-public-page-cms-content"><DynamicPageRenderer page={seoPage} /></div> : <div className="site-content-shell-narrow site-content-section" data-testid="presse-public-page-content">
             <section className="site-highlight-panel" data-testid="presse-kit-panel">
               <h2 className="site-card-title">Dossier de presse</h2>
               <a href="/documents/a428d596_dossier-de-presse-FFG-2020.pdf" target="_blank" rel="noreferrer" className="site-inline-link" data-testid="presse-kit-link">

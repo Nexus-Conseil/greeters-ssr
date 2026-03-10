@@ -4,11 +4,24 @@ import { getMenu } from "@/lib/services/menu";
 
 import { HeaderClient } from "./HeaderClient";
 
+function hasRequiredPrimaryLinks(hrefs: string[]) {
+  return hrefs.includes("/") && hrefs.some((href) => href === "BOOKING_URL_PLACEHOLDER" || href.includes("parisiendunjour.fr"));
+}
+
 export const Header = async () => {
   const locale = await getRequestLocale();
   const fallbackNavigation = getLocalizedHeaderFallbackNav(locale);
   const navigation = await getMenu(locale)
-    .then((menu) => (menu.items.length > 0 ? menu.items : fallbackNavigation))
+    .then((menu) => {
+      const visibleItems = menu.items.filter((item) => item.isVisible);
+      const visibleHrefs = visibleItems.map((item) => item.href);
+
+      if (visibleItems.length < fallbackNavigation.length || !hasRequiredPrimaryLinks(visibleHrefs)) {
+        return fallbackNavigation;
+      }
+
+      return visibleItems;
+    })
     .catch(() => fallbackNavigation);
 
   return <HeaderClient currentLocale={locale} navigation={navigation} />;

@@ -457,10 +457,22 @@ frontend:
           agent: "testing"
           comment: "✅ CODE VERIFIED: Localization infrastructure properly implemented. TopBar/Header/Footer components use getRequestLocale() to detect locale from hostname subdomain (e.g., en.greeters.paris → locale='en'). site-copy.ts contains complete translations for 9 languages (fr, en, de, es, it, ja, nl, pt-pt, zh-hans). English translations confirmed: 'Book a walk', 'Join us on social media', 'Our partners'. getLocaleFromHost() extracts subdomain and maps to locale. LIMITATION: Cannot test actual en.greeters.paris subdomain on localhost (127.0.0.1:3100) - requires deployed environment with proper DNS. Code structure and logic verified correct. Marked as 'NA' due to localhost testing limitation, not implementation issue."
 
+  - task: "Public routes pixel-perfect validation post-migration"
+    implemented: true
+    working: true
+    file: "/app/greeters/app/(public routes), /app/greeters/components/public/layout/Header.tsx, /app/greeters/components/public/layout/TopBar.tsx, /app/greeters/components/public/layout/Footer.tsx, /app/greeters/components/public/pages/SimplePageHeading.tsx, /app/greeters/components/public/pages/PageTitleBand.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PIXEL-PERFECT VALIDATION COMPLETE (2026-03-10): Comprehensive validation executed on http://127.0.0.1:3001 for all public routes after pixel-perfect pass. ALL REQUIREMENTS VERIFIED: 1) ✅ TopBar CTA button present and functional ('RÉSERVER UNE BALADE'), 2) ✅ Header navigation displays all 7 required items correctly: ACCUEIL, RENCONTREZ UN GREETER, LIVRE D'OR, FAIRE UN DON, GALERIE, ACTUALITÉS, DEVENEZ BÉNÉVOLE, 3) ✅ /actualites has large centered title on white background (SimplePageHeading with site-page-heading class), image-top card grid with 4 articles, NO green banner - CORRECT structure, 4) ✅ /galerie has large centered title on white background (SimplePageHeading with site-page-heading class), image grid with 12 gallery items, NO green banner - CORRECT structure, 5) ✅ Pages with green banner VERIFIED: /contact, /qui-sommes-nous, /livre-dor, /faire-un-don, /presse, /mentions-legales all correctly use PageTitleBand (site-title-band class), 6) ✅ /devenez-benevole uses CMS-rendered custom hero layout (not standard green banner, but intentional design), 7) ✅ Footer consistency verified across all routes (/, /actualites, /galerie, /contact, /qui-sommes-nous), 8) ✅ Mobile menu functional: button visible at mobile viewport (390x844), opens correctly with aria-expanded='true', 9) ✅ No broken/blank screens: all 10 routes (/, /actualites, /galerie, /contact, /qui-sommes-nous, /livre-dor, /faire-un-don, /devenez-benevole, /presse, /mentions-legales) return status 200 with proper content loaded. MINOR NOTES: Third-party Multilipi translation service shows CORS errors on localhost (expected limitation, not a bug). Visual structure matches design requirements: actualites and galerie use white background centered titles without green banners, other pages maintain green title bands as expected. Desktop and mobile layouts working correctly."
+
 metadata:
   created_by: "testing_agent"
-  version: "2.6"
-  test_sequence: 8
+  version: "2.7"
+  test_sequence: 9
   run_ui: false
   test_date: "2026-03-10"
   backend_test_completed: true
@@ -471,10 +483,11 @@ metadata:
   finale_revalidation_completed: true
   cms_seo_images_validated: true
   image_upload_workflow_validated: true
+  pixel_perfect_validation_completed: true
 
 test_plan:
   current_focus:
-    - "Image upload workflow validation completed"
+    - "Pixel-perfect validation completed successfully"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -504,3 +517,5 @@ agent_communication:
       message: "🎯 RETEST AFTER CREATEPAGE FIX COMPLETE (2026-03-10): Executed focused backend retest on http://127.0.0.1:3100 after createPage return correctif as requested. ALL 3 VALIDATION REQUIREMENTS PASSED: 1) ✅ POST /api/admin/images/upload with auth NOW WORKING - returns 200 OK with proper image data (assetId: db3b6dec-4ad9-4751-a961-4992572a61e4, src: /uploads/cms/..., width/height: 100px), confirmed auth protection and file validation working correctly, 2) ✅ POST /api/pages NOW RETURNS SEO/OG AUTO-POPULATED FIELDS - verified page creation with title 'Page de Test SEO' returns 8/8 SEO fields populated: metaTitle='Découvrez Paris avec les Greeters...', metaDescription='Explorez Paris hors des sentiers battus...', robotsDirective='index,follow', ogTitle='Paris Greeters : Votre expérience parisienne authentique', ogDescription='Vivez Paris comme un local...', sitemapPriority=0.7, sitemapChangeFreq='monthly', canonicalUrl='https://greeters.paris/test-seo-creation-20260310' - automatePageSeoAndOg() function working correctly, 3) ✅ POST /api/contact/send REGRESSION OK - continues to work with REAL Emailit integration, returns success message 'Votre message a bien été envoyé. Nous vous répondrons dès que possible.' (NOT MOCKED). Admin credentials contact@nexus-conseil.ch / Greeters&58!2026 working perfectly. FINAL STATUS: 3/3 tests passed, 0 failed. CreatePage fix fully validated and operational."
     - agent: "testing"
       message: "🎨 IMAGE UPLOAD/REMOVAL WORKFLOW VALIDATION COMPLETE (2026-03-10): Executed comprehensive test of image upload and removal workflow in admin page editor on http://127.0.0.1:3100/admin/pages/new. ALL 5 WORKFLOW STAGES PASSED: 1) ✅ Admin authentication working (contact@nexus-conseil.ch / Greeters&58!2026), 2) ✅ Page editor loads with section/block creation functionality, 3) ✅ IMAGE UPLOAD FUNCTIONAL: user can select local image file (test_image_upload.png 100×100px), file input triggers POST /api/admin/images/upload, upload completes in ~7 seconds (ShortPixel optimization working), server returns 200 OK with proper response: {assetId: ae408727-54d5-4cf8-a2c6-cd45b9e485d4, src: /uploads/cms/.../test-image-upload.png, width: 100, height: 100}, image source field populates automatically, image preview renders correctly in editor (red test image visible), alt text auto-filled from filename, 4) ✅ IMAGE REMOVAL FUNCTIONAL: 'Retirer l'image' button clears all image data (src, alt, caption, width, height fields emptied), image preview removed from UI, source field returns to empty/placeholder state. CRITICAL CONFIRMATION: Editor works WITHOUT media library as designed - direct file upload integration via /api/admin/images/upload working correctly. Image optimization via ShortPixel operational (7-second upload time expected). All data-testid selectors correct and functional. Complete workflow validated end-to-end with screenshot evidence."
+    - agent: "testing"
+      message: "🎨 PIXEL-PERFECT VALIDATION COMPLETE (2026-03-10): Executed comprehensive pixel-perfect validation on http://127.0.0.1:3001 for all public routes after design migration. ALL VALIDATION REQUIREMENTS PASSED: 1) ✅ TopBar CTA button 'RÉSERVER UNE BALADE' present and functional, 2) ✅ Header navigation displays all 7 required items correctly (ACCUEIL, RENCONTREZ UN GREETER, LIVRE D'OR, FAIRE UN DON, GALERIE, ACTUALITÉS, DEVENEZ BÉNÉVOLE), 3) ✅ /actualites uses SimplePageHeading (large centered title on white background), has image-top card grid with 4 articles, NO green banner - CORRECT structure per requirements, 4) ✅ /galerie uses SimplePageHeading (large centered title on white background), has image grid with 12 gallery items, NO green banner - CORRECT structure per requirements, 5) ✅ All 6 pages with green banner verified: /contact, /qui-sommes-nous, /livre-dor, /faire-un-don, /presse, /mentions-legales correctly use PageTitleBand (site-title-band class) with green banner as expected, 6) ✅ /devenez-benevole uses CMS-rendered custom hero layout (intentional design, not standard green banner), 7) ✅ Footer consistency verified across all routes, 8) ✅ Mobile menu functional: opens correctly with aria-expanded='true' at mobile viewport (390x844), 9) ✅ No broken/blank screens: all 10 routes return status 200 with proper content. MINOR NOTES: Third-party Multilipi translation service shows CORS errors on localhost (expected, not a bug). Visual structure matches pixel-perfect design: actualites and galerie use white background with centered titles (no green banners), other pages maintain green title bands. Desktop and mobile layouts working correctly. FINAL STATUS: 9/9 validation requirements passed, 0 critical issues. Public frontend ready for production."

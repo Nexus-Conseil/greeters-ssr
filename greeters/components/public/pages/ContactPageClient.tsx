@@ -49,12 +49,20 @@ export const ContactPageClient = ({ introText }: { introText: string }) => {
   }
 
   return (
-    <div className="site-container site-content-section" data-testid="contact-page-content">
+    <div className="site-content-shell-narrow site-content-section" data-testid="contact-page-content">
       <div className="site-info-panel" data-testid="contact-page-intro-panel">
         {introText}
       </div>
 
       <form className="site-contact-form" onSubmit={handleSubmit} data-testid="contact-page-form">
+        <h2 className="site-contact-form-title" data-testid="contact-page-form-title">
+          <span className="site-contact-form-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm0 2v.5l9 5.63 9-5.63V7l-9 5.63L3 7.01Zm18 10V9.84l-8.47 5.3a1 1 0 0 1-1.06 0L3 9.84V17h18Z" fill="currentColor" />
+            </svg>
+          </span>
+          Formulaire de contact
+        </h2>
         <div className="site-contact-grid">
           <div className="site-contact-column">
             <label className="site-field-label" htmlFor="contact-name">Nom</label>
@@ -70,8 +78,8 @@ export const ContactPageClient = ({ introText }: { introText: string }) => {
           <div className="site-contact-column">
             <label className="site-field-label" htmlFor="contact-message">Message</label>
             <textarea id="contact-message" name="message" value={formData.message} onChange={(event) => setFormData((prev) => ({ ...prev, message: event.target.value }))} className="site-field-textarea" data-testid="contact-page-message-input" required />
-            <button type="submit" className="site-cta-button site-contact-submit" disabled={submitting} data-testid="contact-page-submit-button">
-              {submitting ? "Envoi en cours..." : "Envoyer"}
+            <button type="submit" className="site-cta-button site-contact-submit site-glow-button" disabled={submitting} data-testid="contact-page-submit-button">
+              <span className="site-glow-button-label">{submitting ? "Envoi en cours..." : "Envoyer"}</span>
             </button>
           </div>
         </div>

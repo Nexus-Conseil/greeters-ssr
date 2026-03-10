@@ -27,7 +27,7 @@ export default async function QuiSommesNousPage() {
       <>
         <StructuredDataScript page={seoPage ?? { title, slug: "qui-sommes-nous", metaDescription: "Association Paris Greeters" }} locale={locale} path="qui-sommes-nous" />
         <PageTitleBand title={title} testId="qui-sommes-nous-public-page-title" />
-        {seoPage ? <div className="site-container site-content-section" data-testid="qui-sommes-nous-public-page-cms-content"><DynamicPageRenderer page={seoPage} /></div> : <div className="site-container site-content-section" data-testid="qui-sommes-nous-public-page-content">
+        {seoPage ? <div className="site-content-shell-narrow site-content-section" data-testid="qui-sommes-nous-public-page-cms-content"><DynamicPageRenderer page={seoPage} /></div> : <div className="site-content-shell-narrow site-content-section" data-testid="qui-sommes-nous-public-page-content">
           <section className="site-info-panel" data-testid="qui-sommes-nous-intro-panel">
             <p>
               Association loi 1901 à but non lucratif, <strong>« Parisien d'un jour – Paris Greeters »</strong> organise des balades gratuites dans la ville de Paris ou dans les communes alentours, accessibles par le métro, hors des sentiers battus et loin des grands axes touristiques.

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { PublicPageShell } from "@/components/public/layout/PublicPageShell";
 import { GalleryPageClient } from "@/components/public/pages/GalleryPageClient";
-import { PageTitleBand } from "@/components/public/pages/PageTitleBand";
+import { SimplePageHeading } from "@/components/public/pages/SimplePageHeading";
 import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
@@ -28,7 +28,7 @@ export default async function GaleriePage() {
     <PublicPageShell testId="galerie-public-page">
       <>
         <StructuredDataScript page={seoPage ?? { title, slug: "galerie", metaDescription: "Galerie Paris Greeters" }} locale={locale} path="galerie" />
-        <PageTitleBand title={title} testId="galerie-public-page-title" />
+        <SimplePageHeading title={title} testId="galerie-public-page-title" />
         <GalleryPageClient items={items} />
       </>
     </PublicPageShell>

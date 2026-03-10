@@ -28,7 +28,7 @@ export default async function FaireUnDonPage() {
       <>
         <StructuredDataScript page={seoPage ?? { title, slug: "faire-un-don", metaDescription: "Soutenir Paris Greeters" }} locale={locale} path="faire-un-don" />
         <PageTitleBand title={title} testId="faire-un-don-public-page-title" />
-        {seoPage ? <div className="site-container site-content-section" data-testid="faire-un-don-public-page-cms-content"><DynamicPageRenderer page={seoPage} /></div> : <div className="site-container site-content-section" data-testid="faire-un-don-public-page-content">
+        {seoPage ? <div className="site-content-shell-narrow site-content-section" data-testid="faire-un-don-public-page-cms-content"><DynamicPageRenderer page={seoPage} /></div> : <div className="site-content-shell-narrow site-content-section" data-testid="faire-un-don-public-page-content">
             <section className="site-info-panel" data-testid="faire-un-don-intro-panel">
               <h2 className="site-card-title">Soutenez les Greeters de Paris</h2>
               <p>Vous avez été satisfait de votre balade avec un bénévole de « Parisien d'un jour – Paris Greeters », alors n'hésitez pas à nous soutenir. <strong>Notre association fonctionne uniquement grâce aux dons.</strong></p>
