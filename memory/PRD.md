@@ -54,6 +54,7 @@
 - Le footer public est maintenant conditionnel comme dans la CSR : partenaires visibles sur `/`, masqués sur `/galerie` tandis que le bloc social reste affiché selon la route.
 - Intégration de MultiLipi dans le `head` global avec les 9 liens `hreflang` de production `greeters.nexus-conseil.ch` + script exact fourni par l’utilisateur (`726562fe-f615-404a-b985-a73e661ee3dc`).
 - Passe pixel-perfect finale route par route sur le frontend public : navigation desktop renforcée avec fallback fidèle à la CSR, `/actualites` et `/galerie` converties en titres blancs centrés sans bandeau vert, grille d’actualités image-top restaurée, containers étroits rétablis sur les pages institutionnelles, formulaire contact et largeurs des pages rapprochés de la CSR.
+- Correctif critique du preview Emergent : le service `/app/frontend` proxyfiait toutes les routes non-API vers `127.0.0.1:3100` sans serveur derrière, ce qui causait `Error occurred while trying to proxy`. Le proxy démarre désormais automatiquement l’app Next.js `/app/greeters` sur `3100`, puis sert correctement les routes publiques via le port preview `3000`.
 
 ## Validation réalisée
 - `eslint` OK sur `/app/greeters`
@@ -90,6 +91,9 @@
   - note de test : les erreurs MultiLipi en localhost sont attendues tant que le domaine autorisé de production n’est pas utilisé
 - Validation frontend finale OK via agent UI + smoke tests locaux
   - navigation complète, `/actualites` et `/galerie` conformes, pages à bandeau vert cohérentes, menu mobile OK, aucun écran blanc
+- Validation preview interne OK
+  - `http://127.0.0.1:3000/` et `/actualites` répondent maintenant en `200` via le proxy preview
+  - screenshot smoke OK via le port preview `3000`
 
 ## Blocages connus
 - Aucun blocage majeur sur le flux contact : Emailit est opérationnel sur l’environnement actuel.
@@ -102,6 +106,7 @@
 - Valider MultiLipi sur le domaine autorisé final `greeters.nexus-conseil.ch` : en local/preview, la CORS de MultiLipi reste attendue.
 - Vérifier en production si MultiLipi réécrit réellement les balises SEO/OG par locale servie, au lieu de supposer une traduction automatique du `<head>`.
 - Étendre si souhaité l’automatisation SEO/OG au-delà du corpus FR initial vers toutes les locales préremplies.
+- Vérifier côté utilisateur que l’onglet Preview Emergent s’est bien réinitialisé après le correctif (refresh complet / réouverture si cache navigateur côté UI plateforme).
 
 ## P1
 - Étendre le sitemap dynamique avec toutes les pages/articles réellement souhaités au référencement final.
