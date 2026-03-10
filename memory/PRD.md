@@ -50,6 +50,9 @@
 - L’IA SEO choisit maintenant le `schema.org` le plus pertinent par page et génère le JSON-LD final, en plus des métadonnées, alt/images et recommandations SEO.
 - Les pages institutionnelles restantes (`qui-sommes-nous`, `faire-un-don`, `devenez-benevole`, `presse`, `mentions-legales`) lisent désormais le contenu CMS publié via `DynamicPageRenderer` lorsqu’il existe.
 - Le périmètre public prérempli est désormais de **90 pages** = **10 slugs publics (dont `/`) × 9 locales**, et **9 menus** = **1 menu public localisé par langue**.
+- Reprise de la passe UI/UX publique à partir de la CSR : topbar avec CTA glow animé, retour haut avec easing progressif, toggle mobile du header en crossfade icône/MENU, footer plus fidèle avec icônes sociales et barre basse animée.
+- Le footer public est maintenant conditionnel comme dans la CSR : partenaires visibles sur `/`, masqués sur `/galerie` tandis que le bloc social reste affiché selon la route.
+- Intégration de MultiLipi dans le `head` global avec les 9 liens `hreflang` de production `greeters.nexus-conseil.ch` + script exact fourni par l’utilisateur (`726562fe-f615-404a-b985-a73e661ee3dc`).
 
 ## Validation réalisée
 - `eslint` OK sur `/app/greeters`
@@ -81,6 +84,9 @@
   - upload image, auto SEO/OG, studio SEO, sitemap enrichi, Emailit, sécurité admin, routes publiques : PASS
 - Retest backend ciblé OK
   - upload image OK, `POST /api/pages` retourne bien les champs SEO/OG auto-populés, contact Emailit OK
+- Validation frontend ciblée OK : `/app/test_reports/iteration_14.json`
+  - home visible, topbar/header/footer ajustés, footer conditionnel, MultiLipi présent dans le `head` : PASS
+  - note de test : les erreurs MultiLipi en localhost sont attendues tant que le domaine autorisé de production n’est pas utilisé
 
 ## Blocages connus
 - Aucun blocage majeur sur le flux contact : Emailit est opérationnel sur l’environnement actuel.
@@ -90,6 +96,7 @@
 - Vérifier la cohérence multilingue réelle (subdomains / variantes preview) sur toutes les pages publiques.
 - Réduire les derniers écarts pixel-perfect visibles entre la SSR et `https://greeters.paris`, route par route.
 - Finaliser la parité visuelle ultra-fine sur davantage de pages secondaires et sur encore plus de tailles d’écran réelles si l’utilisateur veut une passe de finition exhaustive.
+- Valider MultiLipi sur le domaine autorisé final `greeters.nexus-conseil.ch` : en local/preview, la CORS de MultiLipi reste attendue.
 - Étendre si souhaité l’automatisation SEO/OG au-delà du corpus FR initial vers toutes les locales préremplies.
 
 ## P1
@@ -107,6 +114,7 @@
 
 ## Next tasks
 1. Mener une dernière passe pixel-perfect exhaustive page par page / écran par écran si l’utilisateur veut une quasi-parité stricte finale.
-2. Étendre l’automatisation SEO/OG multilingue à toutes les locales préremplies si souhaité.
-3. Continuer à remplacer les derniers contenus statiques par des contenus CMS structurés, notamment sur les pages institutionnelles détaillées.
-4. Ajuster la stratégie SEO finale (pages à indexer/non indexer, priorités, éventuelles pages utilitaires à exclure).
+2. Valider MultiLipi sur le vrai domaine autorisé puis ajuster si la plateforme impose des sélecteurs/slug metadata supplémentaires.
+3. Étendre l’automatisation SEO/OG multilingue à toutes les locales préremplies si souhaité.
+4. Continuer à remplacer les derniers contenus statiques par des contenus CMS structurés, notamment sur les pages institutionnelles détaillées.
+5. Ajuster la stratégie SEO finale (pages à indexer/non indexer, priorités, éventuelles pages utilitaires à exclure).
