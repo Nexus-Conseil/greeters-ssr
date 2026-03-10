@@ -46,8 +46,6 @@ const PUBLIC_PLACEHOLDERS: Record<string, { title: string; description: string }
   },
 };
 
-export const dynamic = "force-dynamic";
-
 type PublicPlaceholderPageProps = {
   params: Promise<{
     slug: string;

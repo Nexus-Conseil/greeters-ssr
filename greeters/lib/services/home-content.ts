@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { getRequestLocale } from "@/lib/i18n/request";
 import { listHomeSections } from "@/lib/repositories/home-sections";
 import { HOME_PAGE_FALLBACK, type HomeArticle, type Testimonial } from "@/lib/public-site-data";
@@ -129,7 +131,7 @@ function getHomePageFromCms(page: PageResponse | null) {
   };
 }
 
-export async function getHomePageContent() {
+export const getHomePageContent = cache(async () => {
   const locale = await getRequestLocale();
   const homepage = await findPublicPageBySlug("/", locale).catch(() => null);
   const cmsHomepageContent = getHomePageFromCms(homepage);
@@ -193,4 +195,4 @@ export async function getHomePageContent() {
     },
     gallery: HOME_PAGE_FALLBACK.gallery,
   };
-}
+});

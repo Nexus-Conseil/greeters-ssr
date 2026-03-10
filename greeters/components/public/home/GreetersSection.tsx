@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-import { PUBLIC_IMAGE_SIZES_ATTR } from "@/lib/media/config";
+import { IMAGE_QUALITY_STANDARD, PUBLIC_HALF_WIDTH_IMAGE_SIZES_ATTR } from "@/lib/media/config";
 import { useState } from "react";
 
 type GreetersSectionProps = {
@@ -34,13 +34,13 @@ export const GreetersSection = ({
 
   return (
     <>
-      <section className="site-section site-section-muted" data-testid="public-home-video-section">
+      <section className="site-section site-section-muted site-deferred-section" data-testid="public-home-video-section">
         <div className="site-container site-centered-stack">
           <h2 className="site-section-title" data-testid="public-home-video-title">
             {subtitle}
           </h2>
           <button type="button" className="site-video-card" onClick={() => setVideoOpen(true)} data-testid="public-home-video-trigger">
-            <Image src={videoThumbnail} alt={videoTitle} fill sizes="(max-width: 1024px) 100vw, 840px" className="site-video-thumbnail" unoptimized />
+            <Image src={videoThumbnail} alt={videoTitle} fill sizes="(max-width: 1024px) 100vw, 840px" quality={IMAGE_QUALITY_STANDARD} className="site-video-thumbnail" />
             <span className="site-play-button" data-testid="public-home-video-play-button">
               ▶
             </span>
@@ -51,10 +51,10 @@ export const GreetersSection = ({
         </div>
       </section>
 
-      <section className="site-section" data-testid="public-home-greeters-section">
+      <section className="site-section site-deferred-section" data-testid="public-home-greeters-section">
         <div className="site-container site-two-column">
           <div className="site-media-card" data-testid="public-home-greeters-image-wrapper">
-            <Image src={image} alt={imageAlt} width={800} height={532} sizes={PUBLIC_IMAGE_SIZES_ATTR} quality={100} className="site-media-image" data-testid="public-home-greeters-image" />
+            <Image src={image} alt={imageAlt} width={800} height={532} sizes={PUBLIC_HALF_WIDTH_IMAGE_SIZES_ATTR} quality={IMAGE_QUALITY_STANDARD} className="site-media-image" data-testid="public-home-greeters-image" />
           </div>
           <div className="site-copy-column" data-testid="public-home-greeters-copy">
             <h2 className="site-section-title site-section-title-left" data-testid="public-home-greeters-title">

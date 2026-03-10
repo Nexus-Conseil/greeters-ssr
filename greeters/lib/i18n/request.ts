@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { headers } from "next/headers";
 
 import { DEFAULT_LOCALE, ROOT_DOMAIN, buildLocaleUrl, normalizeLocale, type AppLocale } from "./config";
@@ -17,10 +18,10 @@ export function getLocaleFromHost(host: string | null | undefined): AppLocale {
   return normalizeLocale(candidate);
 }
 
-export async function getRequestLocale() {
+export const getRequestLocale = cache(async () => {
   const headerStore = await headers();
   return getLocaleFromHost(headerStore.get("x-forwarded-host") ?? headerStore.get("host"));
-}
+});
 
 export async function getRequestOriginForLocale(path = "/") {
   const locale = await getRequestLocale();

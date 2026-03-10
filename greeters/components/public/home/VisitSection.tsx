@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import { PUBLIC_IMAGE_SIZES_ATTR } from "@/lib/media/config";
+import { IMAGE_QUALITY_STANDARD, PUBLIC_HALF_WIDTH_IMAGE_SIZES_ATTR } from "@/lib/media/config";
 
 type VisitSectionProps = {
   title: string;
@@ -11,7 +11,7 @@ type VisitSectionProps = {
 
 export const VisitSection = ({ title, paragraphs, image, imageAlt }: VisitSectionProps) => {
   return (
-    <section className="site-section site-section-muted" data-testid="public-home-visit-section">
+    <section className="site-section site-section-muted site-deferred-section" data-testid="public-home-visit-section">
       <div className="site-container site-two-column">
         <div className="site-copy-column" data-testid="public-home-visit-copy">
           <h2 className="site-section-title site-section-title-left" data-testid="public-home-visit-title">
@@ -26,7 +26,7 @@ export const VisitSection = ({ title, paragraphs, image, imageAlt }: VisitSectio
           </div>
         </div>
         <div className="site-media-card" data-testid="public-home-visit-image-wrapper">
-          <Image src={image} alt={imageAlt} width={1920} height={1280} sizes={PUBLIC_IMAGE_SIZES_ATTR} quality={100} className="site-media-image" data-testid="public-home-visit-image" />
+          <Image src={image} alt={imageAlt} width={1920} height={1280} sizes={PUBLIC_HALF_WIDTH_IMAGE_SIZES_ATTR} quality={IMAGE_QUALITY_STANDARD} className="site-media-image" data-testid="public-home-visit-image" />
         </div>
       </div>
     </section>

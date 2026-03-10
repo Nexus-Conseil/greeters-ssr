@@ -6,7 +6,7 @@ import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
 import { DynamicPageRenderer } from "@/components/cms/DynamicPageRenderer";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
-import { PUBLIC_IMAGE_SIZES_ATTR } from "@/lib/media/config";
+import { IMAGE_QUALITY_STANDARD, PUBLIC_IMAGE_SIZES_ATTR } from "@/lib/media/config";
 import { getRouteMetadata } from "@/lib/seo/public-metadata";
 import { VOLUNTEER_BENEFITS, VOLUNTEER_REQUIREMENTS } from "@/lib/public-pages-data";
 import { findPublicPageBySlug } from "@/lib/services/pages";
@@ -37,7 +37,7 @@ export default async function DevenezBenevolePage() {
 
           <div className="site-content-shell-narrow site-content-section" data-testid="devenez-benevole-public-page-content">
             <div className="site-overlap-image-card" data-testid="devenez-benevole-image-card">
-              <Image src="/images/uploads/devenez-benevole.png" alt="Devenez bénévole Greeter" width={1200} height={630} sizes={PUBLIC_IMAGE_SIZES_ATTR} quality={100} className="site-illustration-image" data-testid="devenez-benevole-image" />
+              <Image src="/images/uploads/devenez-benevole.png" alt="Devenez bénévole Greeter" width={1200} height={630} sizes={PUBLIC_IMAGE_SIZES_ATTR} quality={IMAGE_QUALITY_STANDARD} className="site-illustration-image" data-testid="devenez-benevole-image" />
             </div>
 
             <section className="site-block-stack" data-testid="devenez-benevole-intro-section">

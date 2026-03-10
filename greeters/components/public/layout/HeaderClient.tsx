@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 
 import type { AppLocale } from "@/lib/i18n/config";
 import { buildLocaleUrl, LOCALE_LABELS } from "@/lib/i18n/config";
+import { IMAGE_QUALITY_STANDARD, PUBLIC_LOGO_SIZES_ATTR } from "@/lib/media/config";
 import { getBookingUrl, type SiteNavigationItem } from "@/lib/public-site-data";
 
 const FLAG_MARKUP: Record<AppLocale, string> = {
@@ -98,7 +99,7 @@ export const HeaderClient = ({ currentLocale, navigation }: HeaderClientProps) =
 
       <div className="site-header-brand" data-testid="public-site-header-brand">
         <Link href="/" data-testid="public-site-logo-link">
-          <Image src="/images/logo_greeters.png" alt="Paris Greeters" width={200} height={80} sizes="200px" quality={100} className="site-header-logo" priority data-testid="public-site-logo" />
+          <Image src="/images/logo_greeters.png" alt="Paris Greeters" width={200} height={80} sizes={PUBLIC_LOGO_SIZES_ATTR} quality={IMAGE_QUALITY_STANDARD} className="site-header-logo" priority data-testid="public-site-logo" />
         </Link>
       </div>
 
@@ -112,7 +113,7 @@ export const HeaderClient = ({ currentLocale, navigation }: HeaderClientProps) =
               {item.label}
             </a>
           ) : (
-            <Link key={item.id} href={item.href as Route} className={`site-nav-link${active ? " is-active" : ""}`} data-testid={`public-site-nav-link-${toTestId(item.href)}`}>
+            <Link key={item.id} href={item.href as Route} prefetch={false} className={`site-nav-link${active ? " is-active" : ""}`} data-testid={`public-site-nav-link-${toTestId(item.href)}`}>
               {item.label}
             </Link>
           );
@@ -155,7 +156,7 @@ export const HeaderClient = ({ currentLocale, navigation }: HeaderClientProps) =
                 {item.label}
               </a>
             ) : (
-              <Link key={item.id} href={item.href as Route} className={`site-mobile-link${isActivePath(pathname, item.href) ? " is-active" : ""}`} data-testid={`public-site-mobile-link-${toTestId(item.href)}`}>
+              <Link key={item.id} href={item.href as Route} prefetch={false} className={`site-mobile-link${isActivePath(pathname, item.href) ? " is-active" : ""}`} data-testid={`public-site-mobile-link-${toTestId(item.href)}`}>
                 {item.label}
               </Link>
             );

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Prisma } from "@prisma/client";
 
 import { getMainMenuId, getMainMenuRecord, saveMainMenuRecord } from "@/lib/repositories/menus";
@@ -38,7 +39,7 @@ function parseMenuItems(input: unknown): MenuItem[] {
     .sort((left, right) => left.order - right.order);
 }
 
-export async function getMenu(locale: AppLocale = DEFAULT_LOCALE) {
+export const getMenu = cache(async (locale: AppLocale = DEFAULT_LOCALE) => {
   const resolvedLocale = normalizeLocale(locale);
   const menu = await getMainMenuRecord(resolvedLocale);
   const menuItems = parseMenuItems(menu?.items);
@@ -72,7 +73,7 @@ export async function getMenu(locale: AppLocale = DEFAULT_LOCALE) {
     updatedBy: menu?.updatedBy ?? null,
     updatedAt: menu?.updatedAt?.toISOString() ?? null,
   };
-}
+});
 
 export async function updateMenu(items: MenuItem[], updatedBy: string, locale: AppLocale = DEFAULT_LOCALE) {
   const resolvedLocale = normalizeLocale(locale);

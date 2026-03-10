@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-import { PUBLIC_IMAGE_SIZES_ATTR } from "@/lib/media/config";
+import { IMAGE_QUALITY_STANDARD, PUBLIC_GALLERY_GRID_SIZES_ATTR, PUBLIC_LIGHTBOX_IMAGE_SIZES_ATTR } from "@/lib/media/config";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -18,7 +18,7 @@ export const GallerySection = ({ title, items }: GallerySectionProps) => {
 
   return (
     <>
-      <section className="site-section" data-testid="public-home-gallery-section">
+      <section className="site-section site-deferred-section" data-testid="public-home-gallery-section">
         <div className="site-container">
           <h2 className="site-section-title" data-testid="public-home-gallery-title">
             {title}
@@ -32,7 +32,7 @@ export const GallerySection = ({ title, items }: GallerySectionProps) => {
                 onClick={() => setActiveIndex(index)}
                 data-testid={`public-home-gallery-card-${item.id}`}
               >
-                <Image src={item.src} alt={item.title} width={480} height={480} sizes="(max-width: 640px) calc(100vw - 1rem), (max-width: 900px) 50vw, 25vw" quality={100} className="site-gallery-image" data-testid={`public-home-gallery-image-${item.id}`} />
+                <Image src={item.src} alt={item.title} width={480} height={480} sizes={PUBLIC_GALLERY_GRID_SIZES_ATTR} quality={IMAGE_QUALITY_STANDARD} className="site-gallery-image" data-testid={`public-home-gallery-image-${item.id}`} />
                 <span className="site-gallery-overlay">
                   <strong>{item.title}</strong>
                   <small>{item.date}</small>
@@ -41,7 +41,7 @@ export const GallerySection = ({ title, items }: GallerySectionProps) => {
             ))}
           </div>
           <div className="site-gallery-link-row">
-            <Link href="/galerie" className="site-outline-link" data-testid="public-home-gallery-link">
+            <Link href="/galerie" prefetch={false} className="site-outline-link" data-testid="public-home-gallery-link">
               Voir toutes nos galeries photos
             </Link>
           </div>
@@ -63,7 +63,7 @@ export const GallerySection = ({ title, items }: GallerySectionProps) => {
               ‹
             </button>
             <div className="site-lightbox-media">
-              <Image src={items[activeIndex].src} alt={items[activeIndex].title} width={1200} height={900} sizes={PUBLIC_IMAGE_SIZES_ATTR} quality={100} className="site-lightbox-image" data-testid="public-home-gallery-lightbox-image" />
+              <Image src={items[activeIndex].src} alt={items[activeIndex].title} width={1200} height={900} sizes={PUBLIC_LIGHTBOX_IMAGE_SIZES_ATTR} quality={IMAGE_QUALITY_STANDARD} className="site-lightbox-image" data-testid="public-home-gallery-lightbox-image" />
               <div className="site-lightbox-copy" data-testid="public-home-gallery-lightbox-copy">
                 <strong>{items[activeIndex].title}</strong>
                 <span>{items[activeIndex].date}</span>

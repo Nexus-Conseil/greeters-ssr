@@ -7,6 +7,7 @@ import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
 import { DynamicPageRenderer } from "@/components/cms/DynamicPageRenderer";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
+import { IMAGE_QUALITY_STANDARD, PUBLIC_GALLERY_GRID_SIZES_ATTR } from "@/lib/media/config";
 import { getRouteMetadata } from "@/lib/seo/public-metadata";
 import { PRESS_PHOTOS } from "@/lib/public-pages-data";
 import { findPublicPageBySlug } from "@/lib/services/pages";
@@ -42,7 +43,7 @@ export default async function PressePage() {
               <div className="site-gallery-grid site-gallery-grid-page">
                 {PRESS_PHOTOS.map((photo) => (
                   <a key={photo.id} href={photo.src} target="_blank" rel="noreferrer" className="site-gallery-card" data-testid={`presse-photo-link-${photo.id}`}>
-                    <Image src={photo.src} alt={photo.title} width={520} height={520} sizes="(max-width: 640px) calc(100vw - 1rem), (max-width: 900px) 50vw, 25vw" quality={100} className="site-gallery-image" data-testid={`presse-photo-image-${photo.id}`} />
+                    <Image src={photo.src} alt={photo.title} width={520} height={520} sizes={PUBLIC_GALLERY_GRID_SIZES_ATTR} quality={IMAGE_QUALITY_STANDARD} className="site-gallery-image" data-testid={`presse-photo-image-${photo.id}`} />
                     <span className="site-gallery-overlay">
                       <strong>{photo.title}</strong>
                       <small>{photo.date}</small>

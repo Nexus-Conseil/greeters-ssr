@@ -41,7 +41,7 @@ export const TopBar = ({ initialLocale = "fr" }: { initialLocale?: AppLocale }) 
     onScroll();
     setBookingUrl(getBookingUrl(locale));
     setBookingLabel(getPublicCopy(locale).bookingCta);
-    window.addEventListener("scroll", onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [initialLocale]);
 

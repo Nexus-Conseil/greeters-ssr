@@ -9,8 +9,6 @@ import { getRequestLocale } from "@/lib/i18n/request";
 import { getRouteMetadata } from "@/lib/seo/public-metadata";
 import { findPublicPageBySlug } from "@/lib/services/pages";
 
-export const dynamic = "force-dynamic";
-
 export async function generateMetadata(): Promise<Metadata> {
   return getRouteMetadata("/", {
     title: "Paris Greeters — Balades gratuites avec un local",

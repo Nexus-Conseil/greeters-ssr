@@ -6,6 +6,7 @@ import type { Route } from "next";
 import { usePathname } from "next/navigation";
 
 import type { getPublicCopy } from "@/lib/i18n/site-copy";
+import { IMAGE_QUALITY_STANDARD } from "@/lib/media/config";
 import type { Partner, SocialLink } from "@/lib/public-site-data";
 
 const PAGES_WITH_FULL_FOOTER = ["/", "/livre-dor", "/faire-un-don", "/devenez-benevole", "/qui-sommes-nous"];
@@ -48,7 +49,7 @@ export const FooterClient = ({ copy, footerLinks, partners, socialLinks }: Foote
   return (
     <footer className="site-footer" data-testid="public-site-footer">
       {showSocialSection ? (
-        <section className="site-footer-social" data-testid="public-site-footer-social">
+        <section className="site-footer-social site-deferred-section" data-testid="public-site-footer-social">
           <div className="site-container site-centered-stack">
             <h2 className="site-section-title" data-testid="public-site-footer-social-title">
               {copy.footerSocialTitle}
@@ -75,7 +76,7 @@ export const FooterClient = ({ copy, footerLinks, partners, socialLinks }: Foote
       ) : null}
 
       {showPartnersSection ? (
-        <section className="site-footer-partners" data-testid="public-site-footer-partners">
+        <section className="site-footer-partners site-deferred-section" data-testid="public-site-footer-partners">
           <div className="site-container">
             <h2 className="site-section-title" data-testid="public-site-footer-partners-title">
               {copy.footerPartnersTitle}
@@ -92,7 +93,7 @@ export const FooterClient = ({ copy, footerLinks, partners, socialLinks }: Foote
                   className="site-partner-link"
                   data-testid={`public-site-footer-partner-${partner.id}-${index}`}
                 >
-                  <Image src={partner.logo} alt={partner.name} width={200} height={72} sizes="200px" quality={100} className="site-partner-logo" />
+                  <Image src={partner.logo} alt={partner.name} width={200} height={72} sizes="200px" quality={IMAGE_QUALITY_STANDARD} className="site-partner-logo" />
                 </a>
               ))}
             </div>
@@ -104,7 +105,7 @@ export const FooterClient = ({ copy, footerLinks, partners, socialLinks }: Foote
         <div className="site-container">
           <div className="site-footer-bottom-links" data-testid="public-site-footer-bottom-links">
             {footerLinks.map((link) => (
-              <Link key={link.id} href={link.href as Route} className="site-footer-link" data-testid={`public-site-footer-link-${link.id}`}>
+              <Link key={link.id} href={link.href as Route} prefetch={false} className="site-footer-link" data-testid={`public-site-footer-link-${link.id}`}>
                 {link.label}
               </Link>
             ))}

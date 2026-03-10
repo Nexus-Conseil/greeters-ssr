@@ -1,4 +1,5 @@
 import { PageStatus, type Page, type PageVersion, type Prisma } from "@prisma/client";
+import { cache } from "react";
 
 import { AuthError, isAdminRole } from "@/lib/auth/permissions";
 import type { AuthUser } from "@/lib/auth/session";
@@ -594,7 +595,7 @@ export async function getPublicPageBySlugOrThrow(slug: string, locale: AppLocale
   return serializePage(page);
 }
 
-export async function findPublicPageBySlug(slug: string, locale: AppLocale) {
+export const findPublicPageBySlug = cache(async (slug: string, locale: AppLocale) => {
   const normalizedSlug = normalizeSlug(slug);
   const page = await findPageBySlug(normalizedSlug, locale);
 
@@ -603,7 +604,7 @@ export async function findPublicPageBySlug(slug: string, locale: AppLocale) {
   }
 
   return serializePage(page);
-}
+});
 
 export async function createPage(input: unknown, user: AuthUser) {
   const payload = parsePageInput(input);

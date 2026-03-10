@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Route } from "next";
 
-import { PUBLIC_IMAGE_SIZES_ATTR } from "@/lib/media/config";
+import { IMAGE_QUALITY_STANDARD, PUBLIC_IMAGE_SIZES_ATTR } from "@/lib/media/config";
 
 type RenderablePage = {
   sections: Array<any>;
@@ -89,7 +89,7 @@ function renderBlock(section: RenderableSection, block: RenderableBlock) {
 
     return (
       <figure className="cms-figure" data-testid={`cms-image-block-${block.id}`}>
-        <Image src={asText(content.src)} alt={asText(content.alt) || "Illustration"} width={Number(content.width) || 1400} height={Number(content.height) || 900} sizes={PUBLIC_IMAGE_SIZES_ATTR} quality={100} className="cms-image" data-testid={`cms-image-block-asset-${block.id}`} />
+        <Image src={asText(content.src)} alt={asText(content.alt) || "Illustration"} width={Number(content.width) || 1400} height={Number(content.height) || 900} sizes={PUBLIC_IMAGE_SIZES_ATTR} quality={IMAGE_QUALITY_STANDARD} className="cms-image" data-testid={`cms-image-block-asset-${block.id}`} />
         {asText(content.caption) ? <figcaption className={`cms-caption ${textClassName}`} data-testid={`cms-image-caption-${block.id}`}>{asText(content.caption)}</figcaption> : null}
       </figure>
     );

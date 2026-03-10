@@ -14,7 +14,7 @@ export const TestimonialsSection = ({ title, items }: TestimonialsSectionProps) 
   const currentTestimonial = items[currentIndex];
 
   return (
-    <section className="site-section site-section-muted" data-testid="public-home-testimonials-section">
+    <section className="site-section site-section-muted site-deferred-section" data-testid="public-home-testimonials-section">
       <div className="site-container site-testimonial-shell">
         <h2 className="site-section-title" data-testid="public-home-testimonials-title">
           {title}
@@ -34,6 +34,7 @@ export const TestimonialsSection = ({ title, items }: TestimonialsSectionProps) 
             type="button"
             className="site-round-button"
             onClick={() => setCurrentIndex((value) => (value - 1 + items.length) % items.length)}
+            aria-label="Témoignage précédent"
             data-testid="public-home-testimonial-prev-button"
           >
             ‹
@@ -45,6 +46,7 @@ export const TestimonialsSection = ({ title, items }: TestimonialsSectionProps) 
                 type="button"
                 className={`site-dot${index === currentIndex ? " is-active" : ""}`}
                 onClick={() => setCurrentIndex(index)}
+                aria-label={`Afficher le témoignage ${index + 1}`}
                 data-testid={`public-home-testimonial-dot-${index}`}
               />
             ))}
@@ -53,6 +55,7 @@ export const TestimonialsSection = ({ title, items }: TestimonialsSectionProps) 
             type="button"
             className="site-round-button"
             onClick={() => setCurrentIndex((value) => (value + 1) % items.length)}
+            aria-label="Témoignage suivant"
             data-testid="public-home-testimonial-next-button"
           >
             ›

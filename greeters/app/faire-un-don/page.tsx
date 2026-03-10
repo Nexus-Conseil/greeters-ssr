@@ -7,7 +7,7 @@ import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
 import { DynamicPageRenderer } from "@/components/cms/DynamicPageRenderer";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
-import { PUBLIC_IMAGE_SIZES_ATTR } from "@/lib/media/config";
+import { IMAGE_QUALITY_STANDARD, PUBLIC_IMAGE_SIZES_ATTR } from "@/lib/media/config";
 import { findPublicPageBySlug } from "@/lib/services/pages";
 import { getRouteMetadata } from "@/lib/seo/public-metadata";
 
@@ -80,7 +80,7 @@ export default async function FaireUnDonPage() {
             <p className="site-note-centered" data-testid="faire-un-don-note">Les Greeters de Paris est une association loi 1901 à but non lucratif. Merci de votre soutien !</p>
 
             <div className="site-illustration-card" data-testid="faire-un-don-image-card">
-              <Image src="/images/uploads/greeters-balade-2.jpg" alt="Balade avec les Greeters de Paris" width={1200} height={800} sizes={PUBLIC_IMAGE_SIZES_ATTR} quality={100} className="site-illustration-image" data-testid="faire-un-don-image" />
+              <Image src="/images/uploads/greeters-balade-2.jpg" alt="Balade avec les Greeters de Paris" width={1200} height={800} sizes={PUBLIC_IMAGE_SIZES_ATTR} quality={IMAGE_QUALITY_STANDARD} className="site-illustration-image" data-testid="faire-un-don-image" />
             </div>
         </div>}
       </>

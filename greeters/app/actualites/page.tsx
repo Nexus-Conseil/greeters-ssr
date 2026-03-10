@@ -8,6 +8,7 @@ import { SimplePageHeading } from "@/components/public/pages/SimplePageHeading";
 import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
+import { IMAGE_QUALITY_STANDARD, PUBLIC_NEWS_CARD_IMAGE_SIZES_ATTR } from "@/lib/media/config";
 import { getRouteMetadata } from "@/lib/seo/public-metadata";
 import { ACTUALITES_PAGE_ITEMS } from "@/lib/public-pages-data";
 import { getActualitesCmsContent } from "@/lib/services/public-page-content";
@@ -34,9 +35,9 @@ export default async function ActualitesPage() {
         <div className="site-container site-content-section" data-testid="actualites-public-page-content">
           <div className="site-articles-grid" data-testid="actualites-public-page-grid">
             {items.map((article) => (
-              <Link href={article.link as Route} key={article.id} className="site-article-card" data-testid={`actualites-public-card-${article.id}`}>
+              <Link href={article.link as Route} prefetch={false} key={article.id} className="site-article-card" data-testid={`actualites-public-card-${article.id}`}>
                 <div className="site-article-media" data-testid={`actualites-public-image-wrapper-${article.id}`}>
-                  <Image src={article.image} alt={article.title} width={520} height={292} sizes="(max-width: 767px) calc(100vw - 2rem), (max-width: 1279px) 50vw, 33vw" quality={100} className="site-article-image" data-testid={`actualites-public-image-${article.id}`} />
+                  <Image src={article.image} alt={article.title} width={520} height={292} sizes={PUBLIC_NEWS_CARD_IMAGE_SIZES_ATTR} quality={IMAGE_QUALITY_STANDARD} className="site-article-image" data-testid={`actualites-public-image-${article.id}`} />
                 </div>
                 <div className="site-article-content">
                   <p className="site-article-date" data-testid={`actualites-public-date-${article.id}`}>
