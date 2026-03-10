@@ -101,3 +101,84 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Teste le frontend Next.js Greeters sur http://127.0.0.1:3100 avec focus sur les changements récents. Vérifier: 1) /contact charge avec shell public complet, 2) Formulaire de contact fonctionne, 3) Bandeau d'erreur SendGrid quota/crédit s'affiche correctement, 4) Pas de faux succès mocké, 5) Smoke test routes publiques, 6) data-testid critiques présents."
+
+frontend:
+  - task: "Contact page loads with full public shell"
+    implemented: true
+    working: true
+    file: "/app/greeters/app/contact/page.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Contact page loads successfully with PublicPageShell (TopBar, Header, Footer), ContactPageClient component, and all expected content. Verified data-testid='contact-public-page', 'contact-page-content', and 'contact-page-form' are present."
+  
+  - task: "Contact form submission with SendGrid error handling"
+    implemented: true
+    working: true
+    file: "/app/greeters/components/public/pages/ContactPageClient.tsx, /app/greeters/lib/services/contact.ts, /app/greeters/app/api/contact/send/route.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ EXCELLENT: Contact form correctly handles real SendGrid quota error. API returns 429 status with message 'L'envoi email est temporairement indisponible : le compte SendGrid a atteint son quota/crédit.' Error banner displays correctly with data-testid='contact-page-feedback-error'. NO MOCKED SUCCESS - this is real error handling from SendGrid API. Form clears after submit and shows proper user-facing error message."
+  
+  - task: "Contact form data-testid attributes"
+    implemented: true
+    working: true
+    file: "/app/greeters/components/public/pages/ContactPageClient.tsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ All 7 critical data-testid attributes verified: contact-page-content, contact-page-form, contact-page-name-input, contact-page-email-input, contact-page-subject-input, contact-page-message-input, contact-page-submit-button. All present and functional."
+  
+  - task: "Homepage loads with public shell"
+    implemented: true
+    working: true
+    file: "/app/greeters/app/page.tsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ Homepage loads successfully with root layout (data-testid='app-root-layout') and page shell. Shows hero image with 'Venez en visiteur, repartez en ami' message and full navigation."
+  
+  - task: "Public routes smoke test"
+    implemented: true
+    working: true
+    file: "/app/greeters/app/[multiple routes]"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ All 9 public routes load successfully: / (Homepage), /qui-sommes-nous, /actualites, /galerie, /livre-dor, /faire-un-don, /devenez-benevole, /presse, /mentions-legales. Each page loads with proper public shell and content."
+
+metadata:
+  created_by: "testing_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: true
+  test_date: "2026-03-10"
+
+test_plan:
+  current_focus:
+    - "All tests completed successfully"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "high_first"
+
+agent_communication:
+    - agent: "testing"
+      message: "Complete testing of Greeters Next.js frontend completed successfully. All 6 test scenarios passed. Key finding: SendGrid quota error handling is working correctly with proper error message display (NOT mocked). Contact form properly handles real API errors with user-facing error banner. All public routes load correctly with full shell components. No critical issues found."
