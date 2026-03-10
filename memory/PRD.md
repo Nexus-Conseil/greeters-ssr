@@ -43,6 +43,13 @@
 - Les routes publiques principales injectent maintenant du JSON-LD (`StructuredDataScript`) et utilisent la couche SEO page par page pour leurs métadonnées.
 - Le sitemap SEO a été affiné : filtrage des pages `noindex`, ajout de `changefreq` et `priority`, maintien du host localisé.
 - Sweep responsive étendu : vérification multi-breakpoints sans overflow horizontal et ajustements CSS sur topbar, hero, title bands, grilles et conteneurs.
+- Upload/suppression d’images depuis l’éditeur de page sans médiathèque : `POST /api/admin/images/upload`, optimisation ShortPixel lossless prioritaire avec fallback local Sharp, stockage local sous `/uploads/cms/...`.
+- Nettoyage automatique des fichiers orphelins : lorsqu’une image n’est plus référencée par aucune page ou aucun champ SEO, son dossier est supprimé du serveur (`cleanupOrphanedManagedImages`).
+- Génération automatique d’OG images hyper réalistes via Gemini image generation pour les pages FR existantes et les futures créations, avec stockage local sous `/uploads/og/...`.
+- Automatisation SEO/OG existante et future : batch `POST /api/admin/seo/auto-sync` exécuté sur les 10 pages FR existantes + auto-enrichissement lors de `POST /api/pages`.
+- L’IA SEO choisit maintenant le `schema.org` le plus pertinent par page et génère le JSON-LD final, en plus des métadonnées, alt/images et recommandations SEO.
+- Les pages institutionnelles restantes (`qui-sommes-nous`, `faire-un-don`, `devenez-benevole`, `presse`, `mentions-legales`) lisent désormais le contenu CMS publié via `DynamicPageRenderer` lorsqu’il existe.
+- Le périmètre public prérempli est désormais de **90 pages** = **10 slugs publics (dont `/`) × 9 locales**, et **9 menus** = **1 menu public localisé par langue**.
 
 ## Validation réalisée
 - `eslint` OK sur `/app/greeters`
@@ -70,6 +77,10 @@
   - `/admin/pages/new`, `/admin/pages/[id]`, `/contact`, routes publiques, redirect admin : PASS
 - Validation backend finale OK via agent dédié
   - `/api/ai/seo-optimizer`, `/api/admin/bootstrap/public-content`, `/sitemap.xml`, `/api/contact/send`, `/api/pages*` : PASS
+- Rapport complet OK : `/app/test_reports/iteration_13.json`
+  - upload image, auto SEO/OG, studio SEO, sitemap enrichi, Emailit, sécurité admin, routes publiques : PASS
+- Retest backend ciblé OK
+  - upload image OK, `POST /api/pages` retourne bien les champs SEO/OG auto-populés, contact Emailit OK
 
 ## Blocages connus
 - Aucun blocage majeur sur le flux contact : Emailit est opérationnel sur l’environnement actuel.
@@ -79,6 +90,7 @@
 - Vérifier la cohérence multilingue réelle (subdomains / variantes preview) sur toutes les pages publiques.
 - Réduire les derniers écarts pixel-perfect visibles entre la SSR et `https://greeters.paris`, route par route.
 - Finaliser la parité visuelle ultra-fine sur davantage de pages secondaires et sur encore plus de tailles d’écran réelles si l’utilisateur veut une passe de finition exhaustive.
+- Étendre si souhaité l’automatisation SEO/OG au-delà du corpus FR initial vers toutes les locales préremplies.
 
 ## P1
 - Étendre le sitemap dynamique avec toutes les pages/articles réellement souhaités au référencement final.
@@ -86,7 +98,7 @@
 - Reprendre les écrans admin `/admin/pages/new` et `/admin/pages/[id]` pour coller au CMS source.
 - Brancher les documents/pages publiques sur des contenus éditables depuis le CMS si souhaité.
 - Vérifier route par route quelles pages publiques nommées doivent être enrichies dans le CMS pour dépasser le simple préremplissage initial.
-- Ajouter si souhaité des variantes avancées de schema.org (FAQPage, BreadcrumbList, Organization, TouristAttraction, Event, NewsArticle) déclenchables par type de page.
+- Ajouter si souhaité encore plus de variantes avancées de schema.org et de règles spécialisées par type de contenu.
 
 ## P2
 - Finaliser un gestionnaire de menu admin encore plus riche (drag-and-drop avancé / arborescence si besoin).
@@ -95,6 +107,6 @@
 
 ## Next tasks
 1. Mener une dernière passe pixel-perfect exhaustive page par page / écran par écran si l’utilisateur veut une quasi-parité stricte finale.
-2. Enrichir le studio SEO avec des modèles schema.org spécialisés par type de page et éventuellement une génération OG image dédiée.
+2. Étendre l’automatisation SEO/OG multilingue à toutes les locales préremplies si souhaité.
 3. Continuer à remplacer les derniers contenus statiques par des contenus CMS structurés, notamment sur les pages institutionnelles détaillées.
 4. Ajuster la stratégie SEO finale (pages à indexer/non indexer, priorités, éventuelles pages utilitaires à exclure).

@@ -268,6 +268,17 @@ backend:
           comment: "✅ RETEST AFTER CREATEPAGE FIX COMPLETE: Executed focused backend retest on http://127.0.0.1:3100 after createPage return correctif as requested. ALL 3 VALIDATION REQUIREMENTS PASSED: 1) ✅ POST /api/admin/images/upload with auth NOW WORKING - returns 200 OK with proper image data (assetId: db3b6dec-4ad9-4751-a961-4992572a61e4, src: /uploads/cms/..., width/height: 100px), confirmed auth protection and file validation working correctly, 2) ✅ POST /api/pages NOW RETURNS SEO/OG AUTO-POPULATED FIELDS - verified page creation with title 'Page de Test SEO' returns 8/8 SEO fields populated: metaTitle='Découvrez Paris avec les Greeters...', metaDescription='Explorez Paris hors des sentiers battus...', robotsDirective='index,follow', ogTitle='Paris Greeters : Votre expérience parisienne authentique', ogDescription='Vivez Paris comme un local...', sitemapPriority=0.7, sitemapChangeFreq='monthly', canonicalUrl='https://greeters.paris/test-seo-creation-20260310' - automatePageSeoAndOg() function working correctly, 3) ✅ POST /api/contact/send REGRESSION OK - continues to work with REAL Emailit integration, returns success message 'Votre message a bien été envoyé. Nous vous répondrons dès que possible.' (NOT MOCKED). Admin credentials contact@nexus-conseil.ch / Greeters&58!2026 working perfectly. FINAL STATUS: 3/3 tests passed, 0 failed. CreatePage fix fully validated and operational."
 
 frontend:
+  - task: "Image upload and removal workflow in admin editor"
+    implemented: true
+    working: true
+    file: "/app/greeters/components/admin/pages/BlockEditor.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ IMAGE UPLOAD/REMOVAL WORKFLOW FULLY OPERATIONAL: Comprehensive test executed on http://127.0.0.1:3100/admin/pages/new with admin login (contact@nexus-conseil.ch / Greeters&58!2026). COMPLETE WORKFLOW VERIFIED - ALL 5 TEST CASES PASSED: 1) ✅ User can access /admin/pages/new after admin login (authentication working correctly), 2) ✅ User can add section if needed (section creation working), 3) ✅ User can add image block to section (block type 'image' added successfully with proper UI), 4) ✅ Image upload workflow working correctly: file input accepts local PNG file (test_image_upload.png 100x100), POST /api/admin/images/upload returns 200 OK after ~7 seconds (ShortPixel optimization completed), response contains proper image data (assetId: ae408727-54d5-4cf8-a2c6-cd45b9e485d4, src: /uploads/cms/ae408727-54d5-4cf8-a2c6-cd45b9e485d4/test-image-upload.png, width: 100, height: 100), source field populates with uploaded image path, image preview appears (red test image visible in editor), alt text auto-populated from filename, 5) ✅ Image removal workflow working correctly: 'Retirer l'image' button clears source field completely (returns to empty/placeholder state), image preview removed from UI, all image metadata fields cleared (src, alt, caption, width, height). NOTE: Upload takes 5-10 seconds due to ShortPixel optimization service (not a bug - expected behavior for image optimization). All data-testid selectors working correctly: page-editor-block-image-src-input-{blockId}, page-editor-block-image-upload-input-{blockId}, page-editor-block-image-upload-button-{blockId}, page-editor-block-image-clear-button-{blockId}, page-editor-block-image-preview-{blockId}. Editor WITHOUT media library working as designed - direct file upload integration functional."
   - task: "SEO Studio on /admin/pages/new"
     implemented: true
     working: true
@@ -448,8 +459,8 @@ frontend:
 
 metadata:
   created_by: "testing_agent"
-  version: "2.5"
-  test_sequence: 7
+  version: "2.6"
+  test_sequence: 8
   run_ui: false
   test_date: "2026-03-10"
   backend_test_completed: true
@@ -459,10 +470,11 @@ metadata:
   finale_validation_completed: true
   finale_revalidation_completed: true
   cms_seo_images_validated: true
+  image_upload_workflow_validated: true
 
 test_plan:
   current_focus:
-    - "CMS/SEO/Images backend validation completed"
+    - "Image upload workflow validation completed"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -490,3 +502,5 @@ agent_communication:
       message: "🔥 CMS/SEO/IMAGES BACKEND FINALE VALIDATION COMPLETE (2026-03-10): Executed comprehensive backend validation for all 8 requested endpoints on http://127.0.0.1:3100. RESULTS: 7/9 validation requirements PASSED. ✅ MAJOR SUCCESSES: 1) POST /api/admin/images/upload auth protection working (401 for unauthorized), non-image rejection working correctly ('Le fichier fourni n'est pas une image'), 2) POST /api/admin/seo/auto-sync requires admin auth and processes successfully (normal for bulk operations to take time), 3) POST /api/ai/seo-optimizer requires admin auth and returns structured SEO data with all 8 required fields (metaTitle, metaDescription, focusKeyword, canonicalUrl, robotsDirective, ogTitle, ogDescription, sitemapPriority), 4) GET /sitemap.xml returns valid XML with 11 URLs, includes priority/changefreq elements, properly excludes mentions-legales, 5) POST /api/contact/send shows REAL Emailit success 'Votre message a bien été envoyé. Nous vous répondrons dès que possible.' (NOT MOCKED - confirms real integration), 6) GET /api/menu without auth properly returns 401 'Authentification requise' (access protected), 7) Admin authentication working perfectly with contact@nexus-conseil.ch / Greeters&58!2026. ⚠️ MINOR ISSUES: Image upload returns 500 error (likely ShortPixel service limitation), page creation auto-SEO not populating (async automation may fail silently). CRITICAL VALIDATION: All core CMS/SEO/images functionality operational and secure. Backend endpoints properly authenticated, SEO data structured correctly, contact integration real (not mocked)."
     - agent: "testing"
       message: "🎯 RETEST AFTER CREATEPAGE FIX COMPLETE (2026-03-10): Executed focused backend retest on http://127.0.0.1:3100 after createPage return correctif as requested. ALL 3 VALIDATION REQUIREMENTS PASSED: 1) ✅ POST /api/admin/images/upload with auth NOW WORKING - returns 200 OK with proper image data (assetId: db3b6dec-4ad9-4751-a961-4992572a61e4, src: /uploads/cms/..., width/height: 100px), confirmed auth protection and file validation working correctly, 2) ✅ POST /api/pages NOW RETURNS SEO/OG AUTO-POPULATED FIELDS - verified page creation with title 'Page de Test SEO' returns 8/8 SEO fields populated: metaTitle='Découvrez Paris avec les Greeters...', metaDescription='Explorez Paris hors des sentiers battus...', robotsDirective='index,follow', ogTitle='Paris Greeters : Votre expérience parisienne authentique', ogDescription='Vivez Paris comme un local...', sitemapPriority=0.7, sitemapChangeFreq='monthly', canonicalUrl='https://greeters.paris/test-seo-creation-20260310' - automatePageSeoAndOg() function working correctly, 3) ✅ POST /api/contact/send REGRESSION OK - continues to work with REAL Emailit integration, returns success message 'Votre message a bien été envoyé. Nous vous répondrons dès que possible.' (NOT MOCKED). Admin credentials contact@nexus-conseil.ch / Greeters&58!2026 working perfectly. FINAL STATUS: 3/3 tests passed, 0 failed. CreatePage fix fully validated and operational."
+    - agent: "testing"
+      message: "🎨 IMAGE UPLOAD/REMOVAL WORKFLOW VALIDATION COMPLETE (2026-03-10): Executed comprehensive test of image upload and removal workflow in admin page editor on http://127.0.0.1:3100/admin/pages/new. ALL 5 WORKFLOW STAGES PASSED: 1) ✅ Admin authentication working (contact@nexus-conseil.ch / Greeters&58!2026), 2) ✅ Page editor loads with section/block creation functionality, 3) ✅ IMAGE UPLOAD FUNCTIONAL: user can select local image file (test_image_upload.png 100×100px), file input triggers POST /api/admin/images/upload, upload completes in ~7 seconds (ShortPixel optimization working), server returns 200 OK with proper response: {assetId: ae408727-54d5-4cf8-a2c6-cd45b9e485d4, src: /uploads/cms/.../test-image-upload.png, width: 100, height: 100}, image source field populates automatically, image preview renders correctly in editor (red test image visible), alt text auto-filled from filename, 4) ✅ IMAGE REMOVAL FUNCTIONAL: 'Retirer l'image' button clears all image data (src, alt, caption, width, height fields emptied), image preview removed from UI, source field returns to empty/placeholder state. CRITICAL CONFIRMATION: Editor works WITHOUT media library as designed - direct file upload integration via /api/admin/images/upload working correctly. Image optimization via ShortPixel operational (7-second upload time expected). All data-testid selectors correct and functional. Complete workflow validated end-to-end with screenshot evidence."
