@@ -47,12 +47,37 @@ export type CmsSection = {
   order: number;
 };
 
+export type SeoImageRecommendation = {
+  blockId: string;
+  currentSrc: string;
+  suggestedFileName: string | null;
+  suggestedAlt: string | null;
+  suggestedTitle: string | null;
+  reason: string | null;
+};
+
 export type PageInput = {
   locale: AppLocale;
   title: string;
   slug: string;
+  metaTitle: string | null;
   metaDescription: string | null;
   metaKeywords: string | null;
+  canonicalUrl: string | null;
+  robotsDirective: string | null;
+  ogTitle: string | null;
+  ogDescription: string | null;
+  ogImageUrl: string | null;
+  ogImageAlt: string | null;
+  twitterTitle: string | null;
+  twitterDescription: string | null;
+  twitterImageUrl: string | null;
+  focusKeyword: string | null;
+  secondaryKeywords: string | null;
+  schemaOrgJson: string | null;
+  imageRecommendations: SeoImageRecommendation[];
+  sitemapPriority: number | null;
+  sitemapChangeFreq: string | null;
   sections: CmsSection[];
   isInMenu: boolean;
   menuOrder: number;
@@ -144,6 +169,10 @@ function coerceNumber(input: unknown, fallback = 0) {
   return typeof input === "number" && Number.isFinite(input) ? input : fallback;
 }
 
+function parseOptionalNumber(input: unknown) {
+  return typeof input === "number" && Number.isFinite(input) ? input : null;
+}
+
 function normalizeSlug(raw: string) {
   const cleaned = raw.trim().toLowerCase();
 
@@ -225,6 +254,24 @@ function parseMenuOrder(input: unknown) {
   return coerceNumber(input, 0);
 }
 
+function parseImageRecommendations(input: unknown): SeoImageRecommendation[] {
+  if (!Array.isArray(input)) {
+    return [];
+  }
+
+  return input.map((entry) => {
+    const candidate = asRecord(entry, "Recommandation image invalide.");
+    return {
+      blockId: coerceString(candidate.blockId),
+      currentSrc: coerceString(candidate.currentSrc),
+      suggestedFileName: parseOptionalString(candidate.suggestedFileName),
+      suggestedAlt: parseOptionalString(candidate.suggestedAlt),
+      suggestedTitle: parseOptionalString(candidate.suggestedTitle),
+      reason: parseOptionalString(candidate.reason),
+    } satisfies SeoImageRecommendation;
+  });
+}
+
 function parseStatus(input: unknown) {
   if (typeof input !== "string") {
     return undefined;
@@ -234,7 +281,7 @@ function parseStatus(input: unknown) {
   return STATUS_FROM_API[normalized] ? normalized : undefined;
 }
 
-function parsePageInput(input: unknown): PageInput {
+export function parsePageInput(input: unknown): PageInput {
   const candidate = asRecord(input, "Le corps de requête est invalide.");
   const locale = normalizeLocale(typeof candidate.locale === "string" ? candidate.locale : undefined);
   const title = coerceString(candidate.title);
@@ -252,8 +299,24 @@ function parsePageInput(input: unknown): PageInput {
     locale,
     title,
     slug,
+    metaTitle: parseOptionalString(candidate.metaTitle ?? candidate.meta_title),
     metaDescription: parseOptionalString(candidate.metaDescription ?? candidate.meta_description),
     metaKeywords: parseOptionalString(candidate.metaKeywords ?? candidate.meta_keywords),
+    canonicalUrl: parseOptionalString(candidate.canonicalUrl ?? candidate.canonical_url),
+    robotsDirective: parseOptionalString(candidate.robotsDirective ?? candidate.robots_directive),
+    ogTitle: parseOptionalString(candidate.ogTitle ?? candidate.og_title),
+    ogDescription: parseOptionalString(candidate.ogDescription ?? candidate.og_description),
+    ogImageUrl: parseOptionalString(candidate.ogImageUrl ?? candidate.og_image_url),
+    ogImageAlt: parseOptionalString(candidate.ogImageAlt ?? candidate.og_image_alt),
+    twitterTitle: parseOptionalString(candidate.twitterTitle ?? candidate.twitter_title),
+    twitterDescription: parseOptionalString(candidate.twitterDescription ?? candidate.twitter_description),
+    twitterImageUrl: parseOptionalString(candidate.twitterImageUrl ?? candidate.twitter_image_url),
+    focusKeyword: parseOptionalString(candidate.focusKeyword ?? candidate.focus_keyword),
+    secondaryKeywords: parseOptionalString(candidate.secondaryKeywords ?? candidate.secondary_keywords),
+    schemaOrgJson: parseOptionalString(candidate.schemaOrgJson ?? candidate.schema_org_json),
+    imageRecommendations: parseImageRecommendations(candidate.imageRecommendations ?? candidate.image_recommendations),
+    sitemapPriority: parseOptionalNumber(candidate.sitemapPriority ?? candidate.sitemap_priority),
+    sitemapChangeFreq: parseOptionalString(candidate.sitemapChangeFreq ?? candidate.sitemap_change_freq),
     sections: parseSections(candidate.sections),
     isInMenu: Boolean(candidate.isInMenu ?? candidate.is_in_menu ?? false),
     menuOrder: parseMenuOrder(candidate.menuOrder ?? candidate.menu_order),
@@ -285,8 +348,72 @@ function parsePageUpdateInput(input: unknown): PageUpdateInput {
     payload.metaDescription = parseOptionalString(candidate.metaDescription ?? candidate.meta_description);
   }
 
+  if ("metaTitle" in candidate || "meta_title" in candidate) {
+    payload.metaTitle = parseOptionalString(candidate.metaTitle ?? candidate.meta_title);
+  }
+
   if ("metaKeywords" in candidate || "meta_keywords" in candidate) {
     payload.metaKeywords = parseOptionalString(candidate.metaKeywords ?? candidate.meta_keywords);
+  }
+
+  if ("canonicalUrl" in candidate || "canonical_url" in candidate) {
+    payload.canonicalUrl = parseOptionalString(candidate.canonicalUrl ?? candidate.canonical_url);
+  }
+
+  if ("robotsDirective" in candidate || "robots_directive" in candidate) {
+    payload.robotsDirective = parseOptionalString(candidate.robotsDirective ?? candidate.robots_directive);
+  }
+
+  if ("ogTitle" in candidate || "og_title" in candidate) {
+    payload.ogTitle = parseOptionalString(candidate.ogTitle ?? candidate.og_title);
+  }
+
+  if ("ogDescription" in candidate || "og_description" in candidate) {
+    payload.ogDescription = parseOptionalString(candidate.ogDescription ?? candidate.og_description);
+  }
+
+  if ("ogImageUrl" in candidate || "og_image_url" in candidate) {
+    payload.ogImageUrl = parseOptionalString(candidate.ogImageUrl ?? candidate.og_image_url);
+  }
+
+  if ("ogImageAlt" in candidate || "og_image_alt" in candidate) {
+    payload.ogImageAlt = parseOptionalString(candidate.ogImageAlt ?? candidate.og_image_alt);
+  }
+
+  if ("twitterTitle" in candidate || "twitter_title" in candidate) {
+    payload.twitterTitle = parseOptionalString(candidate.twitterTitle ?? candidate.twitter_title);
+  }
+
+  if ("twitterDescription" in candidate || "twitter_description" in candidate) {
+    payload.twitterDescription = parseOptionalString(candidate.twitterDescription ?? candidate.twitter_description);
+  }
+
+  if ("twitterImageUrl" in candidate || "twitter_image_url" in candidate) {
+    payload.twitterImageUrl = parseOptionalString(candidate.twitterImageUrl ?? candidate.twitter_image_url);
+  }
+
+  if ("focusKeyword" in candidate || "focus_keyword" in candidate) {
+    payload.focusKeyword = parseOptionalString(candidate.focusKeyword ?? candidate.focus_keyword);
+  }
+
+  if ("secondaryKeywords" in candidate || "secondary_keywords" in candidate) {
+    payload.secondaryKeywords = parseOptionalString(candidate.secondaryKeywords ?? candidate.secondary_keywords);
+  }
+
+  if ("schemaOrgJson" in candidate || "schema_org_json" in candidate) {
+    payload.schemaOrgJson = parseOptionalString(candidate.schemaOrgJson ?? candidate.schema_org_json);
+  }
+
+  if ("imageRecommendations" in candidate || "image_recommendations" in candidate) {
+    payload.imageRecommendations = parseImageRecommendations(candidate.imageRecommendations ?? candidate.image_recommendations);
+  }
+
+  if ("sitemapPriority" in candidate || "sitemap_priority" in candidate) {
+    payload.sitemapPriority = parseOptionalNumber(candidate.sitemapPriority ?? candidate.sitemap_priority);
+  }
+
+  if ("sitemapChangeFreq" in candidate || "sitemap_change_freq" in candidate) {
+    payload.sitemapChangeFreq = parseOptionalString(candidate.sitemapChangeFreq ?? candidate.sitemap_change_freq);
   }
 
   if ("sections" in candidate) {
@@ -322,13 +449,29 @@ function parsePageUpdateInput(input: unknown): PageUpdateInput {
   return payload;
 }
 
-function serializeContent(page: Pick<Page, "locale" | "title" | "slug" | "metaDescription" | "metaKeywords" | "sections" | "isInMenu" | "menuOrder" | "menuLabel">): PageInput {
+function serializeContent(page: Pick<Page, "locale" | "title" | "slug" | "metaTitle" | "metaDescription" | "metaKeywords" | "canonicalUrl" | "robotsDirective" | "ogTitle" | "ogDescription" | "ogImageUrl" | "ogImageAlt" | "twitterTitle" | "twitterDescription" | "twitterImageUrl" | "focusKeyword" | "secondaryKeywords" | "schemaOrgJson" | "imageRecommendations" | "sitemapPriority" | "sitemapChangeFreq" | "sections" | "isInMenu" | "menuOrder" | "menuLabel">): PageInput {
   return {
     locale: normalizeLocale(page.locale),
     title: page.title,
     slug: page.slug,
+    metaTitle: page.metaTitle,
     metaDescription: page.metaDescription,
     metaKeywords: page.metaKeywords,
+    canonicalUrl: page.canonicalUrl,
+    robotsDirective: page.robotsDirective,
+    ogTitle: page.ogTitle,
+    ogDescription: page.ogDescription,
+    ogImageUrl: page.ogImageUrl,
+    ogImageAlt: page.ogImageAlt,
+    twitterTitle: page.twitterTitle,
+    twitterDescription: page.twitterDescription,
+    twitterImageUrl: page.twitterImageUrl,
+    focusKeyword: page.focusKeyword,
+    secondaryKeywords: page.secondaryKeywords,
+    schemaOrgJson: page.schemaOrgJson,
+    imageRecommendations: parseImageRecommendations(page.imageRecommendations),
+    sitemapPriority: page.sitemapPriority,
+    sitemapChangeFreq: page.sitemapChangeFreq,
     sections: parseSections(page.sections),
     isInMenu: page.isInMenu,
     menuOrder: page.menuOrder,
@@ -359,8 +502,24 @@ function toJsonValue(content: PageInput) {
     locale: content.locale,
     title: content.title,
     slug: content.slug,
+    metaTitle: content.metaTitle,
     metaDescription: content.metaDescription,
     metaKeywords: content.metaKeywords,
+    canonicalUrl: content.canonicalUrl,
+    robotsDirective: content.robotsDirective,
+    ogTitle: content.ogTitle,
+    ogDescription: content.ogDescription,
+    ogImageUrl: content.ogImageUrl,
+    ogImageAlt: content.ogImageAlt,
+    twitterTitle: content.twitterTitle,
+    twitterDescription: content.twitterDescription,
+    twitterImageUrl: content.twitterImageUrl,
+    focusKeyword: content.focusKeyword,
+    secondaryKeywords: content.secondaryKeywords,
+    schemaOrgJson: content.schemaOrgJson,
+    imageRecommendations: content.imageRecommendations,
+    sitemapPriority: content.sitemapPriority,
+    sitemapChangeFreq: content.sitemapChangeFreq,
     sections: content.sections,
     isInMenu: content.isInMenu,
     menuOrder: content.menuOrder,
@@ -458,8 +617,24 @@ export async function createPage(input: unknown, user: AuthUser) {
     locale: payload.locale,
     title: payload.title,
     slug: payload.slug,
+    metaTitle: payload.metaTitle,
     metaDescription: payload.metaDescription,
     metaKeywords: payload.metaKeywords,
+    canonicalUrl: payload.canonicalUrl,
+    robotsDirective: payload.robotsDirective,
+    ogTitle: payload.ogTitle,
+    ogDescription: payload.ogDescription,
+    ogImageUrl: payload.ogImageUrl,
+    ogImageAlt: payload.ogImageAlt,
+    twitterTitle: payload.twitterTitle,
+    twitterDescription: payload.twitterDescription,
+    twitterImageUrl: payload.twitterImageUrl,
+    focusKeyword: payload.focusKeyword,
+    secondaryKeywords: payload.secondaryKeywords,
+    schemaOrgJson: payload.schemaOrgJson,
+    imageRecommendations: payload.imageRecommendations as unknown as Prisma.InputJsonValue,
+    sitemapPriority: payload.sitemapPriority,
+    sitemapChangeFreq: payload.sitemapChangeFreq,
     sections: payload.sections as Prisma.InputJsonValue,
     status: initialStatus,
     isInMenu: payload.isInMenu,
@@ -510,8 +685,24 @@ export async function updatePage(pageId: string, input: unknown, user: AuthUser)
     locale: targetLocale,
     title: updates.title ?? currentContent.title,
     slug: updates.slug ?? currentContent.slug,
+    metaTitle: updates.metaTitle ?? currentContent.metaTitle,
     metaDescription: updates.metaDescription ?? currentContent.metaDescription,
     metaKeywords: updates.metaKeywords ?? currentContent.metaKeywords,
+    canonicalUrl: updates.canonicalUrl ?? currentContent.canonicalUrl,
+    robotsDirective: updates.robotsDirective ?? currentContent.robotsDirective,
+    ogTitle: updates.ogTitle ?? currentContent.ogTitle,
+    ogDescription: updates.ogDescription ?? currentContent.ogDescription,
+    ogImageUrl: updates.ogImageUrl ?? currentContent.ogImageUrl,
+    ogImageAlt: updates.ogImageAlt ?? currentContent.ogImageAlt,
+    twitterTitle: updates.twitterTitle ?? currentContent.twitterTitle,
+    twitterDescription: updates.twitterDescription ?? currentContent.twitterDescription,
+    twitterImageUrl: updates.twitterImageUrl ?? currentContent.twitterImageUrl,
+    focusKeyword: updates.focusKeyword ?? currentContent.focusKeyword,
+    secondaryKeywords: updates.secondaryKeywords ?? currentContent.secondaryKeywords,
+    schemaOrgJson: updates.schemaOrgJson ?? currentContent.schemaOrgJson,
+    imageRecommendations: updates.imageRecommendations ?? currentContent.imageRecommendations,
+    sitemapPriority: updates.sitemapPriority ?? currentContent.sitemapPriority,
+    sitemapChangeFreq: updates.sitemapChangeFreq ?? currentContent.sitemapChangeFreq,
     sections: updates.sections ?? currentContent.sections,
     isInMenu: updates.isInMenu ?? currentContent.isInMenu,
     menuOrder: updates.menuOrder ?? currentContent.menuOrder,
@@ -524,8 +715,24 @@ export async function updatePage(pageId: string, input: unknown, user: AuthUser)
     locale: mergedContent.locale,
     title: mergedContent.title,
     slug: mergedContent.slug,
+    metaTitle: mergedContent.metaTitle,
     metaDescription: mergedContent.metaDescription,
     metaKeywords: mergedContent.metaKeywords,
+    canonicalUrl: mergedContent.canonicalUrl,
+    robotsDirective: mergedContent.robotsDirective,
+    ogTitle: mergedContent.ogTitle,
+    ogDescription: mergedContent.ogDescription,
+    ogImageUrl: mergedContent.ogImageUrl,
+    ogImageAlt: mergedContent.ogImageAlt,
+    twitterTitle: mergedContent.twitterTitle,
+    twitterDescription: mergedContent.twitterDescription,
+    twitterImageUrl: mergedContent.twitterImageUrl,
+    focusKeyword: mergedContent.focusKeyword,
+    secondaryKeywords: mergedContent.secondaryKeywords,
+    schemaOrgJson: mergedContent.schemaOrgJson,
+    imageRecommendations: mergedContent.imageRecommendations as unknown as Prisma.InputJsonValue,
+    sitemapPriority: mergedContent.sitemapPriority,
+    sitemapChangeFreq: mergedContent.sitemapChangeFreq,
     sections: mergedContent.sections as Prisma.InputJsonValue,
     status: nextStatus,
     isInMenu: mergedContent.isInMenu,
@@ -660,8 +867,24 @@ export async function approvePendingChange(versionId: string, user: AuthUser) {
   await updatePageRecord(version.pageId, {
     title: content.title,
     slug: content.slug,
+    metaTitle: content.metaTitle,
     metaDescription: content.metaDescription,
     metaKeywords: content.metaKeywords,
+    canonicalUrl: content.canonicalUrl,
+    robotsDirective: content.robotsDirective,
+    ogTitle: content.ogTitle,
+    ogDescription: content.ogDescription,
+    ogImageUrl: content.ogImageUrl,
+    ogImageAlt: content.ogImageAlt,
+    twitterTitle: content.twitterTitle,
+    twitterDescription: content.twitterDescription,
+    twitterImageUrl: content.twitterImageUrl,
+    focusKeyword: content.focusKeyword,
+    secondaryKeywords: content.secondaryKeywords,
+    schemaOrgJson: content.schemaOrgJson,
+    imageRecommendations: content.imageRecommendations as unknown as Prisma.InputJsonValue,
+    sitemapPriority: content.sitemapPriority,
+    sitemapChangeFreq: content.sitemapChangeFreq,
     sections: content.sections as Prisma.InputJsonValue,
     status: PageStatus.PUBLISHED,
     isInMenu: content.isInMenu,
@@ -714,8 +937,24 @@ export async function rejectPendingChange(versionId: string, reason: string | nu
       await updatePageRecord(page.id, {
         title: content.title,
         slug: content.slug,
+        metaTitle: content.metaTitle,
         metaDescription: content.metaDescription,
         metaKeywords: content.metaKeywords,
+        canonicalUrl: content.canonicalUrl,
+        robotsDirective: content.robotsDirective,
+        ogTitle: content.ogTitle,
+        ogDescription: content.ogDescription,
+        ogImageUrl: content.ogImageUrl,
+        ogImageAlt: content.ogImageAlt,
+        twitterTitle: content.twitterTitle,
+        twitterDescription: content.twitterDescription,
+        twitterImageUrl: content.twitterImageUrl,
+        focusKeyword: content.focusKeyword,
+        secondaryKeywords: content.secondaryKeywords,
+        schemaOrgJson: content.schemaOrgJson,
+        imageRecommendations: content.imageRecommendations as unknown as Prisma.InputJsonValue,
+        sitemapPriority: content.sitemapPriority,
+        sitemapChangeFreq: content.sitemapChangeFreq,
         sections: content.sections as Prisma.InputJsonValue,
         status: PageStatus.PUBLISHED,
         isInMenu: content.isInMenu,
@@ -807,8 +1046,24 @@ export async function rollbackPage(pageId: string, versionNumber: number, user: 
   await updatePageRecord(pageId, {
     title: content.title,
     slug: content.slug,
+    metaTitle: content.metaTitle,
     metaDescription: content.metaDescription,
     metaKeywords: content.metaKeywords,
+    canonicalUrl: content.canonicalUrl,
+    robotsDirective: content.robotsDirective,
+    ogTitle: content.ogTitle,
+    ogDescription: content.ogDescription,
+    ogImageUrl: content.ogImageUrl,
+    ogImageAlt: content.ogImageAlt,
+    twitterTitle: content.twitterTitle,
+    twitterDescription: content.twitterDescription,
+    twitterImageUrl: content.twitterImageUrl,
+    focusKeyword: content.focusKeyword,
+    secondaryKeywords: content.secondaryKeywords,
+    schemaOrgJson: content.schemaOrgJson,
+    imageRecommendations: content.imageRecommendations as unknown as Prisma.InputJsonValue,
+    sitemapPriority: content.sitemapPriority,
+    sitemapChangeFreq: content.sitemapChangeFreq,
     sections: content.sections as Prisma.InputJsonValue,
     status: PageStatus.PUBLISHED,
     isInMenu: content.isInMenu,

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { LOCALE_LABELS, SUPPORTED_LOCALES } from "@/lib/i18n/config";
 import { createEmptyBlock, createEmptyPage, createEmptySection, normalizePagePayload, slugifyTitle } from "./editor-utils";
 import { PagePreviewModal } from "./PagePreviewModal";
+import { SeoEditorPanel } from "./SeoEditorPanel";
 import { SectionEditor } from "./SectionEditor";
 import { VersionHistory } from "./VersionHistory";
 import type { EditorPage, EditorSection } from "./editor-types";
@@ -65,8 +66,12 @@ export const PageEditorForm = ({ pageId }: { pageId?: string }) => {
 
   const canOpenHistory = useMemo(() => Boolean(pageId), [pageId]);
 
+  function updateForm(updater: (current: EditorPage) => EditorPage) {
+    setForm((current) => updater(current));
+  }
+
   function updateSection(sectionId: string, updater: (section: EditorSection) => EditorSection) {
-    setForm((current) => ({ ...current, sections: current.sections.map((section) => (section.id === sectionId ? updater(section) : section)) }));
+    updateForm((current) => ({ ...current, sections: current.sections.map((section) => (section.id === sectionId ? updater(section) : section)) }));
   }
 
   async function handleSubmit() {
@@ -97,7 +102,7 @@ export const PageEditorForm = ({ pageId }: { pageId?: string }) => {
         <div>
           <p className="eyebrow" data-testid="page-editor-eyebrow">Éditeur de page</p>
           <h1 className="admin-title" data-testid="page-editor-title">{pageId ? "Modifier la page" : "Nouvelle page"}</h1>
-          <p className="admin-copy" data-testid="page-editor-description">Créez vos sections, composez les blocs et préparez un rendu public SSR exploitable.</p>
+          <p className="admin-copy" data-testid="page-editor-description">Composez la page, pilotez son menu et pilotez maintenant tout son SEO éditorial depuis un seul écran.</p>
         </div>
         <div className="dashboard-row-actions" data-testid="page-editor-header-actions">
           <Link href="/admin/pages" className="secondary-button dashboard-inline-button" data-testid="page-editor-back-link">Retour aux pages</Link>
@@ -118,10 +123,12 @@ export const PageEditorForm = ({ pageId }: { pageId?: string }) => {
               <label className="dashboard-field"><span data-testid="page-editor-locale-label">Langue</span><select value={form.locale} onChange={(event) => setForm((current) => ({ ...current, locale: event.target.value as EditorPage["locale"] }))} data-testid="page-editor-locale-select">{SUPPORTED_LOCALES.map((locale) => <option key={locale} value={locale}>{LOCALE_LABELS[locale]}</option>)}</select></label>
               <label className="dashboard-field"><span data-testid="page-editor-slug-label">Slug</span><input value={form.slug} onChange={(event) => { setSlugTouched(true); setForm((current) => ({ ...current, slug: slugifyTitle(event.target.value) })); }} data-testid="page-editor-slug-input" /></label>
               <label className="dashboard-field"><span data-testid="page-editor-status-label">Statut demandé</span><select value={form.status || "draft"} onChange={(event) => setForm((current) => ({ ...current, status: event.target.value as EditorPage["status"] }))} data-testid="page-editor-status-select"><option value="draft">Brouillon</option><option value="pending">En attente</option><option value="published">Publié</option><option value="archived">Archivé</option></select></label>
-              <label className="dashboard-field dashboard-field-full"><span data-testid="page-editor-meta-description-label">Description SEO</span><textarea rows={3} value={form.metaDescription} onChange={(event) => setForm((current) => ({ ...current, metaDescription: event.target.value }))} data-testid="page-editor-meta-description-input" /></label>
-              <label className="dashboard-field dashboard-field-full"><span data-testid="page-editor-meta-keywords-label">Mots-clés SEO</span><input value={form.metaKeywords} onChange={(event) => setForm((current) => ({ ...current, metaKeywords: event.target.value }))} data-testid="page-editor-meta-keywords-input" /></label>
+              <label className="dashboard-field dashboard-field-full"><span data-testid="page-editor-meta-description-label">Résumé éditorial</span><textarea rows={3} value={form.metaDescription} onChange={(event) => setForm((current) => ({ ...current, metaDescription: event.target.value }))} data-testid="page-editor-meta-description-input" /></label>
+              <label className="dashboard-field dashboard-field-full"><span data-testid="page-editor-meta-keywords-label">Mots-clés internes</span><input value={form.metaKeywords} onChange={(event) => setForm((current) => ({ ...current, metaKeywords: event.target.value }))} data-testid="page-editor-meta-keywords-input" /></label>
             </div>
           </div>
+
+          <SeoEditorPanel form={form} onChange={updateForm} onError={setError} />
 
           <div className="editor-section-stack" data-testid="page-editor-sections-stack">
             {form.sections.map((section, index) => (
@@ -154,6 +161,8 @@ export const PageEditorForm = ({ pageId }: { pageId?: string }) => {
             <p className="dashboard-row-title" data-testid="page-editor-summary-title">{form.title || "Page sans titre"}</p>
             <p className="dashboard-row-meta" data-testid="page-editor-summary-slug">/{form.slug || "nouvelle-page"}</p>
             <p className="dashboard-row-meta" data-testid="page-editor-summary-sections">{form.sections.length} section(s) · {form.sections.reduce((total, section) => total + section.blocks.length, 0)} bloc(s)</p>
+            <p className="dashboard-row-meta" data-testid="page-editor-summary-meta-title">Meta title : {form.metaTitle || "à compléter"}</p>
+            <p className="dashboard-row-meta" data-testid="page-editor-summary-canonical">Canonique : {form.canonicalUrl || "auto"}</p>
           </div>
         </aside>
       </div>

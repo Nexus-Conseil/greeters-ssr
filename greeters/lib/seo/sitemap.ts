@@ -1,10 +1,13 @@
 import type { AppLocale } from "@/lib/i18n/config";
 import { buildLocaleUrl } from "@/lib/i18n/config";
+import { getSitemapFrequency, getSitemapPriority, isIndexablePage } from "@/lib/seo/page-seo";
 import { getPublicPages, type PageResponse } from "@/lib/services/pages";
 
 type CategorizedEntry = {
   url: string;
   lastModified: string;
+  priority: number;
+  changeFrequency: string;
 };
 
 type CategorizedSitemap = {
@@ -22,6 +25,8 @@ function toEntry(page: PageResponse): CategorizedEntry {
   return {
     url: buildLocaleUrl(page.locale, path),
     lastModified: page.updatedAt ?? page.createdAt,
+    priority: getSitemapPriority(page),
+    changeFrequency: getSitemapFrequency(page),
   };
 }
 
@@ -32,6 +37,8 @@ export async function getTourismSitemap(locale: AppLocale): Promise<CategorizedS
       {
         url: buildLocaleUrl(locale, "/"),
         lastModified: new Date().toISOString(),
+        priority: 1,
+        changeFrequency: "weekly",
       },
     ],
     internalPages: [],
@@ -39,7 +46,7 @@ export async function getTourismSitemap(locale: AppLocale): Promise<CategorizedS
   };
 
   pages.forEach((page) => {
-    if (page.slug === "/") {
+    if (page.slug === "/" || !isIndexablePage(page)) {
       return;
     }
 
@@ -57,7 +64,7 @@ export async function getTourismSitemap(locale: AppLocale): Promise<CategorizedS
 function renderEntries(entries: CategorizedEntry[]) {
   return entries
     .map(
-      (entry) => `  <url>\n    <loc>${entry.url}</loc>\n    <lastmod>${entry.lastModified}</lastmod>\n  </url>`,
+      (entry) => `  <url>\n    <loc>${entry.url}</loc>\n    <lastmod>${entry.lastModified}</lastmod>\n    <changefreq>${entry.changeFrequency}</changefreq>\n    <priority>${entry.priority.toFixed(1)}</priority>\n  </url>`,
     )
     .join("\n");
 }

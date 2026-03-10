@@ -3,20 +3,28 @@ import Image from "next/image";
 
 import { PublicPageShell } from "@/components/public/layout/PublicPageShell";
 import { PageTitleBand } from "@/components/public/pages/PageTitleBand";
+import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
+import { getRouteMetadata } from "@/lib/seo/public-metadata";
+import { findPublicPageBySlug } from "@/lib/services/pages";
 
-export const metadata: Metadata = {
-  title: "Faire un don — Paris Greeters",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getRouteMetadata("faire-un-don", {
+    title: "Faire un don — Paris Greeters",
+    description: "Soutenez Paris Greeters et permettez à l’association de poursuivre ses balades gratuites et conviviales.",
+  });
+}
 
 export default async function FaireUnDonPage() {
   const locale = await getRequestLocale();
   const title = getLocalizedPageTitle(locale, "faire-un-don");
+  const seoPage = await findPublicPageBySlug("faire-un-don", locale).catch(() => null);
 
   return (
     <PublicPageShell testId="faire-un-don-public-page">
       <>
+        <StructuredDataScript page={seoPage ?? { title, slug: "faire-un-don", metaDescription: "Soutenir Paris Greeters" }} locale={locale} path="faire-un-don" />
         <PageTitleBand title={title} testId="faire-un-don-public-page-title" />
         <div className="site-container site-content-section" data-testid="faire-un-don-public-page-content">
             <section className="site-info-panel" data-testid="faire-un-don-intro-panel">

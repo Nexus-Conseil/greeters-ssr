@@ -1,5 +1,7 @@
+import { getRequestLocale } from "@/lib/i18n/request";
 import { listHomeSections } from "@/lib/repositories/home-sections";
 import { HOME_PAGE_FALLBACK, type HomeArticle, type Testimonial } from "@/lib/public-site-data";
+import { findPublicPageBySlug, type CmsBlock, type PageResponse } from "@/lib/services/pages";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -17,7 +19,125 @@ function getTestimonials(value: unknown, fallback: Testimonial[]) {
   return Array.isArray(value) && value.length > 0 ? (value as Testimonial[]) : fallback;
 }
 
+function getSection(page: PageResponse | null, name: string) {
+  return page?.sections.find((section) => section.name.toLowerCase() === name.toLowerCase()) ?? null;
+}
+
+function getBlock(section: PageResponse["sections"][number] | null, type: CmsBlock["type"], offset = 0) {
+  return section?.blocks.filter((block) => block.type === type)[offset] ?? null;
+}
+
+function blockString(block: CmsBlock | null, key: string, fallback: string) {
+  const value = block?.content?.[key];
+  return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+function splitParagraphs(value: string[], fallback: string[]) {
+  return value.length > 0 ? value : fallback;
+}
+
+function splitText(block: CmsBlock | null, fallback: string[]) {
+  const raw = blockString(block, "text", "");
+  if (!raw) {
+    return fallback;
+  }
+
+  return splitParagraphs(raw.split(/\n{2,}|\n/).map((entry) => entry.trim()).filter(Boolean), fallback);
+}
+
+function getHomePageFromCms(page: PageResponse | null) {
+  if (!page) {
+    return null;
+  }
+
+  const hero = getSection(page, "hero");
+  const intro = getSection(page, "intro");
+  const greeters = getSection(page, "greeters");
+  const visit = getSection(page, "visit");
+  const gallery = getSection(page, "gallery");
+  const newsSections = page.sections.filter((section) => section.name.startsWith("actualites-"));
+  const testimonialSections = page.sections.filter((section) => section.name.startsWith("testimonial-"));
+
+  const actualitesItems = newsSections.map((section, index) => ({
+    id: section.id,
+    day: blockString(getBlock(section, "image"), "caption", HOME_PAGE_FALLBACK.actualites.items[index]?.day ?? "01").split("|")[0]?.trim() || "01",
+    month: blockString(getBlock(section, "image"), "caption", HOME_PAGE_FALLBACK.actualites.items[index]?.month ?? "Jan").split("|")[1]?.trim() || "Jan",
+    title: blockString(getBlock(section, "heading"), "text", HOME_PAGE_FALLBACK.actualites.items[index]?.title ?? `Actualité ${index + 1}`),
+    excerpt: blockString(getBlock(section, "text"), "text", HOME_PAGE_FALLBACK.actualites.items[index]?.excerpt ?? ""),
+    image: blockString(getBlock(section, "image"), "src", HOME_PAGE_FALLBACK.actualites.items[index]?.image ?? "/images/actualites_handicap.webp"),
+    link: blockString(getBlock(section, "button"), "href", HOME_PAGE_FALLBACK.actualites.items[index]?.link ?? "/actualites"),
+  }));
+
+  const testimonialItems = testimonialSections.map((section, index) => ({
+    id: section.id,
+    content: blockString(getBlock(section, "text"), "text", HOME_PAGE_FALLBACK.testimonials.items[index]?.content ?? ""),
+    author: section.name.replace(/^testimonial-\d+/, HOME_PAGE_FALLBACK.testimonials.items[index]?.author ?? `Visiteur ${index + 1}`),
+    location: blockString(getBlock(section, "button"), "text", HOME_PAGE_FALLBACK.testimonials.items[index]?.location ?? "Paris"),
+  }));
+
+  const galleryItems = (gallery?.blocks ?? [])
+    .filter((block) => block.type === "image")
+    .map((block, index) => ({
+      id: block.id,
+      title: blockString(block, "alt", HOME_PAGE_FALLBACK.gallery.items[index]?.title ?? `Galerie ${index + 1}`),
+      date: blockString(block, "caption", HOME_PAGE_FALLBACK.gallery.items[index]?.date ?? "2026"),
+      src: blockString(block, "src", HOME_PAGE_FALLBACK.gallery.items[index]?.src ?? "/images/gallery/gallery1.jpg"),
+    }));
+
+  return {
+    hero: {
+      ...HOME_PAGE_FALLBACK.hero,
+      slogan: blockString(getBlock(hero, "heading"), "text", HOME_PAGE_FALLBACK.hero.slogan),
+      subtitle: blockString(getBlock(hero, "text"), "text", HOME_PAGE_FALLBACK.hero.subtitle),
+      image: blockString(getBlock(hero, "image"), "src", HOME_PAGE_FALLBACK.hero.image),
+      imageAlt: blockString(getBlock(hero, "image"), "alt", HOME_PAGE_FALLBACK.hero.imageAlt),
+    },
+    intro: {
+      ...HOME_PAGE_FALLBACK.intro,
+      title: blockString(getBlock(intro, "heading"), "text", HOME_PAGE_FALLBACK.intro.title),
+      tagline: blockString(getBlock(intro, "text"), "text", HOME_PAGE_FALLBACK.intro.tagline),
+      ctaText: blockString(getBlock(intro, "button"), "text", HOME_PAGE_FALLBACK.intro.ctaText),
+    },
+    greeters: {
+      ...HOME_PAGE_FALLBACK.greeters,
+      title: blockString(getBlock(greeters, "heading"), "text", HOME_PAGE_FALLBACK.greeters.title),
+      subtitle: blockString(getBlock(greeters, "image"), "caption", HOME_PAGE_FALLBACK.greeters.subtitle),
+      paragraphs: splitText(getBlock(greeters, "text"), HOME_PAGE_FALLBACK.greeters.paragraphs),
+      ctaText: blockString(getBlock(greeters, "button"), "text", HOME_PAGE_FALLBACK.greeters.ctaText),
+      image: blockString(getBlock(greeters, "image"), "src", HOME_PAGE_FALLBACK.greeters.image),
+      imageAlt: blockString(getBlock(greeters, "image"), "alt", HOME_PAGE_FALLBACK.greeters.imageAlt),
+    },
+    visit: {
+      ...HOME_PAGE_FALLBACK.visit,
+      title: blockString(getBlock(visit, "heading"), "text", HOME_PAGE_FALLBACK.visit.title),
+      paragraphs: splitText(getBlock(visit, "text"), HOME_PAGE_FALLBACK.visit.paragraphs),
+      image: blockString(getBlock(visit, "image"), "src", HOME_PAGE_FALLBACK.visit.image),
+      imageAlt: blockString(getBlock(visit, "image"), "alt", HOME_PAGE_FALLBACK.visit.imageAlt),
+    },
+    actualites: {
+      ...HOME_PAGE_FALLBACK.actualites,
+      items: actualitesItems.length > 0 ? actualitesItems : HOME_PAGE_FALLBACK.actualites.items,
+    },
+    testimonials: {
+      ...HOME_PAGE_FALLBACK.testimonials,
+      items: testimonialItems.length > 0 ? testimonialItems : HOME_PAGE_FALLBACK.testimonials.items,
+    },
+    gallery: {
+      ...HOME_PAGE_FALLBACK.gallery,
+      items: galleryItems.length > 0 ? galleryItems : HOME_PAGE_FALLBACK.gallery.items,
+    },
+  };
+}
+
 export async function getHomePageContent() {
+  const locale = await getRequestLocale();
+  const homepage = await findPublicPageBySlug("/", locale).catch(() => null);
+  const cmsHomepageContent = getHomePageFromCms(homepage);
+
+  if (cmsHomepageContent) {
+    return cmsHomepageContent;
+  }
+
   const sections = await listHomeSections().catch(() => []);
   const sectionMap = new Map(sections.map((section) => [section.sectionType, section]));
 

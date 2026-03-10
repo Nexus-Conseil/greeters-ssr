@@ -2,21 +2,29 @@ import type { Metadata } from "next";
 import Image from "next/image";
 
 import { PublicPageShell } from "@/components/public/layout/PublicPageShell";
+import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
+import { getRouteMetadata } from "@/lib/seo/public-metadata";
 import { VOLUNTEER_BENEFITS, VOLUNTEER_REQUIREMENTS } from "@/lib/public-pages-data";
+import { findPublicPageBySlug } from "@/lib/services/pages";
 
-export const metadata: Metadata = {
-  title: "Devenez bénévole — Paris Greeters",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getRouteMetadata("devenez-benevole", {
+    title: "Devenez bénévole — Paris Greeters",
+    description: "Rejoignez Paris Greeters et partagez votre passion pour la ville avec des visiteurs du monde entier.",
+  });
+}
 
 export default async function DevenezBenevolePage() {
   const locale = await getRequestLocale();
   const title = getLocalizedPageTitle(locale, "devenez-benevole");
+  const seoPage = await findPublicPageBySlug("devenez-benevole", locale).catch(() => null);
 
   return (
     <PublicPageShell testId="devenez-benevole-public-page">
       <>
+          <StructuredDataScript page={seoPage ?? { title, slug: "devenez-benevole", metaDescription: "Devenir bénévole Paris Greeters" }} locale={locale} path="devenez-benevole" />
           <section className="site-title-band site-title-band-hero" data-testid="devenez-benevole-hero-band">
             <div className="site-container site-centered-stack">
               <h1 className="site-title-band-heading" data-testid="devenez-benevole-title">{title}</h1>

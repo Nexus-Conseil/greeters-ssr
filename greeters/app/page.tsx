@@ -1,34 +1,36 @@
-import { DynamicPageRenderer } from "@/components/cms/DynamicPageRenderer";
+import type { Metadata } from "next";
+
+import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
 import { HomePage } from "@/components/public/home/HomePage";
 import { Footer } from "@/components/public/layout/Footer";
 import { Header } from "@/components/public/layout/Header";
 import { TopBar } from "@/components/public/layout/TopBar";
 import { getRequestLocale } from "@/lib/i18n/request";
+import { getRouteMetadata } from "@/lib/seo/public-metadata";
 import { findPublicPageBySlug } from "@/lib/services/pages";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return getRouteMetadata("/", {
+    title: "Paris Greeters — Balades gratuites avec un local",
+    description: "Découvrez Paris autrement avec les Greeters : des balades gratuites, humaines et locales au cœur de la ville.",
+  });
+}
 
 export default async function Home() {
   const locale = await getRequestLocale();
   const homepage = await findPublicPageBySlug("/", locale).catch(() => null);
 
-  if (homepage) {
-    return (
-      <main className="site-page" data-testid="public-home-page-live">
-        <TopBar initialLocale={locale} />
-        <Header />
-        <div className="site-live-page" data-testid="public-home-live-content">
-          <DynamicPageRenderer page={homepage} />
-        </div>
-        <Footer />
-      </main>
-    );
-  }
-
   return (
     <main className="site-page" data-testid="public-home-page">
       <TopBar initialLocale={locale} />
       <Header />
+      <StructuredDataScript
+        page={homepage ?? { title: "Paris Greeters", slug: "/", metaDescription: "Découvrez Paris autrement avec les Greeters : des balades gratuites, humaines et locales au cœur de la ville." }}
+        locale={locale}
+        path="/"
+      />
       <HomePage locale={locale} />
       <Footer />
     </main>

@@ -2,21 +2,29 @@ import type { Metadata } from "next";
 
 import { PublicPageShell } from "@/components/public/layout/PublicPageShell";
 import { PageTitleBand } from "@/components/public/pages/PageTitleBand";
+import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
+import { getRouteMetadata } from "@/lib/seo/public-metadata";
 import { WHO_WE_ARE_VALUES } from "@/lib/public-pages-data";
+import { findPublicPageBySlug } from "@/lib/services/pages";
 
-export const metadata: Metadata = {
-  title: "Qui sommes-nous ? — Paris Greeters",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getRouteMetadata("qui-sommes-nous", {
+    title: "Qui sommes-nous ? — Paris Greeters",
+    description: "Découvrez l’association Paris Greeters, ses valeurs et sa vision d’un tourisme humain et durable.",
+  });
+}
 
 export default async function QuiSommesNousPage() {
   const locale = await getRequestLocale();
   const title = getLocalizedPageTitle(locale, "qui-sommes-nous");
+  const seoPage = await findPublicPageBySlug("qui-sommes-nous", locale).catch(() => null);
 
   return (
     <PublicPageShell testId="qui-sommes-nous-public-page">
       <>
+        <StructuredDataScript page={seoPage ?? { title, slug: "qui-sommes-nous", metaDescription: "Association Paris Greeters" }} locale={locale} path="qui-sommes-nous" />
         <PageTitleBand title={title} testId="qui-sommes-nous-public-page-title" />
         <div className="site-container site-content-section" data-testid="qui-sommes-nous-public-page-content">
           <section className="site-info-panel" data-testid="qui-sommes-nous-intro-panel">

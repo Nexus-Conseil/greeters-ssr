@@ -3,21 +3,29 @@ import Image from "next/image";
 
 import { PublicPageShell } from "@/components/public/layout/PublicPageShell";
 import { PageTitleBand } from "@/components/public/pages/PageTitleBand";
+import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
+import { getRouteMetadata } from "@/lib/seo/public-metadata";
 import { PRESS_PHOTOS } from "@/lib/public-pages-data";
+import { findPublicPageBySlug } from "@/lib/services/pages";
 
-export const metadata: Metadata = {
-  title: "Presse — Paris Greeters",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getRouteMetadata("presse", {
+    title: "Presse — Paris Greeters",
+    description: "Téléchargez le dossier de presse et accédez aux ressources médias de Paris Greeters.",
+  });
+}
 
 export default async function PressePage() {
   const locale = await getRequestLocale();
   const title = getLocalizedPageTitle(locale, "presse");
+  const seoPage = await findPublicPageBySlug("presse", locale).catch(() => null);
 
   return (
     <PublicPageShell testId="presse-public-page">
       <>
+        <StructuredDataScript page={seoPage ?? { title, slug: "presse", metaDescription: "Presse Paris Greeters" }} locale={locale} path="presse" />
         <PageTitleBand title={title} testId="presse-public-page-title" />
         <div className="site-container site-content-section" data-testid="presse-public-page-content">
             <section className="site-highlight-panel" data-testid="presse-kit-panel">

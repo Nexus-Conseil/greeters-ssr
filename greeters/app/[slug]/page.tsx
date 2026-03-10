@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -5,7 +6,9 @@ import { DynamicPageRenderer } from "@/components/cms/DynamicPageRenderer";
 import { Footer } from "@/components/public/layout/Footer";
 import { Header } from "@/components/public/layout/Header";
 import { TopBar } from "@/components/public/layout/TopBar";
+import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
 import { getRequestLocale } from "@/lib/i18n/request";
+import { buildSeoMetadata } from "@/lib/seo/page-seo";
 import { findPublicPageBySlug } from "@/lib/services/pages";
 
 const PUBLIC_PLACEHOLDERS: Record<string, { title: string; description: string }> = {
@@ -51,15 +54,38 @@ type PublicPlaceholderPageProps = {
   }>;
 };
 
+export async function generateMetadata({ params }: PublicPlaceholderPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const locale = await getRequestLocale();
+  const livePage = await findPublicPageBySlug(slug, locale).catch(() => null);
+  const content = PUBLIC_PLACEHOLDERS[slug];
+
+  if (livePage) {
+    return buildSeoMetadata(livePage, locale, {
+      title: livePage.title,
+      description: livePage.metaDescription || livePage.title,
+      path: livePage.slug,
+    });
+  }
+
+  return buildSeoMetadata({ slug, title: content?.title ?? slug, metaDescription: content?.description ?? slug }, locale, {
+    title: content?.title ?? slug,
+    description: content?.description ?? slug,
+    path: slug,
+  });
+}
+
 export default async function PublicPlaceholderPage({ params }: PublicPlaceholderPageProps) {
   const { slug } = await params;
-  const livePage = await findPublicPageBySlug(slug, await getRequestLocale()).catch(() => null);
+  const locale = await getRequestLocale();
+  const livePage = await findPublicPageBySlug(slug, locale).catch(() => null);
 
   if (livePage) {
     return (
       <main className="site-page" data-testid={`public-live-page-${slug}`}>
-        <TopBar />
+        <TopBar initialLocale={locale} />
         <Header />
+        <StructuredDataScript page={livePage} locale={locale} path={livePage.slug} />
         <div className="site-live-page" data-testid={`public-live-page-content-${slug}`}>
           <DynamicPageRenderer page={livePage} />
         </div>
@@ -76,8 +102,9 @@ export default async function PublicPlaceholderPage({ params }: PublicPlaceholde
 
   return (
     <main className="site-page" data-testid={`public-placeholder-page-${slug}`}>
-      <TopBar />
+      <TopBar initialLocale={locale} />
       <Header />
+      <StructuredDataScript page={{ title: content.title, slug, metaDescription: content.description }} locale={locale} path={slug} />
       <section className="site-static-shell" data-testid={`public-placeholder-shell-${slug}`}>
         <section className="site-static-card" data-testid={`public-placeholder-panel-${slug}`}>
           <p className="site-static-eyebrow" data-testid={`public-placeholder-eyebrow-${slug}`}>

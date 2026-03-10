@@ -1,6 +1,6 @@
 import type { AuthUser } from "@/lib/auth/session";
 import { SUPPORTED_LOCALES, type AppLocale } from "@/lib/i18n/config";
-import { getLocalizedPageTitle, getPublicCopy, type PublicPageSlugKey } from "@/lib/i18n/site-copy";
+import { getLocalizedPageTitle, getPublicCopy } from "@/lib/i18n/site-copy";
 import {
   ACTUALITES_PAGE_ITEMS,
   GALLERY_PAGE_IMAGES,
@@ -17,10 +17,11 @@ import { updateMenu, type MenuItem } from "@/lib/services/menu";
 import { createPage, type CmsBlock, type CmsSection, type PageInput, updatePage } from "@/lib/services/pages";
 
 type PageBlueprint = {
-  slug: PublicPageSlugKey;
+  slug: string;
   isInMenu: boolean;
   menuOrder: number;
   menuLabel: (locale: AppLocale) => string | null;
+  titleResolver: (locale: AppLocale) => string;
   buildSections: () => CmsSection[];
 };
 
@@ -61,10 +62,62 @@ function buildMenuItems(locale: AppLocale): MenuItem[] {
 
 const PAGE_BLUEPRINTS: PageBlueprint[] = [
   {
+    slug: "/",
+    isInMenu: false,
+    menuOrder: 0,
+    menuLabel: () => null,
+    titleResolver: () => "Paris Greeters",
+    buildSections: () => [
+      createSection("hero", [
+        createBlock("heading", { text: HOME_PAGE_FALLBACK.hero.slogan, level: "h1" }, 0),
+        createBlock("text", { text: HOME_PAGE_FALLBACK.hero.subtitle }, 1),
+        createBlock("image", { src: HOME_PAGE_FALLBACK.hero.image, alt: HOME_PAGE_FALLBACK.hero.imageAlt, caption: "hero" }, 2),
+      ], 0, "image", "hero"),
+      createSection("intro", [
+        createBlock("heading", { text: HOME_PAGE_FALLBACK.intro.title, level: "h2" }, 0),
+        createBlock("text", { text: HOME_PAGE_FALLBACK.intro.tagline }, 1),
+        createBlock("button", { text: HOME_PAGE_FALLBACK.intro.ctaText, href: "BOOKING_URL_PLACEHOLDER", style: "primary" }, 2),
+      ], 1, "white", "centered"),
+      createSection("greeters", [
+        createBlock("heading", { text: HOME_PAGE_FALLBACK.greeters.title, level: "h2" }, 0),
+        createBlock("text", { text: HOME_PAGE_FALLBACK.greeters.paragraphs.join("\n\n") }, 1),
+        createBlock("image", { src: HOME_PAGE_FALLBACK.greeters.image, alt: HOME_PAGE_FALLBACK.greeters.imageAlt, caption: HOME_PAGE_FALLBACK.greeters.subtitle }, 2),
+        createBlock("button", { text: HOME_PAGE_FALLBACK.greeters.ctaText, href: "BOOKING_URL_PLACEHOLDER", style: "primary" }, 3),
+      ], 2, "white", "two-column"),
+      createSection("visit", [
+        createBlock("heading", { text: HOME_PAGE_FALLBACK.visit.title, level: "h2" }, 0),
+        createBlock("text", { text: HOME_PAGE_FALLBACK.visit.paragraphs.join("\n\n") }, 1),
+        createBlock("image", { src: HOME_PAGE_FALLBACK.visit.image, alt: HOME_PAGE_FALLBACK.visit.imageAlt, caption: HOME_PAGE_FALLBACK.visit.title }, 2),
+      ], 3, "gray", "two-column"),
+      ...HOME_PAGE_FALLBACK.actualites.items.map((item, index) =>
+        createSection(`actualites-${index}`, [
+          createBlock("heading", { text: item.title, level: "h3" }, 0),
+          createBlock("text", { text: item.excerpt }, 1),
+          createBlock("image", { src: item.image, alt: item.title, caption: `${item.day}|${item.month}` }, 2),
+          createBlock("button", { text: "Lire la suite", href: item.link, style: "secondary" }, 3),
+        ], 4 + index, "white", "cards"),
+      ),
+      ...HOME_PAGE_FALLBACK.testimonials.items.map((item, index) =>
+        createSection(`testimonial-${index}`, [
+          createBlock("text", { text: item.content }, 0),
+          createBlock("button", { text: item.location, href: "/livre-dor", style: "secondary" }, 1),
+        ], 6 + index, index % 2 === 0 ? "gray" : "white", "cards"),
+      ),
+      createSection(
+        "gallery",
+        HOME_PAGE_FALLBACK.gallery.items.map((item, index) => createBlock("image", { src: item.src, alt: item.title, caption: item.date }, index)),
+        10,
+        "white",
+        "cards",
+      ),
+    ],
+  },
+  {
     slug: "qui-sommes-nous",
     isInMenu: false,
     menuOrder: 20,
     menuLabel: () => null,
+    titleResolver: (locale) => getLocalizedPageTitle(locale, "qui-sommes-nous"),
     buildSections: () => [
       createSection("Association", [
         createBlock("heading", { text: "Association Paris Greeters", level: "h2" }, 0),
@@ -89,6 +142,7 @@ const PAGE_BLUEPRINTS: PageBlueprint[] = [
     isInMenu: true,
     menuOrder: 5,
     menuLabel: (locale) => getPublicCopy(locale).navigation.news,
+    titleResolver: (locale) => getLocalizedPageTitle(locale, "actualites"),
     buildSections: () =>
       ACTUALITES_PAGE_ITEMS.map((item, index) =>
         createSection(item.title, [
@@ -104,6 +158,7 @@ const PAGE_BLUEPRINTS: PageBlueprint[] = [
     isInMenu: true,
     menuOrder: 4,
     menuLabel: (locale) => getPublicCopy(locale).navigation.gallery,
+    titleResolver: (locale) => getLocalizedPageTitle(locale, "galerie"),
     buildSections: () => [
       createSection(
         "Galerie photos",
@@ -117,6 +172,7 @@ const PAGE_BLUEPRINTS: PageBlueprint[] = [
     isInMenu: true,
     menuOrder: 2,
     menuLabel: (locale) => getPublicCopy(locale).navigation.guestbook,
+    titleResolver: (locale) => getLocalizedPageTitle(locale, "livre-dor"),
     buildSections: () =>
       GUESTBOOK_ITEMS.map((item, index) =>
         createSection(item.author, [
@@ -130,6 +186,7 @@ const PAGE_BLUEPRINTS: PageBlueprint[] = [
     isInMenu: true,
     menuOrder: 3,
     menuLabel: (locale) => getPublicCopy(locale).navigation.donation,
+    titleResolver: (locale) => getLocalizedPageTitle(locale, "faire-un-don"),
     buildSections: () => [
       createSection("Soutenez les Greeters", [
         createBlock("heading", { text: "Soutenez les Greeters de Paris", level: "h2" }, 0),
@@ -153,6 +210,7 @@ const PAGE_BLUEPRINTS: PageBlueprint[] = [
     isInMenu: true,
     menuOrder: 6,
     menuLabel: (locale) => getPublicCopy(locale).navigation.volunteer,
+    titleResolver: (locale) => getLocalizedPageTitle(locale, "devenez-benevole"),
     buildSections: () => [
       createSection("Hero", [
         createBlock("heading", { text: "Partagez votre passion pour Paris avec des visiteurs du monde entier", level: "h2" }, 0),
@@ -180,6 +238,7 @@ const PAGE_BLUEPRINTS: PageBlueprint[] = [
     isInMenu: false,
     menuOrder: 30,
     menuLabel: () => null,
+    titleResolver: (locale) => getLocalizedPageTitle(locale, "contact"),
     buildSections: () => [
       createSection("Formulaire de contact", [
         createBlock("text", { text: "Si vous souhaitez savoir où en est votre demande, y apporter des modifications, obtenir un remboursement de votre don ou obtenir plus d'informations sur Parisien d'un jour – Paris Greeters, envoyez-nous un message via le formulaire de contact." }, 0),
@@ -191,6 +250,7 @@ const PAGE_BLUEPRINTS: PageBlueprint[] = [
     isInMenu: false,
     menuOrder: 40,
     menuLabel: () => null,
+    titleResolver: (locale) => getLocalizedPageTitle(locale, "presse"),
     buildSections: () => [
       createSection("Dossier de presse", [
         createBlock("heading", { text: "Dossier de presse", level: "h2" }, 0),
@@ -214,6 +274,7 @@ const PAGE_BLUEPRINTS: PageBlueprint[] = [
     isInMenu: false,
     menuOrder: 50,
     menuLabel: () => null,
+    titleResolver: (locale) => getLocalizedPageTitle(locale, "mentions-legales"),
     buildSections: () => [
       createSection("Éditeur", [
         createBlock("heading", { text: "Éditeur, conception et réalisation", level: "h2" }, 0),
@@ -286,13 +347,29 @@ async function bootstrapHomeSections() {
 }
 
 async function upsertLocalizedPage(locale: AppLocale, blueprint: PageBlueprint, user: AuthUser) {
-  const title = getLocalizedPageTitle(locale, blueprint.slug);
+  const title = blueprint.titleResolver(locale);
   const payload: PageInput = {
     locale,
     title,
     slug: blueprint.slug,
+    metaTitle: title,
     metaDescription: `Paris Greeters — ${title}`,
     metaKeywords: "paris greeters, balade, visite, paris",
+    canonicalUrl: null,
+    robotsDirective: "index,follow",
+    ogTitle: title,
+    ogDescription: `Paris Greeters — ${title}`,
+    ogImageUrl: null,
+    ogImageAlt: null,
+    twitterTitle: title,
+    twitterDescription: `Paris Greeters — ${title}`,
+    twitterImageUrl: null,
+    focusKeyword: title,
+    secondaryKeywords: "greeters, paris, balade locale",
+    schemaOrgJson: null,
+    imageRecommendations: [],
+    sitemapPriority: blueprint.slug === "/" ? 1 : 0.7,
+    sitemapChangeFreq: blueprint.slug === "/" ? "weekly" : "monthly",
     sections: blueprint.buildSections(),
     isInMenu: blueprint.isInMenu,
     menuOrder: blueprint.menuOrder,

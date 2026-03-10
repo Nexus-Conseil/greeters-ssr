@@ -2,20 +2,28 @@ import type { Metadata } from "next";
 
 import { PublicPageShell } from "@/components/public/layout/PublicPageShell";
 import { PageTitleBand } from "@/components/public/pages/PageTitleBand";
+import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
+import { getRouteMetadata } from "@/lib/seo/public-metadata";
+import { findPublicPageBySlug } from "@/lib/services/pages";
 
-export const metadata: Metadata = {
-  title: "Mentions légales — Paris Greeters",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getRouteMetadata("mentions-legales", {
+    title: "Mentions légales — Paris Greeters",
+    description: "Consultez les mentions légales, responsabilités et informations réglementaires de Paris Greeters.",
+  });
+}
 
 export default async function MentionsLegalesPage() {
   const locale = await getRequestLocale();
   const title = getLocalizedPageTitle(locale, "mentions-legales");
+  const seoPage = await findPublicPageBySlug("mentions-legales", locale).catch(() => null);
 
   return (
     <PublicPageShell testId="mentions-legales-public-page">
       <>
+        <StructuredDataScript page={seoPage ?? { title, slug: "mentions-legales", metaDescription: "Mentions légales Paris Greeters" }} locale={locale} path="mentions-legales" />
         <PageTitleBand title={title} testId="mentions-legales-public-page-title" />
         <div className="site-container site-content-section" data-testid="mentions-legales-public-page-content">
             <section className="site-info-panel" data-testid="mentions-legales-editor-panel">

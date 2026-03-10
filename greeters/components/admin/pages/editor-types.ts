@@ -1,4 +1,5 @@
 import type { AppLocale } from "@/lib/i18n/config";
+import type { SeoImageRecommendation } from "@/lib/services/pages";
 
 export type EditorBlockType = "heading" | "text" | "image" | "button";
 
@@ -24,8 +25,24 @@ export type EditorPage = {
   locale: AppLocale;
   title: string;
   slug: string;
+  metaTitle: string;
   metaDescription: string;
   metaKeywords: string;
+  canonicalUrl: string;
+  robotsDirective: string;
+  ogTitle: string;
+  ogDescription: string;
+  ogImageUrl: string;
+  ogImageAlt: string;
+  twitterTitle: string;
+  twitterDescription: string;
+  twitterImageUrl: string;
+  focusKeyword: string;
+  secondaryKeywords: string;
+  schemaOrgJson: string;
+  imageRecommendations: SeoImageRecommendation[];
+  sitemapPriority: number;
+  sitemapChangeFreq: string;
   sections: EditorSection[];
   isInMenu: boolean;
   menuOrder: number;

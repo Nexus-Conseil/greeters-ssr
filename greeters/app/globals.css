@@ -903,6 +903,27 @@ code {
   gap: 1rem;
 }
 
+.dashboard-row-spread {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.editor-image-seo-stack {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.editor-image-seo-card {
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(29, 43, 36, 0.08);
+  background: rgba(247, 248, 243, 0.94);
+}
+
 .editor-checkbox-row {
   display: flex;
   align-items: center;

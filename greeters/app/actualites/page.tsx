@@ -5,23 +5,31 @@ import type { Route } from "next";
 
 import { PublicPageShell } from "@/components/public/layout/PublicPageShell";
 import { PageTitleBand } from "@/components/public/pages/PageTitleBand";
+import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
+import { getRouteMetadata } from "@/lib/seo/public-metadata";
 import { ACTUALITES_PAGE_ITEMS } from "@/lib/public-pages-data";
 import { getActualitesCmsContent } from "@/lib/services/public-page-content";
+import { findPublicPageBySlug } from "@/lib/services/pages";
 
-export const metadata: Metadata = {
-  title: "Actualités — Paris Greeters",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getRouteMetadata("actualites", {
+    title: "Actualités — Paris Greeters",
+    description: "Retrouvez les actualités, annonces et informations utiles autour de Paris Greeters.",
+  });
+}
 
 export default async function ActualitesPage() {
   const locale = await getRequestLocale();
   const fallbackTitle = getLocalizedPageTitle(locale, "actualites");
+  const seoPage = await findPublicPageBySlug("actualites", locale).catch(() => null);
   const { title, items } = await getActualitesCmsContent(fallbackTitle, ACTUALITES_PAGE_ITEMS);
 
   return (
     <PublicPageShell testId="actualites-public-page">
       <>
+        <StructuredDataScript page={seoPage ?? { title, slug: "actualites", metaDescription: "Actualités Paris Greeters" }} locale={locale} path="actualites" />
         <PageTitleBand title={title} testId="actualites-public-page-title" />
         <div className="site-container site-content-section" data-testid="actualites-public-page-content">
           <div className="site-news-grid" data-testid="actualites-public-page-grid">
