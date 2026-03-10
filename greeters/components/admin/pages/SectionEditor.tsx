@@ -1,5 +1,7 @@
 "use client";
 
+import { useRef, useState } from "react";
+
 import { BlockEditor } from "./BlockEditor";
 import { BACKGROUND_OPTIONS, BLOCK_TYPE_OPTIONS, LAYOUT_OPTIONS, type EditorBlockType, type EditorSection } from "./editor-types";
 
@@ -26,6 +28,48 @@ export const SectionEditor = ({
   onBlockDelete: (blockId: string) => void;
   onBlockMove: (blockId: string, direction: -1 | 1) => void;
 }) => {
+  const backgroundInputRef = useRef<HTMLInputElement | null>(null);
+  const [uploadingBackground, setUploadingBackground] = useState(false);
+
+  async function handleBackgroundUpload(file: File | null) {
+    if (!file) {
+      return;
+    }
+
+    setUploadingBackground(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/admin/images/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const payload = (await response.json()) as {
+        detail?: string;
+        image?: {
+          src: string;
+        };
+      };
+
+      if (!response.ok || !payload.image) {
+        throw new Error(payload.detail ?? "Import impossible.");
+      }
+
+      onChange({ backgroundImage: payload.image.src });
+    } catch (error) {
+      console.error(error);
+      window.alert(error instanceof Error ? error.message : "Import impossible.");
+    } finally {
+      setUploadingBackground(false);
+      if (backgroundInputRef.current) {
+        backgroundInputRef.current.value = "";
+      }
+    }
+  }
+
   return (
     <section className="editor-panel" data-testid={`page-editor-section-${section.id}`}>
       <div className="editor-panel-header" data-testid={`page-editor-section-header-${section.id}`}>
@@ -59,7 +103,7 @@ export const SectionEditor = ({
                 {BACKGROUND_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
               </select>
             </label>
-            {section.background === "image" ? <label className="dashboard-field dashboard-field-full"><span data-testid={`page-editor-section-background-image-label-${section.id}`}>Image de fond</span><input value={section.backgroundImage || ""} onChange={(event) => onChange({ backgroundImage: event.target.value })} placeholder="https://..." data-testid={`page-editor-section-background-image-input-${section.id}`} /></label> : null}
+            {section.background === "image" ? <label className="dashboard-field dashboard-field-full"><span data-testid={`page-editor-section-background-image-label-${section.id}`}>Image de fond</span><input value={section.backgroundImage || ""} onChange={(event) => onChange({ backgroundImage: event.target.value })} placeholder="https://..." data-testid={`page-editor-section-background-image-input-${section.id}`} /><div className="dashboard-row-actions"><input ref={backgroundInputRef} type="file" accept="image/*" onChange={(event) => void handleBackgroundUpload(event.target.files?.[0] ?? null)} data-testid={`page-editor-section-background-upload-input-${section.id}`} /><button type="button" className="secondary-button dashboard-inline-button" onClick={() => backgroundInputRef.current?.click()} disabled={uploadingBackground} data-testid={`page-editor-section-background-upload-button-${section.id}`}>{uploadingBackground ? "Import..." : "Uploader"}</button><button type="button" className="secondary-button dashboard-inline-button" onClick={() => onChange({ backgroundImage: null })} data-testid={`page-editor-section-background-clear-button-${section.id}`}>Retirer</button></div></label> : null}
           </div>
 
           <div className="editor-stack" data-testid={`page-editor-section-block-list-${section.id}`}>

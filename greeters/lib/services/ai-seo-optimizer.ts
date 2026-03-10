@@ -150,7 +150,7 @@ export async function optimizePageSeo(page: PageInput, extraInstructions: string
       systemInstruction: {
         parts: [
           {
-            text: `Tu es un expert SEO senior pour Paris Greeters. Tu optimises une page éditoriale touristique, sans sur-optimisation. Réponds uniquement avec un JSON valide. Tu dois proposer : meta title, meta description, focus keyword, secondary keywords, canonical, robots, Open Graph, Twitter, schema.org JSON-LD, image recommendations (filename/alt/title), priorité sitemap et fréquence. Langue cible : ${locale}. Respecte une tonalité naturelle, locale, orientée visiteur humain.`,
+            text: `Tu es un expert SEO senior pour Paris Greeters. Tu optimises une page éditoriale touristique, sans sur-optimisation. Réponds uniquement avec un JSON valide. Tu dois proposer : meta title, meta description, focus keyword, secondary keywords, canonical, robots, Open Graph, Twitter, schema.org JSON-LD, image recommendations (filename/alt/title), priorité sitemap et fréquence. Langue cible : ${locale}. Respecte une tonalité naturelle, locale, orientée visiteur humain. Pour schema.org, choisis automatiquement le type LE PLUS pertinent parmi notamment FAQPage, BreadcrumbList, Organization, TouristAttraction, NewsArticle, Event, CollectionPage, ContactPage, ImageGallery, AboutPage, WebPage et génère directement le JSON-LD final le plus approprié pour cette page.`,
           },
         ],
       },

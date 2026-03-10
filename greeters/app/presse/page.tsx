@@ -4,6 +4,7 @@ import Image from "next/image";
 import { PublicPageShell } from "@/components/public/layout/PublicPageShell";
 import { PageTitleBand } from "@/components/public/pages/PageTitleBand";
 import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
+import { DynamicPageRenderer } from "@/components/cms/DynamicPageRenderer";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
 import { getRouteMetadata } from "@/lib/seo/public-metadata";
@@ -27,7 +28,7 @@ export default async function PressePage() {
       <>
         <StructuredDataScript page={seoPage ?? { title, slug: "presse", metaDescription: "Presse Paris Greeters" }} locale={locale} path="presse" />
         <PageTitleBand title={title} testId="presse-public-page-title" />
-        <div className="site-container site-content-section" data-testid="presse-public-page-content">
+        {seoPage ? <div className="site-container site-content-section" data-testid="presse-public-page-cms-content"><DynamicPageRenderer page={seoPage} /></div> : <div className="site-container site-content-section" data-testid="presse-public-page-content">
             <section className="site-highlight-panel" data-testid="presse-kit-panel">
               <h2 className="site-card-title">Dossier de presse</h2>
               <a href="/documents/a428d596_dossier-de-presse-FFG-2020.pdf" target="_blank" rel="noreferrer" className="site-inline-link" data-testid="presse-kit-link">
@@ -41,7 +42,7 @@ export default async function PressePage() {
               <div className="site-gallery-grid site-gallery-grid-page">
                 {PRESS_PHOTOS.map((photo) => (
                   <a key={photo.id} href={photo.src} target="_blank" rel="noreferrer" className="site-gallery-card" data-testid={`presse-photo-link-${photo.id}`}>
-                    <Image src={photo.src} alt={photo.title} width={520} height={520} className="site-gallery-image" data-testid={`presse-photo-image-${photo.id}`} />
+                    <Image src={photo.src} alt={photo.title} width={520} height={520} sizes="(max-width: 640px) calc(100vw - 1rem), (max-width: 900px) 50vw, 25vw" className="site-gallery-image" data-testid={`presse-photo-image-${photo.id}`} />
                     <span className="site-gallery-overlay">
                       <strong>{photo.title}</strong>
                       <small>{photo.date}</small>
@@ -56,7 +57,7 @@ export default async function PressePage() {
               <p>Pour toute demande d'information ou d'interview, contactez notre service presse :</p>
               <a href="mailto:presse@parisgreeters.fr" className="site-inline-link" data-testid="presse-contact-link">presse@parisgreeters.fr</a>
             </section>
-        </div>
+        </div>}
       </>
     </PublicPageShell>
   );

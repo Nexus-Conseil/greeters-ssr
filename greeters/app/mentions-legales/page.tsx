@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { PublicPageShell } from "@/components/public/layout/PublicPageShell";
 import { PageTitleBand } from "@/components/public/pages/PageTitleBand";
 import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
+import { DynamicPageRenderer } from "@/components/cms/DynamicPageRenderer";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
 import { getRouteMetadata } from "@/lib/seo/public-metadata";
@@ -25,7 +26,7 @@ export default async function MentionsLegalesPage() {
       <>
         <StructuredDataScript page={seoPage ?? { title, slug: "mentions-legales", metaDescription: "Mentions légales Paris Greeters" }} locale={locale} path="mentions-legales" />
         <PageTitleBand title={title} testId="mentions-legales-public-page-title" />
-        <div className="site-container site-content-section" data-testid="mentions-legales-public-page-content">
+        {seoPage ? <div className="site-container site-content-section" data-testid="mentions-legales-public-page-cms-content"><DynamicPageRenderer page={seoPage} /></div> : <div className="site-container site-content-section" data-testid="mentions-legales-public-page-content">
             <section className="site-info-panel" data-testid="mentions-legales-editor-panel">
               <h2 className="site-card-title">Éditeur, conception et réalisation</h2>
               <p><strong>Association « Parisien d'un jour – Paris Greeters »</strong></p>
@@ -55,7 +56,7 @@ export default async function MentionsLegalesPage() {
               <h2 className="site-card-title">Hébergement</h2>
               <p>Ce site est hébergé par Nexus Conseil.</p>
             </section>
-        </div>
+        </div>}
       </>
     </PublicPageShell>
   );

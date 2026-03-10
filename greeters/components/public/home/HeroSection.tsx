@@ -1,5 +1,7 @@
 import Image from "next/image";
 
+import { PUBLIC_IMAGE_SIZES_ATTR } from "@/lib/media/config";
+
 type HeroSectionProps = {
   slogan: string;
   subtitle: string;
@@ -11,7 +13,7 @@ export const HeroSection = ({ slogan, subtitle, image, imageAlt }: HeroSectionPr
   return (
     <section className="site-hero" data-testid="public-home-hero-section">
       <div className="site-hero-media" data-testid="public-home-hero-media">
-        <Image src={image} alt={imageAlt} width={1920} height={814} priority className="site-hero-image" data-testid="public-home-hero-image" />
+        <Image src={image} alt={imageAlt} width={1920} height={814} sizes={PUBLIC_IMAGE_SIZES_ATTR} priority className="site-hero-image" data-testid="public-home-hero-image" />
         <div className="site-hero-overlay" />
         <div className="site-hero-copy" data-testid="public-home-hero-copy">
           <h1 className="site-script-title" data-testid="public-home-hero-title">

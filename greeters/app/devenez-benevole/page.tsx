@@ -3,8 +3,10 @@ import Image from "next/image";
 
 import { PublicPageShell } from "@/components/public/layout/PublicPageShell";
 import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
+import { DynamicPageRenderer } from "@/components/cms/DynamicPageRenderer";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
+import { PUBLIC_IMAGE_SIZES_ATTR } from "@/lib/media/config";
 import { getRouteMetadata } from "@/lib/seo/public-metadata";
 import { VOLUNTEER_BENEFITS, VOLUNTEER_REQUIREMENTS } from "@/lib/public-pages-data";
 import { findPublicPageBySlug } from "@/lib/services/pages";
@@ -25,6 +27,7 @@ export default async function DevenezBenevolePage() {
     <PublicPageShell testId="devenez-benevole-public-page">
       <>
           <StructuredDataScript page={seoPage ?? { title, slug: "devenez-benevole", metaDescription: "Devenir bénévole Paris Greeters" }} locale={locale} path="devenez-benevole" />
+          {seoPage ? <div className="site-container site-content-section" data-testid="devenez-benevole-public-page-cms-content"><DynamicPageRenderer page={seoPage} /></div> : <>
           <section className="site-title-band site-title-band-hero" data-testid="devenez-benevole-hero-band">
             <div className="site-container site-centered-stack">
               <h1 className="site-title-band-heading" data-testid="devenez-benevole-title">{title}</h1>
@@ -34,7 +37,7 @@ export default async function DevenezBenevolePage() {
 
           <div className="site-container site-content-section" data-testid="devenez-benevole-public-page-content">
             <div className="site-overlap-image-card" data-testid="devenez-benevole-image-card">
-              <Image src="/images/uploads/devenez-benevole.png" alt="Devenez bénévole Greeter" width={1200} height={630} className="site-illustration-image" data-testid="devenez-benevole-image" />
+              <Image src="/images/uploads/devenez-benevole.png" alt="Devenez bénévole Greeter" width={1200} height={630} sizes={PUBLIC_IMAGE_SIZES_ATTR} className="site-illustration-image" data-testid="devenez-benevole-image" />
             </div>
 
             <section className="site-block-stack" data-testid="devenez-benevole-intro-section">
@@ -68,6 +71,7 @@ export default async function DevenezBenevolePage() {
               <a href="https://docs.google.com/forms/d/1R4Q85pNX60rDTLkwO24WYH6nAH2VEd13SvfAEVzgLd0/viewform" target="_blank" rel="noreferrer" className="site-cta-button" data-testid="devenez-benevole-cta-link">Postuler pour devenir Greeter</a>
             </section>
           </div>
+          </>}
       </>
     </PublicPageShell>
   );

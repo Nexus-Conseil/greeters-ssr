@@ -26,6 +26,7 @@ const scriptFont = Pacifico({
 export const metadata: Metadata = {
   title: "Paris Greeters — Balades gratuites avec un local",
   description: "Découvrez Paris autrement avec les Greeters : des balades gratuites, humaines et locales au cœur de la ville.",
+  metadataBase: new URL("https://greeters.paris"),
 };
 
 export default async function RootLayout({

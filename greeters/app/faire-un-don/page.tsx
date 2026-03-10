@@ -4,10 +4,12 @@ import Image from "next/image";
 import { PublicPageShell } from "@/components/public/layout/PublicPageShell";
 import { PageTitleBand } from "@/components/public/pages/PageTitleBand";
 import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
+import { DynamicPageRenderer } from "@/components/cms/DynamicPageRenderer";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
-import { getRouteMetadata } from "@/lib/seo/public-metadata";
+import { PUBLIC_IMAGE_SIZES_ATTR } from "@/lib/media/config";
 import { findPublicPageBySlug } from "@/lib/services/pages";
+import { getRouteMetadata } from "@/lib/seo/public-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   return getRouteMetadata("faire-un-don", {
@@ -26,7 +28,7 @@ export default async function FaireUnDonPage() {
       <>
         <StructuredDataScript page={seoPage ?? { title, slug: "faire-un-don", metaDescription: "Soutenir Paris Greeters" }} locale={locale} path="faire-un-don" />
         <PageTitleBand title={title} testId="faire-un-don-public-page-title" />
-        <div className="site-container site-content-section" data-testid="faire-un-don-public-page-content">
+        {seoPage ? <div className="site-container site-content-section" data-testid="faire-un-don-public-page-cms-content"><DynamicPageRenderer page={seoPage} /></div> : <div className="site-container site-content-section" data-testid="faire-un-don-public-page-content">
             <section className="site-info-panel" data-testid="faire-un-don-intro-panel">
               <h2 className="site-card-title">Soutenez les Greeters de Paris</h2>
               <p>Vous avez été satisfait de votre balade avec un bénévole de « Parisien d'un jour – Paris Greeters », alors n'hésitez pas à nous soutenir. <strong>Notre association fonctionne uniquement grâce aux dons.</strong></p>
@@ -78,9 +80,9 @@ export default async function FaireUnDonPage() {
             <p className="site-note-centered" data-testid="faire-un-don-note">Les Greeters de Paris est une association loi 1901 à but non lucratif. Merci de votre soutien !</p>
 
             <div className="site-illustration-card" data-testid="faire-un-don-image-card">
-              <Image src="/images/uploads/greeters-balade-2.jpg" alt="Balade avec les Greeters de Paris" width={1200} height={800} className="site-illustration-image" data-testid="faire-un-don-image" />
+              <Image src="/images/uploads/greeters-balade-2.jpg" alt="Balade avec les Greeters de Paris" width={1200} height={800} sizes={PUBLIC_IMAGE_SIZES_ATTR} className="site-illustration-image" data-testid="faire-un-don-image" />
             </div>
-        </div>
+        </div>}
       </>
     </PublicPageShell>
   );

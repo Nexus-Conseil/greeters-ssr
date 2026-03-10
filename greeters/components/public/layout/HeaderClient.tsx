@@ -73,7 +73,7 @@ export const HeaderClient = ({ currentLocale, navigation }: HeaderClientProps) =
 
       <div className="site-header-brand" data-testid="public-site-header-brand">
         <Link href="/" data-testid="public-site-logo-link">
-          <Image src="/images/logo_greeters.png" alt="Paris Greeters" width={200} height={80} className="site-header-logo" priority data-testid="public-site-logo" />
+          <Image src="/images/logo_greeters.png" alt="Paris Greeters" width={200} height={80} sizes="200px" className="site-header-logo" priority data-testid="public-site-logo" />
         </Link>
       </div>
 

@@ -34,6 +34,7 @@ export const PagesTable = () => {
   const [localeFilter, setLocaleFilter] = useState("all");
   const [deleteTarget, setDeleteTarget] = useState<PageItem | null>(null);
   const [bootstrapping, setBootstrapping] = useState(false);
+  const [autoSyncingSeo, setAutoSyncingSeo] = useState(false);
 
   async function fetchPages() {
     setLoading(true);
@@ -127,6 +128,32 @@ export const PagesTable = () => {
     }
   }
 
+  async function handleAutoSyncSeo() {
+    setAutoSyncingSeo(true);
+    setError("");
+    setNotice("");
+
+    try {
+      const response = await fetch("/api/admin/seo/auto-sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ locale: "fr" }),
+      });
+      const payload = (await response.json()) as { detail?: string; message?: string; result?: { processed: number } };
+
+      if (!response.ok) {
+        throw new Error(payload.detail ?? "Auto-optimisation impossible.");
+      }
+
+      setNotice(`${payload.message ?? "Auto-optimisation terminée."} ${payload.result?.processed ?? 0} page(s) traitée(s).`);
+      await fetchPages();
+    } catch (seoError) {
+      setError(seoError instanceof Error ? seoError.message : "Auto-optimisation impossible.");
+    } finally {
+      setAutoSyncingSeo(false);
+    }
+  }
+
   return (
     <section className="dashboard-content" data-testid="admin-pages-page">
       <div className="dashboard-section-header" data-testid="admin-pages-header">
@@ -142,6 +169,9 @@ export const PagesTable = () => {
           </p>
         </div>
         <div className="dashboard-row-actions" data-testid="admin-pages-header-actions">
+          <button className="secondary-button dashboard-inline-button" onClick={() => void handleAutoSyncSeo()} disabled={autoSyncingSeo} data-testid="admin-pages-auto-seo-button">
+            {autoSyncingSeo ? "SEO/OG..." : "Auto SEO/OG (FR)"}
+          </button>
           <button className="secondary-button dashboard-inline-button" onClick={() => void handleBootstrap()} disabled={bootstrapping} data-testid="admin-pages-bootstrap-button">
             {bootstrapping ? "Préremplissage..." : "Préremplir le site public"}
           </button>

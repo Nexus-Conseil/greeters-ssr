@@ -25,7 +25,7 @@ export const ActualitesSection = ({ title, items }: ActualitesSectionProps) => {
               </div>
               <div className="site-news-content">
                 <div className="site-news-thumb">
-                  <Image src={article.image} alt={article.title} width={96} height={96} className="site-news-thumb-image" data-testid={`public-home-actualite-image-${article.id}`} />
+                  <Image src={article.image} alt={article.title} width={96} height={96} sizes="96px" className="site-news-thumb-image" data-testid={`public-home-actualite-image-${article.id}`} />
                 </div>
                 <div className="site-news-copy">
                   <h3 className="site-news-title" data-testid={`public-home-actualite-title-${article.id}`}>

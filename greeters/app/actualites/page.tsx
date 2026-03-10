@@ -41,7 +41,7 @@ export default async function ActualitesPage() {
                 </div>
                 <div className="site-news-content">
                   <div className="site-news-thumb">
-                    <Image src={article.image} alt={article.title} width={96} height={96} className="site-news-thumb-image" data-testid={`actualites-public-image-${article.id}`} />
+                    <Image src={article.image} alt={article.title} width={96} height={96} sizes="96px" className="site-news-thumb-image" data-testid={`actualites-public-image-${article.id}`} />
                   </div>
                   <div className="site-news-copy">
                     <h2 className="site-news-title" data-testid={`actualites-public-title-${article.id}`}>{article.title}</h2>

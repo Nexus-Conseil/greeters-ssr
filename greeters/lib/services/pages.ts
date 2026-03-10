@@ -27,7 +27,9 @@ import {
   updatePageRecord,
 } from "@/lib/repositories/pages";
 import { listUsersByIds } from "@/lib/repositories/users";
+import { cleanupOrphanedManagedImages } from "@/lib/media/managed-images";
 import { syncMenuFromPublishedPages } from "@/lib/services/menu";
+import { automatePageSeoAndOg } from "@/lib/services/page-automation";
 import { normalizeLocale, type AppLocale } from "@/lib/i18n/config";
 
 export type CmsBlock = {
@@ -659,6 +661,11 @@ export async function createPage(input: unknown, user: AuthUser) {
 
   await syncMenuFromPublishedPages(user.id, payload.locale);
 
+  await automatePageSeoAndOg(serializePage(page)).catch((error) => {
+    console.error("Automatisation SEO/OG échouée à la création", error);
+  });
+  await cleanupOrphanedManagedImages();
+
   return serializePage(page);
 }
 
@@ -762,6 +769,8 @@ export async function updatePage(pageId: string, input: unknown, user: AuthUser)
     await syncMenuFromPublishedPages(user.id, mergedContent.locale);
   }
 
+  await cleanupOrphanedManagedImages();
+
   return serializePage(updatedPage);
 }
 
@@ -782,6 +791,7 @@ export async function removePage(pageId: string, user: AuthUser) {
   await deleteVersionsForPage(pageId);
   await deletePageRecord(pageId);
   await syncMenuFromPublishedPages(user.id, normalizeLocale(page.locale));
+  await cleanupOrphanedManagedImages();
 
   return { message: "Page supprimée avec succès." };
 }
@@ -898,6 +908,7 @@ export async function approvePendingChange(versionId: string, user: AuthUser) {
   await upsertPageContentRecord(version.pageId, toJsonValue(content));
 
   await syncMenuFromPublishedPages(user.id, content.locale);
+  await cleanupOrphanedManagedImages();
 
   return { message: "Modifications approuvées et publiées." };
 }
@@ -975,6 +986,7 @@ export async function rejectPendingChange(versionId: string, reason: string | nu
   }
 
   await syncMenuFromPublishedPages(user.id, normalizeLocale(page.locale));
+  await cleanupOrphanedManagedImages();
 
   return {
     message: "Modifications rejetées.",
@@ -1078,6 +1090,7 @@ export async function rollbackPage(pageId: string, versionNumber: number, user: 
   await upsertPageContentRecord(pageId, toJsonValue(content));
 
   await syncMenuFromPublishedPages(user.id, content.locale);
+  await cleanupOrphanedManagedImages();
 
   return {
     message: `Page restaurée à partir de la version ${versionNumber}.`,

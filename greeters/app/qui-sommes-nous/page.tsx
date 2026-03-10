@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { PublicPageShell } from "@/components/public/layout/PublicPageShell";
 import { PageTitleBand } from "@/components/public/pages/PageTitleBand";
 import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
+import { DynamicPageRenderer } from "@/components/cms/DynamicPageRenderer";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
 import { getRouteMetadata } from "@/lib/seo/public-metadata";
@@ -26,7 +27,7 @@ export default async function QuiSommesNousPage() {
       <>
         <StructuredDataScript page={seoPage ?? { title, slug: "qui-sommes-nous", metaDescription: "Association Paris Greeters" }} locale={locale} path="qui-sommes-nous" />
         <PageTitleBand title={title} testId="qui-sommes-nous-public-page-title" />
-        <div className="site-container site-content-section" data-testid="qui-sommes-nous-public-page-content">
+        {seoPage ? <div className="site-container site-content-section" data-testid="qui-sommes-nous-public-page-cms-content"><DynamicPageRenderer page={seoPage} /></div> : <div className="site-container site-content-section" data-testid="qui-sommes-nous-public-page-content">
           <section className="site-info-panel" data-testid="qui-sommes-nous-intro-panel">
             <p>
               Association loi 1901 à but non lucratif, <strong>« Parisien d'un jour – Paris Greeters »</strong> organise des balades gratuites dans la ville de Paris ou dans les communes alentours, accessibles par le métro, hors des sentiers battus et loin des grands axes touristiques.
@@ -61,7 +62,7 @@ export default async function QuiSommesNousPage() {
             <h3 className="site-card-title" data-testid="qui-sommes-nous-warning-title">Important</h3>
             <p>Les visites proposées par les Greeters sont uniquement des balades amicales dans un quartier fréquenté régulièrement par le Greeter. Nous ne proposons aucune visite de musée ou nécessitant une expertise spécifique.</p>
           </section>
-        </div>
+        </div>}
       </>
     </PublicPageShell>
   );
