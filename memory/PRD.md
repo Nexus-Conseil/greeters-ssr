@@ -53,6 +53,7 @@
 - Reprise de la passe UI/UX publique à partir de la CSR : topbar avec CTA glow animé, retour haut avec easing progressif, toggle mobile du header en crossfade icône/MENU, footer plus fidèle avec icônes sociales et barre basse animée.
 - Le footer public est maintenant conditionnel comme dans la CSR : partenaires visibles sur `/`, masqués sur `/galerie` tandis que le bloc social reste affiché selon la route.
 - Intégration de MultiLipi dans le `head` global avec les 9 liens `hreflang` de production `greeters.nexus-conseil.ch` + script exact fourni par l’utilisateur (`726562fe-f615-404a-b985-a73e661ee3dc`).
+- Passe pixel-perfect finale route par route sur le frontend public : navigation desktop renforcée avec fallback fidèle à la CSR, `/actualites` et `/galerie` converties en titres blancs centrés sans bandeau vert, grille d’actualités image-top restaurée, containers étroits rétablis sur les pages institutionnelles, formulaire contact et largeurs des pages rapprochés de la CSR.
 
 ## Validation réalisée
 - `eslint` OK sur `/app/greeters`
@@ -87,6 +88,8 @@
 - Validation frontend ciblée OK : `/app/test_reports/iteration_14.json`
   - home visible, topbar/header/footer ajustés, footer conditionnel, MultiLipi présent dans le `head` : PASS
   - note de test : les erreurs MultiLipi en localhost sont attendues tant que le domaine autorisé de production n’est pas utilisé
+- Validation frontend finale OK via agent UI + smoke tests locaux
+  - navigation complète, `/actualites` et `/galerie` conformes, pages à bandeau vert cohérentes, menu mobile OK, aucun écran blanc
 
 ## Blocages connus
 - Aucun blocage majeur sur le flux contact : Emailit est opérationnel sur l’environnement actuel.
@@ -97,6 +100,7 @@
 - Réduire les derniers écarts pixel-perfect visibles entre la SSR et `https://greeters.paris`, route par route.
 - Finaliser la parité visuelle ultra-fine sur davantage de pages secondaires et sur encore plus de tailles d’écran réelles si l’utilisateur veut une passe de finition exhaustive.
 - Valider MultiLipi sur le domaine autorisé final `greeters.nexus-conseil.ch` : en local/preview, la CORS de MultiLipi reste attendue.
+- Vérifier en production si MultiLipi réécrit réellement les balises SEO/OG par locale servie, au lieu de supposer une traduction automatique du `<head>`.
 - Étendre si souhaité l’automatisation SEO/OG au-delà du corpus FR initial vers toutes les locales préremplies.
 
 ## P1
@@ -114,7 +118,7 @@
 
 ## Next tasks
 1. Mener une dernière passe pixel-perfect exhaustive page par page / écran par écran si l’utilisateur veut une quasi-parité stricte finale.
-2. Valider MultiLipi sur le vrai domaine autorisé puis ajuster si la plateforme impose des sélecteurs/slug metadata supplémentaires.
+2. Valider MultiLipi sur le vrai domaine autorisé puis vérifier explicitement si les méta SEO/OG changent bien par sous-domaine/locale côté HTML servi.
 3. Étendre l’automatisation SEO/OG multilingue à toutes les locales préremplies si souhaité.
 4. Continuer à remplacer les derniers contenus statiques par des contenus CMS structurés, notamment sur les pages institutionnelles détaillées.
 5. Ajuster la stratégie SEO finale (pages à indexer/non indexer, priorités, éventuelles pages utilitaires à exclure).
