@@ -102,7 +102,92 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Teste le frontend Next.js Greeters sur http://127.0.0.1:3100 avec focus sur les changements récents. Vérifier: 1) /contact charge avec shell public complet, 2) Formulaire de contact fonctionne, 3) Bandeau d'erreur SendGrid quota/crédit s'affiche correctement, 4) Pas de faux succès mocké, 5) Smoke test routes publiques, 6) data-testid critiques présents."
+user_problem_statement: "Teste le backend Next.js Greeters sur http://127.0.0.1:3100 pour les flux critiques récents. Cas à vérifier: 1) POST /api/contact/send avec payload valide doit appeler la vraie intégration SendGrid et NE PAS être mocké, 2) Si SendGrid refuse pour quota/crédit, l'API doit renvoyer une erreur explicite en français (pas un succès), 3) Validation backend du formulaire contact, 4) POST /api/auth/login avec credentials fournis, 5) POST /api/ai/page-generator avec clé Gemini, 6) Conversation multi-tour avec sessionId, 7) GET /sitemap.xml XML valide, 8) GET /api/menu après authentification."
+
+backend:
+  - task: "Contact form with real SendGrid integration"
+    implemented: true
+    working: true
+    file: "/app/greeters/app/api/contact/send/route.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASS: Real SendGrid integration working correctly. API returns 429 status with French error message 'L'envoi email est temporairement indisponible : le compte SendGrid a atteint son quota/crédit.' This confirms the integration is NOT mocked and properly handles SendGrid quota errors."
+
+  - task: "Contact form payload validation"
+    implemented: true
+    working: true
+    file: "/app/greeters/app/api/contact/send/route.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASS: Backend validation working correctly. Invalid payload (missing required fields) returns proper 400 error with French message 'Merci de renseigner un nom, un email valide, un sujet et un message.'"
+
+  - task: "Authentication login endpoint"
+    implemented: true
+    working: true
+    file: "/app/greeters/app/api/auth/login/route.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASS: Authentication working perfectly with provided credentials (contact@nexus-conseil.ch / Greeters&58!2026). Returns 200 with user data (User: Nexus Conseil) and proper session expiration (7 days). Session cookies properly set for authenticated requests."
+
+  - task: "AI page generator with Gemini"
+    implemented: true
+    working: true
+    file: "/app/greeters/app/api/ai/page-generator/route.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASS: AI page generation working with current Gemini API key. Successfully generates pages with proper structure including sessionId and generatedPage with title. Requires editor permissions (working correctly)."
+
+  - task: "AI multi-turn conversation"
+    implemented: true
+    working: true
+    file: "/app/greeters/app/api/ai/page-generator/route.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASS: Multi-turn conversation working correctly with sessionId persistence. First call creates session, second call with same sessionId properly maintains conversation history. Message count increases from 2 to 4 messages as expected."
+
+  - task: "Sitemap XML generation"
+    implemented: true
+    working: true
+    file: "/app/greeters/app/sitemap.xml/route.ts"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASS: Sitemap XML endpoint working correctly. Returns valid XML with proper Content-Type: application/xml; charset=utf-8 and cache headers. XML parses correctly without errors."
+
+  - task: "Authenticated menu endpoint"
+    implemented: true
+    working: true
+    file: "/app/greeters/app/api/menu/route.ts"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASS: Menu endpoint working after authentication. Returns proper JSON data structure. Authentication requirement properly enforced."
 
 frontend:
   - task: "Contact page loads with full public shell"
@@ -167,14 +252,16 @@ frontend:
 
 metadata:
   created_by: "testing_agent"
-  version: "1.0"
-  test_sequence: 1
-  run_ui: true
+  version: "2.0"
+  test_sequence: 2
+  run_ui: false
   test_date: "2026-03-10"
+  backend_test_completed: true
 
 test_plan:
   current_focus:
-    - "All tests completed successfully"
+    - "All backend tests completed successfully"
+    - "Frontend tests from previous iteration also completed"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
@@ -182,3 +269,5 @@ test_plan:
 agent_communication:
     - agent: "testing"
       message: "Complete testing of Greeters Next.js frontend completed successfully. All 6 test scenarios passed. Key finding: SendGrid quota error handling is working correctly with proper error message display (NOT mocked). Contact form properly handles real API errors with user-facing error banner. All public routes load correctly with full shell components. No critical issues found."
+    - agent: "testing"
+      message: "BACKEND TESTING COMPLETE: All 7 backend API endpoints tested successfully on http://127.0.0.1:3100. Key findings: 1) SendGrid integration is REAL (not mocked) - properly returns 429 quota error in French, 2) Authentication working with provided credentials, 3) AI page generator working with current Gemini API key, 4) Multi-turn AI conversations maintain session state, 5) All validation and error handling working correctly. No critical backend issues found - all flows operational."
