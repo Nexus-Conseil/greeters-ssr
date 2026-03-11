@@ -55,6 +55,8 @@
 - Intégration de MultiLipi dans le `head` global avec les 9 liens `hreflang` de production `greeters.nexus-conseil.ch` + script exact fourni par l’utilisateur (`726562fe-f615-404a-b985-a73e661ee3dc`).
 - Passe pixel-perfect finale route par route sur le frontend public : navigation desktop renforcée avec fallback fidèle à la CSR, `/actualites` et `/galerie` converties en titres blancs centrés sans bandeau vert, grille d’actualités image-top restaurée, containers étroits rétablis sur les pages institutionnelles, formulaire contact et largeurs des pages rapprochés de la CSR.
 - Correctif critique du preview Emergent : le service `/app/frontend` proxyfiait toutes les routes non-API vers `127.0.0.1:3100` sans serveur derrière, ce qui causait `Error occurred while trying to proxy`. Le proxy démarre désormais automatiquement l’app Next.js `/app/greeters` sur `3100`, puis sert correctement les routes publiques via le port preview `3000`.
+- Passe performance mobile orientée production : baisse agressive des qualités d’images publiques, tailles `sizes` plus fines par contexte (hero / demi-colonne / cartes / galerie), suppression du `unoptimized` sur la vignette vidéo, désactivation du prefetch non critique sur de nombreux liens visibles, `content-visibility` sur les sections sous la ligne de flottaison et réduction des animations continues sur mobile.
+- Mise en cache serveur du contenu public : `findPublicPageBySlug`, `getMenu` et `getHomePageContent` sont maintenant appuyés sur `unstable_cache` avec tags de revalidation ; les mutations CMS/menu revalident ces tags automatiquement.
 
 ## Validation réalisée
 - `eslint` OK sur `/app/greeters`
@@ -94,6 +96,10 @@
 - Validation preview interne OK
   - `http://127.0.0.1:3000/` et `/actualites` répondent maintenant en `200` via le proxy preview
   - screenshot smoke OK via le port preview `3000`
+- Validation performance locale en mode production
+  - `yarn build` OK puis Lighthouse mobile local sur `next start` : score stabilisé **96–97/100**, avec un meilleur run à **97/100**
+  - TTFB local de la home abaissé à ~20–30 ms après mise en cache, LCP mobile mesuré autour de ~2.6 s sur le meilleur run
+- Validation frontend après optimisation performance : agent UI OK sur `/`, `/actualites`, `/galerie` + menu mobile, sans régression fonctionnelle ni visuelle majeure
 
 ## Blocages connus
 - Aucun blocage majeur sur le flux contact : Emailit est opérationnel sur l’environnement actuel.
@@ -107,6 +113,7 @@
 - Vérifier en production si MultiLipi réécrit réellement les balises SEO/OG par locale servie, au lieu de supposer une traduction automatique du `<head>`.
 - Étendre si souhaité l’automatisation SEO/OG au-delà du corpus FR initial vers toutes les locales préremplies.
 - Vérifier côté utilisateur que l’onglet Preview Emergent s’est bien réinitialisé après le correctif (refresh complet / réouverture si cache navigateur côté UI plateforme).
+- Mesurer le vrai domaine de production une fois branché, car MultiLipi autorisé en prod pourra encore coûter quelques points Lighthouse réels.
 
 ## P1
 - Étendre le sitemap dynamique avec toutes les pages/articles réellement souhaités au référencement final.
@@ -127,3 +134,4 @@
 3. Étendre l’automatisation SEO/OG multilingue à toutes les locales préremplies si souhaité.
 4. Continuer à remplacer les derniers contenus statiques par des contenus CMS structurés, notamment sur les pages institutionnelles détaillées.
 5. Ajuster la stratégie SEO finale (pages à indexer/non indexer, priorités, éventuelles pages utilitaires à exclure).
+6. Refaire une passe Lighthouse sur le domaine de production réel et décider ensuite, si nécessaire, d’un traitement spécifique de MultiLipi pour viser 98–100 mobile.
