@@ -10,6 +10,7 @@ import {
   VOLUNTEER_REQUIREMENTS,
   WHO_WE_ARE_VALUES,
 } from "@/lib/public-pages-data";
+import { revalidatePublicSiteCache } from "@/lib/cache/public-site";
 import { HOME_PAGE_FALLBACK } from "@/lib/public-site-data";
 import { upsertHomeSectionRecord } from "@/lib/repositories/home-sections";
 import { findPageBySlug } from "@/lib/repositories/pages";
@@ -412,6 +413,8 @@ export async function bootstrapPublicContent(user: AuthUser) {
     await updateMenu(buildMenuItems(locale), user.id, locale);
     report.menusUpdated += 1;
   }
+
+  await revalidatePublicSiteCache();
 
   return report;
 }

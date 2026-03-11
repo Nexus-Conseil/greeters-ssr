@@ -1,8 +1,10 @@
 import { PageStatus, type Page, type PageVersion, type Prisma } from "@prisma/client";
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 
 import { AuthError, isAdminRole } from "@/lib/auth/permissions";
 import type { AuthUser } from "@/lib/auth/session";
+import { revalidatePublicSiteCache, PUBLIC_SITE_CACHE_TAGS } from "@/lib/cache/public-site";
 import { deletePageContentByPageId, upsertPageContentRecord } from "@/lib/repositories/page-contents";
 import { deletePageEditsByPageId } from "@/lib/repositories/page-edits";
 import { deletePagePreviewsByPageId } from "@/lib/repositories/page-previews";
@@ -595,7 +597,8 @@ export async function getPublicPageBySlugOrThrow(slug: string, locale: AppLocale
   return serializePage(page);
 }
 
-export const findPublicPageBySlug = cache(async (slug: string, locale: AppLocale) => {
+const findPublicPageBySlugCached = unstable_cache(
+  async (slug: string, locale: AppLocale) => {
   const normalizedSlug = normalizeSlug(slug);
   const page = await findPageBySlug(normalizedSlug, locale);
 
@@ -604,7 +607,15 @@ export const findPublicPageBySlug = cache(async (slug: string, locale: AppLocale
   }
 
   return serializePage(page);
-});
+  },
+  ["find-public-page-by-slug"],
+  {
+    revalidate: 300,
+    tags: [PUBLIC_SITE_CACHE_TAGS.pages],
+  },
+);
+
+export const findPublicPageBySlug = cache(async (slug: string, locale: AppLocale) => findPublicPageBySlugCached(slug, locale));
 
 export async function createPage(input: unknown, user: AuthUser) {
   const payload = parsePageInput(input);
@@ -666,6 +677,7 @@ export async function createPage(input: unknown, user: AuthUser) {
     console.error("Automatisation SEO/OG échouée à la création", error);
   });
   await cleanupOrphanedManagedImages();
+  await revalidatePublicSiteCache();
 
   return getPageByIdOrThrow(page.id);
 }
@@ -771,6 +783,7 @@ export async function updatePage(pageId: string, input: unknown, user: AuthUser)
   }
 
   await cleanupOrphanedManagedImages();
+  await revalidatePublicSiteCache();
 
   return serializePage(updatedPage);
 }
@@ -793,6 +806,7 @@ export async function removePage(pageId: string, user: AuthUser) {
   await deletePageRecord(pageId);
   await syncMenuFromPublishedPages(user.id, normalizeLocale(page.locale));
   await cleanupOrphanedManagedImages();
+  await revalidatePublicSiteCache();
 
   return { message: "Page supprimée avec succès." };
 }
@@ -910,6 +924,7 @@ export async function approvePendingChange(versionId: string, user: AuthUser) {
 
   await syncMenuFromPublishedPages(user.id, content.locale);
   await cleanupOrphanedManagedImages();
+  await revalidatePublicSiteCache();
 
   return { message: "Modifications approuvées et publiées." };
 }
@@ -988,6 +1003,7 @@ export async function rejectPendingChange(versionId: string, reason: string | nu
 
   await syncMenuFromPublishedPages(user.id, normalizeLocale(page.locale));
   await cleanupOrphanedManagedImages();
+  await revalidatePublicSiteCache();
 
   return {
     message: "Modifications rejetées.",
@@ -1092,6 +1108,7 @@ export async function rollbackPage(pageId: string, versionNumber: number, user: 
 
   await syncMenuFromPublishedPages(user.id, content.locale);
   await cleanupOrphanedManagedImages();
+  await revalidatePublicSiteCache();
 
   return {
     message: `Page restaurée à partir de la version ${versionNumber}.`,
