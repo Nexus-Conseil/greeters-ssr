@@ -124,3 +124,7 @@ greeters/.next/dev/cache/turbopack/23c46498/00003237.sst
 greeters/.next/dev/cache/turbopack/23c46498/00003269.sst
 greeters/.next/dev/cache/turbopack/23c46498/00003268.sst
 greeters/.next/dev/cache/turbopack/23c46498/00003288.sst
+-e 
+# Environment files
+*.env
+*.env.*
