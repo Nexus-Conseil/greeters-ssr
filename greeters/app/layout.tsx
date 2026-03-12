@@ -25,6 +25,8 @@ const scriptFont = Pacifico({
   weight: "400",
 });
 
+const ENABLE_MULTILIPI = process.env.NEXT_PUBLIC_ENABLE_MULTILIPI === "1";
+
 export const metadata: Metadata = {
   title: "Paris Greeters — Balades gratuites avec un local",
   description: "Découvrez Paris autrement avec les Greeters : des balades gratuites, humaines et locales au cœur de la ville.",
@@ -54,14 +56,16 @@ export default async function RootLayout({
         data-testid="app-root-layout"
       >
         {children}
-        <Script
-          src="https://script-cdn.multilipi.com/static/JS/page_translations.js"
-          strategy="lazyOnload"
-          crossOrigin="anonymous"
-          data-pos-x="50"
-          data-pos-y="50"
-          {...{ mode: "auto", "multilipi-key": "726562fe-f615-404a-b985-a73e661ee3dc" }}
-        />
+        {ENABLE_MULTILIPI ? (
+          <Script
+            src="https://script-cdn.multilipi.com/static/JS/page_translations.js"
+            strategy="lazyOnload"
+            crossOrigin="anonymous"
+            data-pos-x="50"
+            data-pos-y="50"
+            {...{ mode: "auto", "multilipi-key": "726562fe-f615-404a-b985-a73e661ee3dc" }}
+          />
+        ) : null}
       </body>
     </html>
   );
