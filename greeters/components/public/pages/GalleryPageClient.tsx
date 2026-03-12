@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
-
-import { IMAGE_QUALITY_GALLERY, PUBLIC_GALLERY_GRID_SIZES_ATTR, PUBLIC_LIGHTBOX_IMAGE_SIZES_ATTR } from "@/lib/media/config";
+import { IMAGE_QUALITY_GALLERY, PUBLIC_GALLERY_GRID_SIZES_ATTR } from "@/lib/media/config";
 import { useState } from "react";
 
 import type { GalleryImage } from "@/lib/public-site-data";
+
+import { ProgressiveImage } from "../media/ProgressiveImage";
 
 export const GalleryPageClient = ({ items }: { items: GalleryImage[] }) => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -16,7 +16,11 @@ export const GalleryPageClient = ({ items }: { items: GalleryImage[] }) => {
         <div className="site-gallery-grid site-gallery-grid-page" data-testid="gallery-page-grid">
           {items.map((item, index) => (
             <button key={item.id} type="button" className="site-gallery-card" onClick={() => setActiveIndex(index)} data-testid={`gallery-page-card-${item.id}`}>
-              <Image src={item.src} alt={item.title} width={520} height={520} sizes={PUBLIC_GALLERY_GRID_SIZES_ATTR} quality={IMAGE_QUALITY_GALLERY} className="site-gallery-image" data-testid={`gallery-page-image-${item.id}`} />
+              <ProgressiveImage src={item.src} alt={item.title} sizes={PUBLIC_GALLERY_GRID_SIZES_ATTR} lowQuality={34} highQuality={IMAGE_QUALITY_GALLERY} className="site-gallery-image" wrapperClassName="site-progressive-image-fill" />
+              <span className="site-gallery-overlay">
+                <strong>{item.title}</strong>
+                <small>{item.date}</small>
+              </span>
             </button>
           ))}
         </div>
@@ -32,7 +36,11 @@ export const GalleryPageClient = ({ items }: { items: GalleryImage[] }) => {
               ‹
             </button>
             <div className="site-lightbox-media">
-              <Image src={items[activeIndex].src} alt={items[activeIndex].title} width={1200} height={900} sizes={PUBLIC_LIGHTBOX_IMAGE_SIZES_ATTR} quality={IMAGE_QUALITY_GALLERY} className="site-lightbox-image" data-testid="gallery-page-lightbox-image" />
+              <img src={items[activeIndex].src} alt={items[activeIndex].title} className="site-lightbox-image" data-testid="gallery-page-lightbox-image" />
+              <div className="site-lightbox-copy" data-testid="gallery-page-lightbox-copy">
+                <strong>{items[activeIndex].title}</strong>
+                <span>{items[activeIndex].date}</span>
+              </div>
             </div>
             <button type="button" className="site-lightbox-arrow is-right" onClick={() => setActiveIndex((value) => (value === null ? 0 : (value + 1) % items.length))} data-testid="gallery-page-next-button">
               ›

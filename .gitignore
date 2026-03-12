@@ -105,3 +105,4 @@ greeters/node_modules/@next/swc-linux-arm64-gnu/next-swc.linux-arm64-gnu.node
 *.env.*
 .greeters-csr-ref/.git/objects/pack/pack-2e3d8baf9c1e5650e96a60fb31f3565f9b0f21b1.pack
 greeters/.next/dev/cache/turbopack/23c46498/00001653.sst
+greeters/.next/dev/cache/turbopack/23c46498/00001967.sst
