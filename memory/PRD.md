@@ -60,7 +60,9 @@
 - Protocole Lighthouse mobile automatisé ajouté : script `scripts/lighthouse-mobile-reference.sh` + documentation `docs/lighthouse-mobile-protocol.md`, avec campagnes multi-runs, synthèse best/median/average/worst et seuil médian configurable pour détecter les régressions.
 - Ajustements UI supplémentaires : espacement accru entre le titre social du footer et les icônes, bouton CMS de `/devenez-benevole` harmonisé avec les CTA glow verts du site, galerie resserrée et rapprochée visuellement du live (titre, container, coins, rythme vertical).
 - Diagnostic chatbot confirmé : le chatbot public n’a pas “cassé”, il n’a simplement pas été porté dans la SSR ; il existe dans la CSR de référence mais n’est pas monté dans l’app publique Next.js actuelle.
-- Nouvelle passe UI demandée par l’utilisateur : tous les CTA/contrôles publics visibles sont désormais en rectangles à coins arrondis (plus de pilules), avec conservation des animations subtiles ; espacement augmenté sous « Venez en visiteur, repartez en ami ! » sur l’accueil ; `Nos partenaires` centré avec logos plus petits et plus nets ; page `/presse` réduite à une seule image ; suppression des noms/années/légendes sur galerie/lightbox/captions CMS ; alternance blanc/gris clair renforcée sur les sections publiques et les sections CMS non colorées.
+- Nouvelle passe UI demandée par l’utilisateur : tous les CTA/contrôles publics visibles sont désormais en rectangles à coins arrondis (plus de pilules), avec conservation des animations subtiles ; espacement augmenté sous « Venez en visiteur, repartez en ami ! » sur l’accueil ; `Nos partenaires` centré avec logos plus petits et plus nets ; alternance blanc/gris clair renforcée sur les sections publiques et les sections CMS non colorées. Certaines décisions intermédiaires de ce lot ont ensuite été remplacées par le réalignement strict sur la production.
+- Reprise stricte alignée sur la production : `/presse` a été restaurée vers une structure fidèle au live/CSR (dossier de presse + grille de photos + contact presse), les overlays/titres/années de `/galerie` et de la lightbox ont été remis comme sur la CSR/live, et les fonds alternés des pages à sections étroites sont désormais rendus en bandes pleine largeur derrière un contenu contraint et margé.
+- Dispositif d’images progressives ajouté sur les galeries/presse : vignettes basse qualité initiales sous la ligne de flottaison, puis rechargement silencieux en haute qualité via `IntersectionObserver` quand l’utilisateur approche de la zone visible ; l’above-the-fold reste en chargement qualitatif direct.
 
 ## Validation réalisée
 - `eslint` OK sur `/app/greeters`
@@ -113,9 +115,13 @@
   - boutons non pilules PASS
   - espacement homepage avant vidéo PASS
   - footer partenaires centré / logos propres PASS
-  - `/presse` une seule image PASS
-  - `/galerie` sans noms/années/légendes PASS
+  - lot intermédiaire validé puis remplacé ensuite par un réalignement strict production
   - alternance blanc / gris clair PASS
+- Validation finale après réalignement strict production OK par agent frontend
+  - `/presse` structure live/CSR PASS (plusieurs images + blocs attendus)
+  - `/galerie` overlays + lightbox conformes PASS
+  - bandes pleine largeur sur `/contact` et `/presse` PASS
+  - chargement progressif des images galerie détecté et stable PASS
 
 ## Blocages connus
 - Aucun blocage majeur sur le flux contact : Emailit est opérationnel sur l’environnement actuel.
@@ -132,6 +138,7 @@
 - Mesurer le vrai domaine de production une fois branché, car MultiLipi autorisé en prod pourra encore coûter quelques points Lighthouse réels.
 - Décider si le chatbot public historique doit être restauré à l’identique depuis la CSR dans la SSR publique.
 - Restaurer le chatbot public historique si l’utilisateur confirme qu’il doit revenir dans la SSR.
+- Re-mesurer la production réelle après l’ajout du chargement progressif des images pour confirmer l’impact Lighthouse mobile.
 
 ## P1
 - Étendre le sitemap dynamique avec toutes les pages/articles réellement souhaités au référencement final.
@@ -155,3 +162,4 @@
 6. Refaire une passe Lighthouse sur le domaine de production réel et décider ensuite, si nécessaire, d’un traitement spécifique de MultiLipi pour viser 98–100 mobile.
 7. Si souhaité par l’utilisateur, porter ensuite le chatbot public depuis la CSR vers la SSR avec comportement et style équivalents.
 8. Lancer la baseline Lighthouse de production et fixer le budget de release définitif.
+9. Si l’utilisateur le souhaite, poursuivre le réalignement ultra-strict des dernières micro-différences visuelles encore perçues par rapport au live.
