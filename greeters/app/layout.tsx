@@ -23,6 +23,7 @@ const scriptFont = Pacifico({
   variable: "--font-script",
   subsets: ["latin"],
   weight: "400",
+  preload: false,
 });
 
 const ENABLE_MULTILIPI = process.env.NEXT_PUBLIC_ENABLE_MULTILIPI === "1";

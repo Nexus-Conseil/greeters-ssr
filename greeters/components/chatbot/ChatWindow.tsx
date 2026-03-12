@@ -7,7 +7,7 @@ import ReactMarkdown from "react-markdown";
 const BACKEND_URL = process.env.NEXT_PUBLIC_CHAT_API_URL || "";
 
 const TRANSLATIONS: Record<string, { placeholder: string; welcome: string }> = {
-  fr: { placeholder: "Posez votre question...", welcome: "Bonjour ! 👋 Enchanté de vous accueillir." },
+  fr: { placeholder: "Posez votre question...", welcome: "Bonjour ! 👋 Vous avez envie de profiter d'une balade à Paris avec un Greeters ? Qu'est-ce qui vous plairait tout particulièrement ? 😊" },
   en: { placeholder: "Ask your question...", welcome: "Hello! How can I help you?" },
   de: { placeholder: "Stellen Sie Ihre Frage...", welcome: "Hallo! Wie kann ich Ihnen helfen?" },
   es: { placeholder: "Haga su pregunta...", welcome: "¡Hola! ¿Cómo puedo ayudarte?" },

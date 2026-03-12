@@ -30,6 +30,8 @@ Installer ce site Next.js en SSR : https://github.com/Nexus-Conseil/greeters-ssr
 - Persistance des échanges chatbot dans MongoDB (`chat_messages`)
 - Correction des warnings `next/image` sur `images.qualities`
 - Désactivation conditionnelle du script Multilipi en preview/local pour supprimer les erreurs console critiques
+- Nettoyage du warning console lié au preload de police (`Pacifico`) côté Next.js
+- Ajustement du chatbot : sélecteur de langue à 50px et nouveau message d’accueil frontend
 - Vérifications réalisées : `/`, `/contact`, `/qui-sommes-nous`, `/galerie` répondent en 200 ; chatbot visible, ouvrable et répondant côté UI et API
 
 ## Backlog priorisé
@@ -47,7 +49,6 @@ Installer ce site Next.js en SSR : https://github.com/Nexus-Conseil/greeters-ssr
 - Nettoyer les artefacts non essentiels de la branche (dump, anciens tests, fichiers historiques)
 - Revoir le packaging du repo pour éviter le mélange template parent / app Next cible
 - Ajouter une procédure d'import de données claire et reproductible
-- Nettoyer le warning mineur de preload de police remonté par les tests
 
 ## Next tasks
 1. Préparer une version de merge ciblé de `1203` contenant seulement les fichiers utiles
