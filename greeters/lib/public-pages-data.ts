@@ -86,7 +86,7 @@ export const GALLERY_PAGE_IMAGES: GalleryImage[] = [
   { id: "gallery-page-9", title: "Paris slider 4", date: "2024", src: "/images/uploads/slider-home-4.jpg" },
   { id: "gallery-page-10", title: "Bannière Greeters 1", date: "2024", src: "/images/uploads/greeters-banner-1.jpg" },
   { id: "gallery-page-11", title: "Bannière Greeters 2", date: "2024", src: "/images/uploads/greeters-banner-2.jpg" },
-  { id: "gallery-page-12", title: "Bannière Greeters 3", date: "2024", src: "/images/uploads/greeters-banner-3.jpg" },
+  { id: "gallery-page-12", title: "Paris vue panoramique", date: "2024", src: "/images/uploads/hero-main.webp" },
 ];
 
 export const WHO_WE_ARE_VALUES = [

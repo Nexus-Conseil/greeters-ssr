@@ -23,16 +23,10 @@ export const GalleryPageClient = ({ items }: { items: GalleryImage[] }) => {
               <img
                 src={item.src}
                 alt={item.title}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
                 decoding="async"
               />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-end">
-                <div className="p-3 opacity-0 group-hover:opacity-100 transition-opacity w-full">
-                  <p className="text-white text-sm truncate">{item.title}</p>
-                  <p className="text-white/70 text-xs">{item.date}</p>
-                </div>
-              </div>
             </div>
           ))}
         </div>

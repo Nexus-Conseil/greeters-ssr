@@ -44,6 +44,7 @@ api_router = APIRouter(prefix="/api")
 auth_router = APIRouter(prefix="/auth", tags=["Authentication"])
 pages_router = APIRouter(prefix="/pages", tags=["Pages"])
 menu_router = APIRouter(prefix="/menu", tags=["Menu"])
+chat_router = APIRouter(prefix="/chat", tags=["Chat"])
 
 security = HTTPBearer(auto_error=False)
 
@@ -68,6 +69,14 @@ class MenuItem(BaseModel):
     label: str
     href: str
     order: int
+
+class ChatMessage(BaseModel):
+    session_id: str
+    message: str
+    language: str = "fr"
+
+# Chat sessions storage (in-memory for simplicity)
+chat_sessions: Dict[str, List[Dict[str, str]]] = {}
 
 # ============ SESSION HELPERS ============
 
@@ -303,6 +312,105 @@ async def get_menu(locale: str = "fr"):
     finally:
         conn.close()
 
+# ============ CHAT ROUTES ============
+
+SYSTEM_PROMPTS = {
+    "fr": """Tu es l'assistant virtuel de Paris Greeters, une association de bénévoles qui propose des balades gratuites dans Paris avec des habitants passionnés.
+
+Ton rôle:
+- Répondre aux questions sur les balades Greeters
+- Expliquer comment réserver une balade
+- Présenter l'association et ses valeurs
+- Donner des informations pratiques sur Paris
+
+Informations clés:
+- Les balades sont GRATUITES et durent 2-3 heures
+- Les Greeters sont des bénévoles passionnés par Paris
+- Réservation sur le site, au moins 2 semaines à l'avance
+- Groupes de 1 à 6 personnes maximum
+- URL de réservation: https://gestion.parisiendunjour.fr/visits/new
+
+Sois chaleureux, enthousiaste et serviable. Réponds en français de manière concise.""",
+    
+    "en": """You are the virtual assistant for Paris Greeters, an association of volunteers offering free walks in Paris with passionate locals.
+
+Your role:
+- Answer questions about Greeter walks
+- Explain how to book a walk
+- Present the association and its values
+- Give practical information about Paris
+
+Key information:
+- Walks are FREE and last 2-3 hours
+- Greeters are volunteers passionate about Paris
+- Book on the website, at least 2 weeks in advance
+- Groups of 1 to 6 people maximum
+- Booking URL: https://gestion.parisiendunjour.fr/visits/new
+
+Be warm, enthusiastic and helpful. Respond in English concisely.""",
+}
+
+@chat_router.post("/message")
+async def chat_message(msg: ChatMessage):
+    if not GEMINI_API_KEY:
+        return {"content": "Désolé, le service de chat n'est pas configuré."}
+    
+    session_id = msg.session_id
+    language = msg.language if msg.language in SYSTEM_PROMPTS else "fr"
+    
+    # Initialize session if needed
+    if session_id not in chat_sessions:
+        chat_sessions[session_id] = []
+    
+    # Add user message to history
+    chat_sessions[session_id].append({"role": "user", "content": msg.message})
+    
+    # Build conversation for Gemini
+    system_prompt = SYSTEM_PROMPTS.get(language, SYSTEM_PROMPTS["fr"])
+    
+    contents = []
+    for m in chat_sessions[session_id][-10:]:  # Last 10 messages
+        contents.append({
+            "role": "user" if m["role"] == "user" else "model",
+            "parts": [{"text": m["content"]}]
+        })
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}",
+                json={
+                    "systemInstruction": {"parts": [{"text": system_prompt}]},
+                    "contents": contents,
+                    "generationConfig": {
+                        "temperature": 0.7,
+                        "topP": 0.9,
+                        "maxOutputTokens": 500
+                    }
+                }
+            )
+        
+        if response.status_code != 200:
+            logger.error(f"Gemini API error: {response.text}")
+            return {"content": "Désolé, une erreur s'est produite. Veuillez réessayer."}
+        
+        data = response.json()
+        assistant_text = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+        
+        if not assistant_text:
+            return {"content": "Désolé, je n'ai pas pu générer de réponse."}
+        
+        # Add assistant response to history
+        chat_sessions[session_id].append({"role": "assistant", "content": assistant_text})
+        
+        return {"content": assistant_text}
+        
+    except httpx.TimeoutException:
+        return {"content": "Désolé, la requête a expiré. Veuillez réessayer."}
+    except Exception as e:
+        logger.error(f"Chat error: {e}")
+        return {"content": "Désolé, une erreur s'est produite."}
+
 # ============ ROOT ROUTES ============
 
 @api_router.get("/")
@@ -322,6 +430,7 @@ async def health():
 api_router.include_router(auth_router)
 api_router.include_router(pages_router)
 api_router.include_router(menu_router)
+api_router.include_router(chat_router)
 app.include_router(api_router)
 
 app.add_middleware(
