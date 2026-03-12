@@ -5,6 +5,7 @@ import { HomePage } from "@/components/public/home/HomePage";
 import { Footer } from "@/components/public/layout/Footer";
 import { Header } from "@/components/public/layout/Header";
 import { TopBar } from "@/components/public/layout/TopBar";
+import { ChatBotLoader } from "@/components/chatbot/ChatBotLoader";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getRouteMetadata } from "@/lib/seo/public-metadata";
 import { findPublicPageBySlug } from "@/lib/services/pages";
@@ -31,6 +32,7 @@ export default async function Home() {
       />
       <HomePage locale={locale} />
       <Footer />
+      <ChatBotLoader />
     </main>
   );
 }
