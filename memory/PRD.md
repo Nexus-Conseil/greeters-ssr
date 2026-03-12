@@ -57,6 +57,9 @@
 - Correctif critique du preview Emergent : le service `/app/frontend` proxyfiait toutes les routes non-API vers `127.0.0.1:3100` sans serveur derrière, ce qui causait `Error occurred while trying to proxy`. Le proxy démarre désormais automatiquement l’app Next.js `/app/greeters` sur `3100`, puis sert correctement les routes publiques via le port preview `3000`.
 - Passe performance mobile orientée production : baisse agressive des qualités d’images publiques, tailles `sizes` plus fines par contexte (hero / demi-colonne / cartes / galerie), suppression du `unoptimized` sur la vignette vidéo, désactivation du prefetch non critique sur de nombreux liens visibles, `content-visibility` sur les sections sous la ligne de flottaison et réduction des animations continues sur mobile.
 - Mise en cache serveur du contenu public : `findPublicPageBySlug`, `getMenu` et `getHomePageContent` sont maintenant appuyés sur `unstable_cache` avec tags de revalidation ; les mutations CMS/menu revalident ces tags automatiquement.
+- Protocole Lighthouse mobile automatisé ajouté : script `scripts/lighthouse-mobile-reference.sh` + documentation `docs/lighthouse-mobile-protocol.md`, avec campagnes multi-runs, synthèse best/median/average/worst et seuil médian configurable pour détecter les régressions.
+- Ajustements UI supplémentaires : espacement accru entre le titre social du footer et les icônes, bouton CMS de `/devenez-benevole` harmonisé avec les CTA glow verts du site, galerie resserrée et rapprochée visuellement du live (titre, container, coins, rythme vertical).
+- Diagnostic chatbot confirmé : le chatbot public n’a pas “cassé”, il n’a simplement pas été porté dans la SSR ; il existe dans la CSR de référence mais n’est pas monté dans l’app publique Next.js actuelle.
 
 ## Validation réalisée
 - `eslint` OK sur `/app/greeters`
@@ -100,6 +103,11 @@
   - `yarn build` OK puis Lighthouse mobile local sur `next start` : score stabilisé **96–97/100**, avec un meilleur run à **97/100**
   - TTFB local de la home abaissé à ~20–30 ms après mise en cache, LCP mobile mesuré autour de ~2.6 s sur le meilleur run
 - Validation frontend après optimisation performance : agent UI OK sur `/`, `/actualites`, `/galerie` + menu mobile, sans régression fonctionnelle ni visuelle majeure
+- Validation UI complémentaire OK
+  - footer social spacing PASS
+  - `/galerie` structure cohérente et plus proche du live PASS
+  - `/devenez-benevole` CTA glow CMS PASS après correctif `globals.css`
+  - protocole Lighthouse script testé localement (génération des rapports + `summary.md` OK)
 
 ## Blocages connus
 - Aucun blocage majeur sur le flux contact : Emailit est opérationnel sur l’environnement actuel.
@@ -114,6 +122,7 @@
 - Étendre si souhaité l’automatisation SEO/OG au-delà du corpus FR initial vers toutes les locales préremplies.
 - Vérifier côté utilisateur que l’onglet Preview Emergent s’est bien réinitialisé après le correctif (refresh complet / réouverture si cache navigateur côté UI plateforme).
 - Mesurer le vrai domaine de production une fois branché, car MultiLipi autorisé en prod pourra encore coûter quelques points Lighthouse réels.
+- Décider si le chatbot public historique doit être restauré à l’identique depuis la CSR dans la SSR publique.
 
 ## P1
 - Étendre le sitemap dynamique avec toutes les pages/articles réellement souhaités au référencement final.
@@ -135,3 +144,4 @@
 4. Continuer à remplacer les derniers contenus statiques par des contenus CMS structurés, notamment sur les pages institutionnelles détaillées.
 5. Ajuster la stratégie SEO finale (pages à indexer/non indexer, priorités, éventuelles pages utilitaires à exclure).
 6. Refaire une passe Lighthouse sur le domaine de production réel et décider ensuite, si nécessaire, d’un traitement spécifique de MultiLipi pour viser 98–100 mobile.
+7. Si souhaité par l’utilisateur, porter ensuite le chatbot public depuis la CSR vers la SSR avec comportement et style équivalents.
