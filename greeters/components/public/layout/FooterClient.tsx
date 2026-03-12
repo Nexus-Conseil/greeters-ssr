@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import type { getPublicCopy } from "@/lib/i18n/site-copy";
 import type { Partner, SocialLink } from "@/lib/public-site-data";
@@ -19,6 +20,7 @@ type FooterLink = {
 type FooterClientProps = {
   copy: ReturnType<typeof getPublicCopy>;
   footerLinks: FooterLink[];
+  initialPathname?: string;
   partners: Partner[];
   socialLinks: SocialLink[];
 };
@@ -40,9 +42,25 @@ function showFooterSections(pathname: string) {
   return { showSocialSection, showPartnersSection };
 }
 
-export const FooterClient = ({ copy, footerLinks, partners, socialLinks }: FooterClientProps) => {
-  const pathname = usePathname() ?? "/";
-  const { showSocialSection, showPartnersSection } = showFooterSections(pathname);
+export const FooterClient = ({ copy, footerLinks, initialPathname = "/", partners, socialLinks }: FooterClientProps) => {
+  const pathname = usePathname();
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [resolvedPathname, setResolvedPathname] = useState(initialPathname);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) {
+      return;
+    }
+
+    setResolvedPathname(pathname ?? initialPathname);
+  }, [initialPathname, isHydrated, pathname]);
+
+  const currentPathname = resolvedPathname || "/";
+  const { showSocialSection, showPartnersSection } = showFooterSections(currentPathname);
 
   return (
     <footer className="site-footer" data-testid="public-site-footer">

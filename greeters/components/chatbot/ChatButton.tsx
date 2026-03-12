@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { X, MessageCircle } from "lucide-react";
-import Image from "next/image";
-
 export default function ChatButton({ onClick, isOpen }: { onClick: () => void; isOpen: boolean }) {
   const [isMinimized, setIsMinimized] = useState(false);
   const [isNearFooter, setIsNearFooter] = useState(false);
@@ -73,13 +71,14 @@ export default function ChatButton({ onClick, isOpen }: { onClick: () => void; i
         </button>
 
         <div className="absolute left-1/2 -translate-x-1/2" style={{ zIndex: 10, bottom: "100%", marginBottom: -25 }}>
-          <Image
+          <img
             src="/couple-greeters.png"
             alt="Greeters de Paris"
             width={200}
             height={220}
             className="drop-shadow-2xl w-[140px] sm:w-[200px] h-auto"
             loading="lazy"
+            decoding="async"
             data-testid="chat-couple-image"
           />
         </div>

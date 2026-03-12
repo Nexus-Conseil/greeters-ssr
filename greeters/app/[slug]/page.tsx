@@ -88,7 +88,7 @@ export default async function PublicPlaceholderPage({ params }: PublicPlaceholde
         <div className="site-live-page" data-testid={`public-live-page-content-${slug}`}>
           <DynamicPageRenderer page={livePage} />
         </div>
-        <Footer />
+        <Footer currentPath={currentPath} />
       </main>
     );
   }
@@ -125,7 +125,7 @@ export default async function PublicPlaceholderPage({ params }: PublicPlaceholde
           </div>
         </section>
       </section>
-      <Footer />
+      <Footer currentPath={currentPath} />
     </main>
   );
 }

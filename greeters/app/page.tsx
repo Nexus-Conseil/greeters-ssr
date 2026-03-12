@@ -31,7 +31,7 @@ export default async function Home() {
         path="/"
       />
       <HomePage locale={locale} />
-      <Footer />
+      <Footer currentPath="/" />
       <ChatBotLoader />
     </main>
   );

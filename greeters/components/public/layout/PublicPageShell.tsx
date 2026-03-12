@@ -12,7 +12,7 @@ export const PublicPageShell = async ({ children, currentPath = "/", testId }: {
       <TopBar initialLocale={locale} />
       <Header currentPath={currentPath} />
       {children}
-      <Footer />
+      <Footer currentPath={currentPath} />
       <ChatBotLoader />
     </main>
   );

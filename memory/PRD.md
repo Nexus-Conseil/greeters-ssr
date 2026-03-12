@@ -34,6 +34,9 @@ Installer ce site Next.js en SSR : https://github.com/Nexus-Conseil/greeters-ssr
 - Ajustement du chatbot : sélecteur de langue à 50px et nouveau message d’accueil frontend
 - Suppression du warning d’hydratation lié à l’attribut externe `data-google-analytics-opt-out` via `suppressHydrationWarning` sur `<html>` et `<body>`
 - Passe de durcissement SSR sur `TopBar` et `HeaderClient` : rendu initial stabilisé, pathname initial injecté côté serveur, comportements navigateur différés après hydratation
+- Passe de durcissement SSR sur `FooterClient` avec pathname initial injecté côté serveur pour homogénéiser tout le shell public
+- Nettoyage des warnings app restants : remplacement de l’image décorative du bouton chatbot par un `<img>` standard pour supprimer l’alerte Next/Image sur le LCP
+- Optimisation LCP applicative : compression réduite de l’image hero principale (`IMAGE_QUALITY_HERO` abaissée à 76)
 - Vérifications réalisées : `/`, `/contact`, `/qui-sommes-nous`, `/galerie` répondent en 200 ; chatbot visible, ouvrable et répondant côté UI et API
 
 ## Backlog priorisé
