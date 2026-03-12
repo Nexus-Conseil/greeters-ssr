@@ -10,12 +10,10 @@ Migration "pixel-perfect" de l'application React CSR (`https://greeters.paris`) 
 - **Images**: Cloudinary via `next-cloudinary`
 - **Auth**: NextAuth.js
 - **Email**: Emailit
-- **Chatbot IA**: Claude (Anthropic) via emergentintegrations + Emergent LLM Key
+- **Chatbot IA**: Gemini 2.5 Flash (via emergentintegrations + clé API Gemini)
+- **SEO IA**: Gemini 2.0 Flash (via direct API call + clé API Gemini)
 - **Traduction**: MultiLipi (chargé en `lazyOnload`)
 - **Carrousels**: react-slick
-
-## Répertoire principal
-`/app/greeters/` (Next.js) + `/app/backend/` (FastAPI)
 
 ## Ce qui est implémenté
 
@@ -23,41 +21,45 @@ Migration "pixel-perfect" de l'application React CSR (`https://greeters.paris`) 
 Toutes les pages publiques réécrites avec les classes Tailwind du code CSR.
 
 ### Chatbot public — 12 Mars 2026
-- Backend: API `/api/chat/message` (FastAPI + Claude via emergentintegrations)
-- Frontend: Composants ChatBot, ChatButton, ChatWindow avec chargement différé
-- Chargement: `next/dynamic` ssr:false + `requestIdleCallback` (zéro impact PageSpeed)
-- Fonctionnalités: 6 langues, vouvoiement, réponses contextuelles, quick replies, bouton réservation
-- Markdown rendering (react-markdown)
-- Cache session MongoDB pour historique conversation
-- Tests: 100% backend (8/8) + 100% frontend (10/10) — iteration 16
+- Backend: API `/api/chat/message` (FastAPI + Gemini via emergentintegrations)
+- Frontend: ChatBot, ChatButton, ChatWindow avec chargement différé (zero PageSpeed impact)
+- 6 langues, vouvoiement, quick replies, bouton réservation, Markdown
 
-### Optimisations performance — 12 Mars 2026
-- Image héro: `fetchPriority="high"`
-- Logos partenaires: `width`/`height` explicites
-- Contraste texte renforcé
-- Touch targets dots agrandis à 24×24px
-- MultiLipi: `next/script` strategy `lazyOnload`
+### Sitemap dynamique multilingue — 12 Mars 2026
+- `/sitemap.xml` génère 117 URLs (13 pages × 9 langues)
+- Chaque URL inclut les `xhtml:link rel="alternate"` pour les 9 langues
+- Cache-Control: 1h
 
-### Backend / CMS
-- Authentification admin (NextAuth.js)
-- API CMS admin complète
-- Envoi d'emails (Emailit)
-- Pipeline images (Cloudinary, ShortPixel)
+### Génération SEO par IA (Gemini) — 12 Mars 2026
+- Endpoint admin: `/api/admin/seo/auto-sync`
+- Gemini 2.0 Flash génère: meta title, meta description, focus keyword, schema.org JSON-LD, OG tags, Twitter cards, image recommendations
+- Sanitization des résultats avec fallbacks
+
+### Corrections UI — 12 Mars 2026
+- Favicon PNG du CSR
+- Icônes réseaux sociaux carrées coins arrondis
+- Carrousel partenaires espacement uniforme
+- Dropdown langues chatbot: texte lisible (noir sur blanc)
+
+### Optimisations performance
+- Image héro: fetchPriority="high"
+- Partner logos: width/height explicites
+- Contraste texte renforcé, touch targets agrandis
+- MultiLipi: lazyOnload
 
 ### Tests
 - Iteration 15: 100% frontend (12 pages)
 - Iteration 16: 100% backend + frontend (chatbot)
 
-## Backlog priorité
+## Backlog
 
-### P1 (Important)
+### P1
 - [ ] Vérifier SEO multilingue avec MultiLipi
 
-### P2 (Future)
-- [ ] Sitemap dynamique multilingue
-- [ ] Génération SEO par IA (Gemini)
+### P2
 - [ ] Gestionnaire de menus drag-and-drop admin
 
 ## Credentials
 - Admin: `contact@nexus-conseil.ch` / `Greeters&58!2026`
 - Preview: `https://greeters-ssr-rebuild.preview.emergentagent.com`
+- Gemini API Key: dans `.env` et `/app/backend/.env`

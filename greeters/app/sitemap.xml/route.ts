@@ -1,10 +1,7 @@
-import { getLocaleFromHost } from "@/lib/i18n/request";
-import { renderTourismSitemapXml } from "@/lib/seo/sitemap";
+import { renderMultilingueSitemapXml } from "@/lib/seo/sitemap";
 
-export async function GET(request: Request) {
-  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
-  const locale = getLocaleFromHost(host);
-  const xml = await renderTourismSitemapXml(locale);
+export async function GET() {
+  const xml = await renderMultilingueSitemapXml();
 
   return new Response(xml, {
     headers: {

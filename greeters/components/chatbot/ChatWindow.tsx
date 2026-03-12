@@ -98,7 +98,7 @@ export default function ChatWindow({ onClose }: { onClose: () => void }) {
         <select
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
-          className="text-sm bg-white/20 text-white border border-white/30 rounded-lg px-3 py-2 focus:outline-none cursor-pointer"
+          className="text-sm bg-white/20 text-white border border-white/30 rounded-lg px-3 py-2 focus:outline-none cursor-pointer [&>option]:text-slate-800 [&>option]:bg-white"
           data-testid="chat-language-selector"
         >
           <option value="fr">FR</option>
