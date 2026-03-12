@@ -830,7 +830,7 @@ code {
   justify-content: center;
   min-height: 3rem;
   padding: 0.9rem 1.4rem;
-  border-radius: 0.5rem;
+  border-radius: 0.25rem;
   font-family: var(--font-heading), sans-serif;
   overflow: visible;
   transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease, color 180ms ease;

@@ -1,12 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
 
 import type { getPublicCopy } from "@/lib/i18n/site-copy";
-import { IMAGE_QUALITY_LOGO } from "@/lib/media/config";
 import type { Partner, SocialLink } from "@/lib/public-site-data";
 
 const PAGES_WITH_FULL_FOOTER = ["/", "/livre-dor", "/faire-un-don", "/devenez-benevole", "/qui-sommes-nous"];
@@ -93,7 +91,7 @@ export const FooterClient = ({ copy, footerLinks, partners, socialLinks }: Foote
                   className="site-partner-link"
                   data-testid={`public-site-footer-partner-${partner.id}-${index}`}
                 >
-                  <Image src={partner.logo} alt={partner.name} width={160} height={58} sizes="160px" quality={IMAGE_QUALITY_LOGO} className="site-partner-logo" />
+                  <img src={partner.logo} alt={partner.name} className="site-partner-logo" loading="lazy" decoding="async" />
                 </a>
               ))}
             </div>

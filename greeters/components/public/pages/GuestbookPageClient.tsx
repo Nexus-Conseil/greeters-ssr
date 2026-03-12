@@ -22,6 +22,7 @@ export const GuestbookPageClient = ({ items }: { items: Testimonial[] }) => {
           </article>
         ))}
       </div>
+
       <div className="site-testimonial-controls" data-testid="guestbook-page-controls">
         <button type="button" className="site-round-button" onClick={() => setCurrentIndex((value) => (value - 1 + items.length) % items.length)} data-testid="guestbook-page-prev-button">‹</button>
         <div className="site-dot-list" data-testid="guestbook-page-dots">

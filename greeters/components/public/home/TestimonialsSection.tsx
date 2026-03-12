@@ -39,6 +39,7 @@ export const TestimonialsSection = ({ title, items }: TestimonialsSectionProps) 
           >
             ‹
           </button>
+
           <div className="site-dot-list" data-testid="public-home-testimonial-dots">
             {items.map((item, index) => (
               <button

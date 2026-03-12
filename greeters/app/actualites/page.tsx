@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import type { Route } from "next";
+import { ArrowRight, Calendar } from "lucide-react";
 
 import { PublicPageShell } from "@/components/public/layout/PublicPageShell";
 import { SimplePageHeading } from "@/components/public/pages/SimplePageHeading";
 import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
-import { IMAGE_QUALITY_STANDARD, PUBLIC_NEWS_CARD_IMAGE_SIZES_ATTR } from "@/lib/media/config";
 import { getRouteMetadata } from "@/lib/seo/public-metadata";
 import { ACTUALITES_PAGE_ITEMS } from "@/lib/public-pages-data";
 import { getActualitesCmsContent } from "@/lib/services/public-page-content";
@@ -32,25 +31,21 @@ export default async function ActualitesPage() {
       <>
         <StructuredDataScript page={seoPage ?? { title, slug: "actualites", metaDescription: "Actualités Paris Greeters" }} locale={locale} path="actualites" />
         <SimplePageHeading title={title} testId="actualites-public-page-title" />
-        <div className="site-container site-content-section" data-testid="actualites-public-page-content">
-          <div className="site-articles-grid" data-testid="actualites-public-page-grid">
+        <div className="max-w-7xl mx-auto px-4 py-12" data-testid="actualites-public-page-content">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8" data-testid="actualites-public-page-grid">
             {items.map((article) => (
-              <Link href={article.link as Route} prefetch={false} key={article.id} className="site-article-card" data-testid={`actualites-public-card-${article.id}`}>
-                <div className="site-article-media" data-testid={`actualites-public-image-wrapper-${article.id}`}>
-                  <Image src={article.image} alt={article.title} width={520} height={292} sizes={PUBLIC_NEWS_CARD_IMAGE_SIZES_ATTR} quality={IMAGE_QUALITY_STANDARD} className="site-article-image" data-testid={`actualites-public-image-${article.id}`} />
+              <Link href={article.link as Route} prefetch={false} key={article.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 group border border-gray-100" data-testid={`actualites-public-card-${article.id}`}>
+                <div className="aspect-[16/9] overflow-hidden bg-gray-100" data-testid={`actualites-public-image-wrapper-${article.id}`}>
+                  <img src={article.image} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" decoding="async" data-testid={`actualites-public-image-${article.id}`} />
                 </div>
-                <div className="site-article-content">
-                  <p className="site-article-date" data-testid={`actualites-public-date-${article.id}`}>
-                    <span className="site-article-date-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24">
-                        <path d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2Zm11 8H6v10h12V10ZM8 6H6v2h12V6h-2v1h-2V6h-4v1H8V6Z" fill="currentColor" />
-                      </svg>
-                    </span>
+                <div className="p-6">
+                  <p className="flex items-center gap-2 text-[#8cab4f] text-sm mb-4" data-testid={`actualites-public-date-${article.id}`}>
+                    <Calendar size={16} />
                     <span>{article.day} {article.month}</span>
                   </p>
-                  <h2 className="site-article-title" data-testid={`actualites-public-title-${article.id}`}>{article.title}</h2>
-                  <p className="site-article-excerpt" data-testid={`actualites-public-excerpt-${article.id}`}>{article.excerpt}</p>
-                  <span className="site-article-link">Lire la suite</span>
+                  <h2 className="text-xl font-semibold text-gray-800 mb-3 leading-tight" data-testid={`actualites-public-title-${article.id}`}>{article.title}</h2>
+                  <p className="text-gray-600 text-sm leading-relaxed mb-4" data-testid={`actualites-public-excerpt-${article.id}`}>{article.excerpt}</p>
+                  <span className="inline-flex items-center gap-2 text-[#8cab4f] hover:text-[#689f38] font-medium transition-colors">Lire la suite <ArrowRight size={16} /></span>
                 </div>
               </Link>
             ))}
