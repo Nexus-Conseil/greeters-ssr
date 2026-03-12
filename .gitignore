@@ -1,0 +1,134 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# IDE and editors
+.idea/
+.vscode/
+
+# Dependencies
+node_modules/
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Production builds
+/build
+dist/
+dist
+
+# Environment files (comprehensive coverage)
+
+*token.json*
+*credentials.json*
+
+# Logs and debug files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dump.rdb
+
+# System files
+.DS_Store
+*.pem
+
+# Python
+__pycache__/
+*pyc*
+venv/
+.venv/
+
+# Development tools
+chainlit.md
+.chainlit
+.ipynb_checkpoints/
+.ac
+
+# Deployment
+.vercel
+
+# Data and databases
+agenthub/agents/youtube/db
+
+# Archive files and large assets
+**/*.zip
+**/*.tar.gz
+**/*.tar
+**/*.tgz
+*.pack
+*.deb
+*.dylib
+
+# Build caches
+.cache/
+
+# Mobile development
+android-sdk/ greeters/.git/objects/pack/pack-2fef6016de2f54463ef958f87a643f16f80ec167.pack
+greeters/.git/objects/pack/pack-2fef6016de2f54463ef958f87a643f16f80ec167.pack
+greeters/frontend/node_modules/@next/swc-linux-arm64-gnu/next-swc.linux-arm64-gnu.node
+greeters/frontend/node_modules/@next/swc-linux-arm64-musl/next-swc.linux-arm64-musl.node
+-e 
+# Environment files
+*.env
+*.env.*
+-e 
+# Environment files
+*.env
+*.env.*
+greeters/node_modules/@next/swc-linux-arm64-musl/next-swc.linux-arm64-musl.node
+greeters/node_modules/@next/swc-linux-arm64-gnu/next-swc.linux-arm64-gnu.node
+-e 
+# Environment files
+*.env
+*.env.*
+-e 
+# Environment files
+*.env
+*.env.*
+-e 
+# Environment files
+*.env
+*.env.*
+.greeters-csr-ref/.git/objects/pack/pack-2e3d8baf9c1e5650e96a60fb31f3565f9b0f21b1.pack
+greeters/.next/dev/cache/turbopack/23c46498/00001653.sst
+greeters/.next/dev/cache/turbopack/23c46498/00001967.sst
+greeters/.next/dev/cache/turbopack/23c46498/00002362.sst
+greeters/.next/dev/cache/turbopack/23c46498/00002490.sst
+greeters/.next/dev/cache/turbopack/23c46498/00002745.sst
+greeters/.next/dev/cache/turbopack/23c46498/00002747.sst
+greeters/.next/dev/cache/turbopack/23c46498/00002744.sst
+greeters/.next/dev/cache/turbopack/23c46498/00002889.sst
+greeters/.next/dev/cache/turbopack/23c46498/00002891.sst
+greeters/.next/dev/cache/turbopack/23c46498/00002966.sst
+greeters/.next/dev/cache/turbopack/23c46498/00002890.sst
+greeters/.next/dev/cache/turbopack/23c46498/00002967.sst
+greeters/.next/dev/cache/turbopack/23c46498/00003220.sst
+greeters/.next/dev/cache/turbopack/23c46498/00003219.sst
+greeters/.next/dev/cache/turbopack/23c46498/00003218.sst
+greeters/.next/dev/cache/turbopack/23c46498/00003164.sst
+greeters/.next/dev/cache/turbopack/23c46498/00003237.sst
+greeters/.next/dev/cache/turbopack/23c46498/00003269.sst
+greeters/.next/dev/cache/turbopack/23c46498/00003268.sst
+greeters/.next/dev/cache/turbopack/23c46498/00003288.sst
+-e 
+# Environment files
+*.env
+*.env.*
+-e 
+# Environment files
+*.env
+*.env.*
