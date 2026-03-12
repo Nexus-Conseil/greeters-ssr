@@ -173,9 +173,9 @@ class ChatMessageResponse(BaseModel):
 @api_router.post("/chat/message", response_model=ChatMessageResponse)
 async def send_chat_message(input: ChatMessageCreate):
     try:
-        api_key = os.environ.get('EMERGENT_LLM_KEY', '')
+        api_key = os.environ.get('GEMINI_API_KEY', '')
         if not api_key:
-            raise Exception("LLM API key not configured")
+            raise Exception("Gemini API key not configured")
 
         # Store user message
         user_msg = {
@@ -198,12 +198,12 @@ async def send_chat_message(input: ChatMessageCreate):
         # Build system message
         system_message = build_system_message(input.language)
 
-        # Use emergentintegrations for Claude
+        # Use emergentintegrations for Gemini
         chat = LlmChat(
             api_key=api_key,
             session_id=f"greeters-chat-{input.session_id}",
             system_message=system_message
-        ).with_model("anthropic", "claude-4-sonnet-20250514")
+        ).with_model("gemini", "gemini-2.5-flash")
 
         # Send conversation as a single prompt with context
         context_parts = []
