@@ -4,7 +4,6 @@ import Image from "next/image";
 import { PublicPageShell } from "@/components/public/layout/PublicPageShell";
 import { PageTitleBand } from "@/components/public/pages/PageTitleBand";
 import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
-import { DynamicPageRenderer } from "@/components/cms/DynamicPageRenderer";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
 import { IMAGE_QUALITY_GALLERY, PUBLIC_IMAGE_SIZES_ATTR } from "@/lib/media/config";
@@ -29,7 +28,7 @@ export default async function PressePage() {
       <>
         <StructuredDataScript page={seoPage ?? { title, slug: "presse", metaDescription: "Presse Paris Greeters" }} locale={locale} path="presse" />
         <PageTitleBand title={title} testId="presse-public-page-title" />
-        {seoPage ? <div className="site-content-shell-narrow site-content-section" data-testid="presse-public-page-cms-content"><DynamicPageRenderer page={seoPage} /></div> : <div className="site-content-shell-narrow site-content-section" data-testid="presse-public-page-content">
+        <div className="site-content-shell-narrow site-content-section" data-testid="presse-public-page-content">
             <section className="site-highlight-panel" data-testid="presse-kit-panel">
               <h2 className="site-card-title">Dossier de presse</h2>
               <a href="/documents/a428d596_dossier-de-presse-FFG-2020.pdf" target="_blank" rel="noreferrer" className="site-inline-link" data-testid="presse-kit-link">
@@ -52,7 +51,7 @@ export default async function PressePage() {
               <p>Pour toute demande d'information ou d'interview, contactez notre service presse :</p>
               <a href="mailto:presse@parisgreeters.fr" className="site-inline-link" data-testid="presse-contact-link">presse@parisgreeters.fr</a>
             </section>
-        </div>}
+        </div>
       </>
     </PublicPageShell>
   );
