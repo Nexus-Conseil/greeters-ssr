@@ -68,7 +68,7 @@ export default async function DevenezBenevolePage() {
 
             <section className="site-centered-stack" data-testid="devenez-benevole-cta-section">
               <p>Intéressé(e) ? Rejoignez notre communauté de bénévoles passionnés !</p>
-              <a href="https://docs.google.com/forms/d/1R4Q85pNX60rDTLkwO24WYH6nAH2VEd13SvfAEVzgLd0/viewform" target="_blank" rel="noreferrer" className="site-cta-button" data-testid="devenez-benevole-cta-link">Postuler pour devenir Greeter</a>
+              <a href="https://docs.google.com/forms/d/1R4Q85pNX60rDTLkwO24WYH6nAH2VEd13SvfAEVzgLd0/viewform" target="_blank" rel="noreferrer" className="site-cta-button site-glow-button" data-testid="devenez-benevole-cta-link"><span className="site-glow-button-label">Postuler pour devenir Greeter</span></a>
             </section>
           </div>
           </>}

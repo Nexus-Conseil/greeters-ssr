@@ -51,7 +51,7 @@ export const FooterClient = ({ copy, footerLinks, partners, socialLinks }: Foote
       {showSocialSection ? (
         <section className="site-footer-social site-deferred-section" data-testid="public-site-footer-social">
           <div className="site-container site-centered-stack">
-            <h2 className="site-section-title" data-testid="public-site-footer-social-title">
+            <h2 className="site-section-title site-footer-social-title" data-testid="public-site-footer-social-title">
               {copy.footerSocialTitle}
             </h2>
             <div className="site-social-links" data-testid="public-site-footer-social-links">

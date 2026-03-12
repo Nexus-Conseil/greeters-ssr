@@ -12,7 +12,7 @@ export const GalleryPageClient = ({ items }: { items: GalleryImage[] }) => {
 
   return (
     <>
-      <div className="site-container site-content-section" data-testid="gallery-page-content">
+      <div className="site-gallery-page-container site-content-section site-gallery-page-content" data-testid="gallery-page-content">
         <div className="site-gallery-grid site-gallery-grid-page" data-testid="gallery-page-grid">
           {items.map((item, index) => (
             <button key={item.id} type="button" className="site-gallery-card" onClick={() => setActiveIndex(index)} data-testid={`gallery-page-card-${item.id}`}>

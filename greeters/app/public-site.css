@@ -715,7 +715,7 @@
 .site-gallery-card {
   position: relative;
   border: none;
-  border-radius: 1rem;
+  border-radius: 0.65rem;
   overflow: hidden;
   aspect-ratio: 1 / 1;
   background: #f3f3f3;
@@ -766,6 +766,10 @@
 .site-footer-social {
   padding: 4rem 0 3.5rem;
   background: #ededed;
+}
+
+.site-footer-social-title {
+  margin-bottom: 2.3rem;
 }
 
 .site-social-link {
@@ -1036,13 +1040,13 @@
 }
 
 .site-page-heading {
-  padding: 3rem 0 2.5rem;
+  padding: 2.6rem 0 2.1rem;
 }
 
 .site-page-heading-title {
   text-align: center;
   color: #1f2937;
-  font-size: clamp(2.25rem, 4vw, 3.5rem);
+  font-size: clamp(2rem, 3.4vw, 3rem);
   font-weight: 300;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1385,6 +1389,15 @@
   margin-top: 0;
 }
 
+.site-gallery-page-container {
+  width: min(1280px, calc(100% - 2rem));
+  margin: 0 auto;
+}
+
+.site-gallery-page-content {
+  padding-top: 1.1rem;
+}
+
 @keyframes partners-marquee {
   0% {
     transform: translateX(0);
@@ -1625,7 +1638,7 @@
   }
 
   .site-page-heading {
-    padding: 2.4rem 0 2rem;
+    padding: 2.2rem 0 1.75rem;
   }
 }
 
