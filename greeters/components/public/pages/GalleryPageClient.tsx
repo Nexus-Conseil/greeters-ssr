@@ -1,53 +1,87 @@
 "use client";
 
-import { IMAGE_QUALITY_GALLERY, PUBLIC_GALLERY_GRID_SIZES_ATTR } from "@/lib/media/config";
 import { useState } from "react";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 import type { GalleryImage } from "@/lib/public-site-data";
-
-import { ProgressiveImage } from "../media/ProgressiveImage";
 
 export const GalleryPageClient = ({ items }: { items: GalleryImage[] }) => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   return (
     <>
-      <div className="site-gallery-page-container site-content-section site-gallery-page-content" data-testid="gallery-page-content">
-        <div className="site-gallery-grid site-gallery-grid-page" data-testid="gallery-page-grid">
+      <div className="max-w-7xl mx-auto px-4 py-12" data-testid="gallery-page-content">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" data-testid="gallery-page-grid">
           {items.map((item, index) => (
-            <button key={item.id} type="button" className="site-gallery-card" onClick={() => setActiveIndex(index)} data-testid={`gallery-page-card-${item.id}`}>
-              <ProgressiveImage src={item.src} alt={item.title} sizes={PUBLIC_GALLERY_GRID_SIZES_ATTR} lowQuality={34} highQuality={IMAGE_QUALITY_GALLERY} className="site-gallery-image" wrapperClassName="site-progressive-image-fill" />
-              <span className="site-gallery-overlay">
-                <strong>{item.title}</strong>
-                <small>{item.date}</small>
-              </span>
-            </button>
+            <div
+              key={item.id}
+              className="relative aspect-square overflow-hidden rounded-lg cursor-pointer group"
+              onClick={() => setActiveIndex(index)}
+              data-testid={`gallery-page-card-${item.id}`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={item.src}
+                alt={item.title}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                loading="lazy"
+                decoding="async"
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-end">
+                <div className="p-3 opacity-0 group-hover:opacity-100 transition-opacity w-full">
+                  <p className="text-white text-sm truncate">{item.title}</p>
+                  <p className="text-white/70 text-xs">{item.date}</p>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </div>
 
-      {activeIndex !== null ? (
-        <div className="site-modal-backdrop" data-testid="gallery-page-lightbox" onClick={() => setActiveIndex(null)}>
-          <div className="site-lightbox-panel" onClick={(event) => event.stopPropagation()}>
-            <button type="button" className="site-modal-close" onClick={() => setActiveIndex(null)} data-testid="gallery-page-close-button">
-              ×
-            </button>
-            <button type="button" className="site-lightbox-arrow is-left" onClick={() => setActiveIndex((value) => (value === null ? 0 : (value - 1 + items.length) % items.length))} data-testid="gallery-page-prev-button">
-              ‹
-            </button>
-            <div className="site-lightbox-media">
-              <img src={items[activeIndex].src} alt={items[activeIndex].title} className="site-lightbox-image" data-testid="gallery-page-lightbox-image" />
-              <div className="site-lightbox-copy" data-testid="gallery-page-lightbox-copy">
-                <strong>{items[activeIndex].title}</strong>
-                <span>{items[activeIndex].date}</span>
-              </div>
+      {/* Lightbox */}
+      {activeIndex !== null && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+          onClick={() => setActiveIndex(null)}
+          data-testid="gallery-page-lightbox"
+        >
+          <button
+            onClick={() => setActiveIndex(null)}
+            className="absolute top-4 right-4 text-white hover:text-[#8bc34a] transition-colors z-10"
+            data-testid="gallery-page-close-button"
+          >
+            <X size={32} />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); setActiveIndex((v) => (v === null ? 0 : (v - 1 + items.length) % items.length)); }}
+            className="absolute left-4 text-white hover:text-[#8bc34a] transition-colors z-10"
+            data-testid="gallery-page-prev-button"
+          >
+            <ChevronLeft size={40} />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); setActiveIndex((v) => (v === null ? 0 : (v + 1) % items.length)); }}
+            className="absolute right-4 text-white hover:text-[#8bc34a] transition-colors z-10"
+            data-testid="gallery-page-next-button"
+          >
+            <ChevronRight size={40} />
+          </button>
+          <div className="max-w-4xl max-h-[80vh] p-4" onClick={(e) => e.stopPropagation()}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={items[activeIndex].src}
+              alt={items[activeIndex].title}
+              className="max-w-full max-h-[70vh] object-contain rounded-lg"
+              decoding="async"
+              data-testid="gallery-page-lightbox-image"
+            />
+            <div className="text-center mt-4" data-testid="gallery-page-lightbox-copy">
+              <p className="text-white font-medium">{items[activeIndex].title}</p>
+              <p className="text-white/70 text-sm">{items[activeIndex].date}</p>
             </div>
-            <button type="button" className="site-lightbox-arrow is-right" onClick={() => setActiveIndex((value) => (value === null ? 0 : (value + 1) % items.length))} data-testid="gallery-page-next-button">
-              ›
-            </button>
           </div>
         </div>
-      ) : null}
+      )}
     </>
   );
 };

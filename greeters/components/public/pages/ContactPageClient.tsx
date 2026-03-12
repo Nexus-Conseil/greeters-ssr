@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Mail, Send, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 
 type FormState = {
   name: string;
@@ -48,48 +49,119 @@ export const ContactPageClient = ({ introText }: { introText: string }) => {
     }
   }
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
   return (
-    <div className="site-content-shell-narrow site-content-section" data-testid="contact-page-content">
-      <div className="site-info-panel" data-testid="contact-page-intro-panel">
-        {introText}
-      </div>
-
-      <form className="site-contact-form" onSubmit={handleSubmit} data-testid="contact-page-form">
-        <h2 className="site-contact-form-title" data-testid="contact-page-form-title">
-          <span className="site-contact-form-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24">
-              <path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm0 2v.5l9 5.63 9-5.63V7l-9 5.63L3 7.01Zm18 10V9.84l-8.47 5.3a1 1 0 0 1-1.06 0L3 9.84V17h18Z" fill="currentColor" />
-            </svg>
-          </span>
-          Formulaire de contact
-        </h2>
-        <div className="site-contact-grid">
-          <div className="site-contact-column">
-            <label className="site-field-label" htmlFor="contact-name">Nom</label>
-            <input id="contact-name" name="name" value={formData.name} onChange={(event) => setFormData((prev) => ({ ...prev, name: event.target.value }))} className="site-field-input" data-testid="contact-page-name-input" required />
-
-            <label className="site-field-label" htmlFor="contact-email">Email</label>
-            <input id="contact-email" type="email" name="email" value={formData.email} onChange={(event) => setFormData((prev) => ({ ...prev, email: event.target.value }))} className="site-field-input" data-testid="contact-page-email-input" required />
-
-            <label className="site-field-label" htmlFor="contact-subject">Sujet</label>
-            <input id="contact-subject" name="subject" value={formData.subject} onChange={(event) => setFormData((prev) => ({ ...prev, subject: event.target.value }))} className="site-field-input" data-testid="contact-page-subject-input" required />
-          </div>
-
-          <div className="site-contact-column">
-            <label className="site-field-label" htmlFor="contact-message">Message</label>
-            <textarea id="contact-message" name="message" value={formData.message} onChange={(event) => setFormData((prev) => ({ ...prev, message: event.target.value }))} className="site-field-textarea" data-testid="contact-page-message-input" required />
-            <button type="submit" className="site-cta-button site-contact-submit site-glow-button" disabled={submitting} data-testid="contact-page-submit-button">
-              <span className="site-glow-button-label">{submitting ? "Envoi en cours..." : "Envoyer"}</span>
-            </button>
-          </div>
+    <section className="py-12" data-testid="contact-page-content">
+      <div className="max-w-5xl mx-auto px-4">
+        <div className="bg-gray-50 rounded-lg p-6 mb-8" data-testid="contact-page-intro-panel">
+          <p className="text-gray-700 leading-relaxed">{introText}</p>
         </div>
 
-        {feedback ? (
-          <div className={`site-feedback-banner is-${feedback.type}`} data-testid={`contact-page-feedback-${feedback.type}`}>
-            {feedback.message}
-          </div>
-        ) : null}
-      </form>
-    </div>
+        <div className="bg-white border border-gray-200 rounded-lg p-6" data-testid="contact-page-form-wrapper">
+          <h3 className="text-lg font-semibold text-gray-800 mb-6 flex items-center justify-center gap-2" data-testid="contact-page-form-title">
+            <Mail className="w-5 h-5 text-[#558b2f]" />
+            Formulaire de contact
+          </h3>
+
+          <form onSubmit={handleSubmit} data-testid="contact-page-form">
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Colonne gauche : Nom, Email, Sujet */}
+              <div className="space-y-4 flex flex-col">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="contact-name">Nom</label>
+                  <input
+                    id="contact-name"
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#8bc34a]"
+                    data-testid="contact-page-name-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="contact-email">Email</label>
+                  <input
+                    id="contact-email"
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#8bc34a]"
+                    data-testid="contact-page-email-input"
+                  />
+                </div>
+                <div className="flex-1 flex flex-col">
+                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="contact-subject">Sujet</label>
+                  <input
+                    id="contact-subject"
+                    type="text"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#8bc34a]"
+                    data-testid="contact-page-subject-input"
+                  />
+                </div>
+              </div>
+
+              {/* Colonne droite : Message + Bouton */}
+              <div className="flex flex-col">
+                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="contact-message">Message</label>
+                <textarea
+                  id="contact-message"
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
+                  className="w-full flex-1 min-h-[140px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#8bc34a] resize-none"
+                  data-testid="contact-page-message-input"
+                />
+                <div className="mt-4">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full bg-[#558b2f] hover:bg-[#33691e] text-white flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed py-2 px-4 rounded-md transition-colors"
+                    data-testid="contact-page-submit-button"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Envoi en cours...
+                      </>
+                    ) : (
+                      <>
+                        <Send size={18} />
+                        Envoyer
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {feedback?.type === "success" && (
+              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md flex items-start gap-2 text-green-700" data-testid="contact-page-feedback-success">
+                <CheckCircle size={18} className="flex-shrink-0 mt-0.5" />
+                <span className="text-sm">{feedback.message}</span>
+              </div>
+            )}
+
+            {feedback?.type === "error" && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md flex items-start gap-2 text-red-700" data-testid="contact-page-feedback-error">
+                <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
+                <span className="text-sm">{feedback.message}</span>
+              </div>
+            )}
+          </form>
+        </div>
+      </div>
+    </section>
   );
 };

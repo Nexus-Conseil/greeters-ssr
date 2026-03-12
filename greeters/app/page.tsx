@@ -21,7 +21,7 @@ export default async function Home() {
   const homepage = await findPublicPageBySlug("/", locale).catch(() => null);
 
   return (
-    <main className="site-page" data-testid="public-home-page">
+    <main className="min-h-screen flex flex-col bg-white" data-testid="public-home-page">
       <TopBar initialLocale={locale} />
       <Header />
       <StructuredDataScript

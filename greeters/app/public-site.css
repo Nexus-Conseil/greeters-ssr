@@ -1,3 +1,5 @@
+@layer components {
+
 .site-page {
   min-height: 100vh;
   background: #ffffff;
@@ -1864,4 +1866,4 @@
     padding-top: 1rem;
     justify-content: center;
   }
-}
+}}

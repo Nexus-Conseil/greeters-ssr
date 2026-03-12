@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 
 import { PublicPageShell } from "@/components/public/layout/PublicPageShell";
 import { GuestbookPageClient } from "@/components/public/pages/GuestbookPageClient";
-import { PageTitleBand } from "@/components/public/pages/PageTitleBand";
 import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
@@ -28,7 +27,16 @@ export default async function LivreDorPage() {
     <PublicPageShell testId="livre-dor-public-page">
       <>
         <StructuredDataScript page={seoPage ?? { title, slug: "livre-dor", metaDescription: "Livre d'or Paris Greeters" }} locale={locale} path="livre-dor" />
-        <PageTitleBand title={title} testId="livre-dor-public-page-title" />
+
+        {/* Section titre avec fond vert */}
+        <section className="bg-[#8bc34a] py-12" data-testid="livre-dor-title-band">
+          <div className="max-w-4xl mx-auto px-4">
+            <h1 className="text-3xl md:text-4xl font-light text-white mb-0 text-center uppercase tracking-wider" data-testid="livre-dor-heading">
+              {title}
+            </h1>
+          </div>
+        </section>
+
         <GuestbookPageClient items={items} />
       </>
     </PublicPageShell>

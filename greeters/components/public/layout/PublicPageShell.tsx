@@ -7,7 +7,7 @@ export const PublicPageShell = async ({ children, testId }: { children: React.Re
   const locale = await getRequestLocale();
 
   return (
-    <main className="site-page" data-testid={testId}>
+    <main className="min-h-screen flex flex-col bg-white" data-testid={testId}>
       <TopBar initialLocale={locale} />
       <Header />
       {children}
