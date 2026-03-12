@@ -1,6 +1,6 @@
-import { createElement } from "react";
 import type { Metadata } from "next";
 import { Pacifico } from "next/font/google";
+import Script from "next/script";
 
 import { getRequestLocale } from "@/lib/i18n/request";
 
@@ -19,16 +19,6 @@ const MULTILIPI_ALTERNATES = [
   { href: "https://es.greeters.nexus-conseil.ch/", hreflang: "es" },
 ];
 
-const multiLipiScriptProps = {
-  src: "https://script-cdn.multilipi.com/static/JS/page_translations.js",
-  defer: true,
-  crossOrigin: "anonymous",
-  mode: "auto",
-  "multilipi-key": "726562fe-f615-404a-b985-a73e661ee3dc",
-  "data-pos-x": "50",
-  "data-pos-y": "50",
-};
-
 const scriptFont = Pacifico({
   variable: "--font-script",
   subsets: ["latin"],
@@ -39,6 +29,10 @@ export const metadata: Metadata = {
   title: "Paris Greeters — Balades gratuites avec un local",
   description: "Découvrez Paris autrement avec les Greeters : des balades gratuites, humaines et locales au cœur de la ville.",
   metadataBase: new URL("https://greeters.paris"),
+  icons: {
+    icon: "/favicon.png",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default async function RootLayout({
@@ -54,13 +48,20 @@ export default async function RootLayout({
         {MULTILIPI_ALTERNATES.map((alternate) => (
           <link key={alternate.hreflang} href={alternate.href} hrefLang={alternate.hreflang} rel="alternate" />
         ))}
-        {createElement("script", multiLipiScriptProps as Record<string, unknown>)}
       </head>
       <body
         className={`${scriptFont.variable} app-shell`}
         data-testid="app-root-layout"
       >
         {children}
+        <Script
+          src="https://script-cdn.multilipi.com/static/JS/page_translations.js"
+          strategy="lazyOnload"
+          crossOrigin="anonymous"
+          data-pos-x="50"
+          data-pos-y="50"
+          {...{ mode: "auto", "multilipi-key": "726562fe-f615-404a-b985-a73e661ee3dc" }}
+        />
       </body>
     </html>
   );

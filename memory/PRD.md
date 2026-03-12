@@ -10,7 +10,7 @@ Migration "pixel-perfect" de l'application React CSR (`https://greeters.paris`) 
 - **Images**: Cloudinary via `next-cloudinary`
 - **Auth**: NextAuth.js
 - **Email**: Emailit
-- **Traduction**: MultiLipi
+- **Traduction**: MultiLipi (chargé en `lazyOnload`)
 - **Carrousels**: react-slick
 
 ## Répertoire principal
@@ -19,35 +19,28 @@ Migration "pixel-perfect" de l'application React CSR (`https://greeters.paris`) 
 ## Ce qui est implémenté
 
 ### Pages publiques (Tailwind pixel-perfect) — 12 Mars 2026
-Toutes les pages publiques réécrites avec les classes Tailwind exactes du code CSR de référence :
-- `/qui-sommes-nous`, `/devenez-benevole`, `/faire-un-don`, `/mentions-legales`
-- `/presse`, `/contact`, `/actualites`, `/galerie`, `/livre-dor`, `/` (accueil)
+Toutes les pages publiques réécrites avec les classes Tailwind exactes du code CSR de référence.
 
 ### Corrections UI — 12 Mars 2026
 - Favicon remplacé par PNG du CSR (icon.png + apple-icon.png)
 - Icônes réseaux sociaux : carrées avec coins arrondis (border-radius: 0.75rem)
 - Carrousel partenaires : espacement uniforme (gap: 3rem, flex-shrink-0, h-auto)
 
-### Infrastructure CSS — 12 Mars 2026
-- Tailwind CSS v4.2.1 avec `@tailwindcss/postcss`
-- CSS custom wrappé dans `@layer base/components`
-- `PublicPageShell` avec `bg-white`
-
-### Backend / CMS
-- Authentification admin (NextAuth.js)
-- API CMS admin complète
-- Envoi d'emails (Emailit)
-- Pipeline images (Cloudinary, ShortPixel)
-- Script MultiLipi intégré
+### Optimisations performance — 12 Mars 2026
+- Image héro : `fetchPriority="high"` ajouté pour améliorer LCP
+- Logos partenaires : `width`/`height` explicites (200x48) pour éviter CLS
+- Contraste texte : tagline (#555 au lieu de #7d7d7d), outline-link (#3a6d18 au lieu de #5a8c2c), news-date (#4a7a25 au lieu de #5b8d30)
+- Touch targets : dots témoignages agrandis à 24x24px minimum
+- MultiLipi : chargé via `next/script` strategy `lazyOnload` au lieu de defer dans head
 
 ### Tests
 - Testing agent iteration 15: **100% frontend** (12 pages validées)
+- PageSpeed score avant optimisations: 96 (mobile)
 
 ## Backlog priorité
 
 ### P1 (Important)
 - [ ] Réintégrer le chatbot public depuis le code CSR
-- [ ] Optimisations performance (PageSpeed 98-100 mobile)
 - [ ] Vérifier SEO multilingue avec MultiLipi
 
 ### P2 (Future)

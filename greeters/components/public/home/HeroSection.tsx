@@ -13,7 +13,7 @@ export const HeroSection = ({ slogan, subtitle, image, imageAlt }: HeroSectionPr
   return (
     <section className="site-hero" data-testid="public-home-hero-section">
       <div className="site-hero-media" data-testid="public-home-hero-media">
-        <Image src={image} alt={imageAlt} width={1920} height={814} sizes={PUBLIC_HERO_SIZES_ATTR} quality={IMAGE_QUALITY_HERO} priority className="site-hero-image" data-testid="public-home-hero-image" />
+        <Image src={image} alt={imageAlt} width={1920} height={814} sizes={PUBLIC_HERO_SIZES_ATTR} quality={IMAGE_QUALITY_HERO} priority fetchPriority="high" className="site-hero-image" data-testid="public-home-hero-image" />
         <div className="site-hero-overlay" />
         <div className="site-hero-copy" data-testid="public-home-hero-copy">
           <h1 className="site-script-title" data-testid="public-home-hero-title">

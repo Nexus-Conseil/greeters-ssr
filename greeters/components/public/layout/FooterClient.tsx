@@ -91,7 +91,7 @@ export const FooterClient = ({ copy, footerLinks, partners, socialLinks }: Foote
                   className="site-partner-link"
                   data-testid={`public-site-footer-partner-${partner.id}-${index}`}
                 >
-                  <img src={partner.logo} alt={partner.name} className="site-partner-logo" loading="lazy" decoding="async" />
+                  <img src={partner.logo} alt={partner.name} className="site-partner-logo" loading="lazy" decoding="async" width={200} height={48} />
                 </a>
               ))}
             </div>
