@@ -32,6 +32,7 @@ Installer ce site Next.js en SSR : https://github.com/Nexus-Conseil/greeters-ssr
 - Désactivation conditionnelle du script Multilipi en preview/local pour supprimer les erreurs console critiques
 - Nettoyage du warning console lié au preload de police (`Pacifico`) côté Next.js
 - Ajustement du chatbot : sélecteur de langue à 50px et nouveau message d’accueil frontend
+- Suppression du warning d’hydratation lié à l’attribut externe `data-google-analytics-opt-out` via `suppressHydrationWarning` sur `<html>` et `<body>`
 - Vérifications réalisées : `/`, `/contact`, `/qui-sommes-nous`, `/galerie` répondent en 200 ; chatbot visible, ouvrable et répondant côté UI et API
 
 ## Backlog priorisé

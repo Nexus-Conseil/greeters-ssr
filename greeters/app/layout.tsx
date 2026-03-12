@@ -46,13 +46,14 @@ export default async function RootLayout({
   const locale = await getRequestLocale();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         {MULTILIPI_ALTERNATES.map((alternate) => (
           <link key={alternate.hreflang} href={alternate.href} hrefLang={alternate.hreflang} rel="alternate" />
         ))}
       </head>
       <body
+        suppressHydrationWarning
         className={`${scriptFont.variable} app-shell`}
         data-testid="app-root-layout"
       >
