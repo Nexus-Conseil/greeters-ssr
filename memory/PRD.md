@@ -63,6 +63,7 @@
 - Nouvelle passe UI demandée par l’utilisateur : tous les CTA/contrôles publics visibles sont désormais en rectangles à coins arrondis (plus de pilules), avec conservation des animations subtiles ; espacement augmenté sous « Venez en visiteur, repartez en ami ! » sur l’accueil ; `Nos partenaires` centré avec logos plus petits et plus nets ; alternance blanc/gris clair renforcée sur les sections publiques et les sections CMS non colorées. Certaines décisions intermédiaires de ce lot ont ensuite été remplacées par le réalignement strict sur la production.
 - Reprise stricte alignée sur la production : `/presse` a été restaurée vers une structure fidèle au live/CSR (dossier de presse + grille de photos + contact presse), les overlays/titres/années de `/galerie` et de la lightbox ont été remis comme sur la CSR/live, et les fonds alternés des pages à sections étroites sont désormais rendus en bandes pleine largeur derrière un contenu contraint et margé.
 - Dispositif d’images progressives ajouté sur les galeries/presse : vignettes basse qualité initiales sous la ligne de flottaison, puis rechargement silencieux en haute qualité via `IntersectionObserver` quand l’utilisateur approche de la zone visible ; l’above-the-fold reste en chargement qualitatif direct.
+- Nouvelle passe de réalignement CSR/live sur les pages publiques signalées par l’utilisateur : restauration des versions stylées CSS (au lieu des rendus non stylés), flèches/dots cohérents sur home + livre d’or, drapeaux du header plus petits, corner-radius des CTA réduit, largeur uniforme des logos partenaires, actualités réajustées, et `/qui-sommes-nous`, `/devenez-benevole`, `/contact`, `/faire-un-don`, `/mentions-legales`, `/presse` replacées sur des structures visuelles stables et cohérentes.
 
 ## Validation réalisée
 - `eslint` OK sur `/app/greeters`
@@ -122,6 +123,14 @@
   - `/galerie` overlays + lightbox conformes PASS
   - bandes pleine largeur sur `/contact` et `/presse` PASS
   - chargement progressif des images galerie détecté et stable PASS
+- Validation complémentaire OK par agent frontend après la dernière salve de retouches
+  - 9/9 routes publiques testées (`/`, `/qui-sommes-nous`, `/devenez-benevole`, `/contact`, `/faire-un-don`, `/mentions-legales`, `/presse`, `/actualites`, `/livre-dor`)
+  - fonds/panneaux cohérents PASS
+  - carrousels avis + dots/flèches PASS
+  - partenaires largeur uniforme PASS
+  - `/presse` 3 blocs + 6 photos PASS
+  - `/actualites` cartes homogènes PASS
+  - drapeaux plus petits + radius discret PASS
 
 ## Blocages connus
 - Aucun blocage majeur sur le flux contact : Emailit est opérationnel sur l’environnement actuel.
@@ -139,6 +148,7 @@
 - Décider si le chatbot public historique doit être restauré à l’identique depuis la CSR dans la SSR publique.
 - Restaurer le chatbot public historique si l’utilisateur confirme qu’il doit revenir dans la SSR.
 - Re-mesurer la production réelle après l’ajout du chargement progressif des images pour confirmer l’impact Lighthouse mobile.
+- Décider si l’on restaure maintenant le chatbot public historique depuis la CSR.
 
 ## P1
 - Étendre le sitemap dynamique avec toutes les pages/articles réellement souhaités au référencement final.
@@ -163,3 +173,4 @@
 7. Si souhaité par l’utilisateur, porter ensuite le chatbot public depuis la CSR vers la SSR avec comportement et style équivalents.
 8. Lancer la baseline Lighthouse de production et fixer le budget de release définitif.
 9. Si l’utilisateur le souhaite, poursuivre le réalignement ultra-strict des dernières micro-différences visuelles encore perçues par rapport au live.
+10. Vérifier la prod réelle route par route dès que l’utilisateur donne un nouvel écart visible précis ou demande le retour du chatbot public.
