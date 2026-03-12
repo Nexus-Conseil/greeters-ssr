@@ -6,7 +6,7 @@ import type { Route } from "next";
 import { usePathname } from "next/navigation";
 
 import type { getPublicCopy } from "@/lib/i18n/site-copy";
-import { IMAGE_QUALITY_STANDARD } from "@/lib/media/config";
+import { IMAGE_QUALITY_LOGO } from "@/lib/media/config";
 import type { Partner, SocialLink } from "@/lib/public-site-data";
 
 const PAGES_WITH_FULL_FOOTER = ["/", "/livre-dor", "/faire-un-don", "/devenez-benevole", "/qui-sommes-nous"];
@@ -78,7 +78,7 @@ export const FooterClient = ({ copy, footerLinks, partners, socialLinks }: Foote
       {showPartnersSection ? (
         <section className="site-footer-partners site-deferred-section" data-testid="public-site-footer-partners">
           <div className="site-container">
-            <h2 className="site-section-title" data-testid="public-site-footer-partners-title">
+            <h2 className="site-section-title site-footer-partners-title" data-testid="public-site-footer-partners-title">
               {copy.footerPartnersTitle}
             </h2>
           </div>
@@ -93,7 +93,7 @@ export const FooterClient = ({ copy, footerLinks, partners, socialLinks }: Foote
                   className="site-partner-link"
                   data-testid={`public-site-footer-partner-${partner.id}-${index}`}
                 >
-                  <Image src={partner.logo} alt={partner.name} width={200} height={72} sizes="200px" quality={IMAGE_QUALITY_STANDARD} className="site-partner-logo" />
+                  <Image src={partner.logo} alt={partner.name} width={160} height={58} sizes="160px" quality={IMAGE_QUALITY_LOGO} className="site-partner-logo" />
                 </a>
               ))}
             </div>

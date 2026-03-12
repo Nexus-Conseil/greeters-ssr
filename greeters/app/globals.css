@@ -727,6 +727,14 @@ code {
   background: rgba(241, 238, 231, 0.88);
 }
 
+.cms-page .cms-section:not(.cms-section-green):not(.cms-section-image):nth-of-type(odd) {
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.cms-page .cms-section:not(.cms-section-green):not(.cms-section-image):nth-of-type(even) {
+  background: rgba(237, 237, 237, 0.96);
+}
+
 .cms-section-green {
   background: linear-gradient(135deg, #135d55 0%, #0f766e 100%);
 }
@@ -822,7 +830,7 @@ code {
   justify-content: center;
   min-height: 3rem;
   padding: 0.9rem 1.4rem;
-  border-radius: 999px;
+  border-radius: 0.5rem;
   font-family: var(--font-heading), sans-serif;
   overflow: visible;
   transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease, color 180ms ease;

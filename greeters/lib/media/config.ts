@@ -16,3 +16,5 @@ export const PUBLIC_LOGO_SIZES_ATTR = "(max-width: 640px) 150px, 200px";
 export const IMAGE_QUALITY_HERO = 76;
 export const IMAGE_QUALITY_STANDARD = 70;
 export const IMAGE_QUALITY_THUMB = 60;
+export const IMAGE_QUALITY_GALLERY = 86;
+export const IMAGE_QUALITY_LOGO = 100;

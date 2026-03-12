@@ -7,7 +7,7 @@ import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
 import { DynamicPageRenderer } from "@/components/cms/DynamicPageRenderer";
 import { getRequestLocale } from "@/lib/i18n/request";
 import { getLocalizedPageTitle } from "@/lib/i18n/site-copy";
-import { IMAGE_QUALITY_STANDARD, PUBLIC_GALLERY_GRID_SIZES_ATTR } from "@/lib/media/config";
+import { IMAGE_QUALITY_GALLERY, PUBLIC_IMAGE_SIZES_ATTR } from "@/lib/media/config";
 import { getRouteMetadata } from "@/lib/seo/public-metadata";
 import { PRESS_PHOTOS } from "@/lib/public-pages-data";
 import { findPublicPageBySlug } from "@/lib/services/pages";
@@ -40,16 +40,10 @@ export default async function PressePage() {
             <section className="site-block-stack" data-testid="presse-photos-section">
               <h2 className="site-section-subtitle">Photos libres de droit</h2>
               <p className="site-copy-stack">Voici une sélection de photos libres de droit publiées par l'association. Si vous deviez utiliser l'une de ces photos, merci de nous prévenir.</p>
-              <div className="site-gallery-grid site-gallery-grid-page">
-                {PRESS_PHOTOS.map((photo) => (
-                  <a key={photo.id} href={photo.src} target="_blank" rel="noreferrer" className="site-gallery-card" data-testid={`presse-photo-link-${photo.id}`}>
-                    <Image src={photo.src} alt={photo.title} width={520} height={520} sizes={PUBLIC_GALLERY_GRID_SIZES_ATTR} quality={IMAGE_QUALITY_STANDARD} className="site-gallery-image" data-testid={`presse-photo-image-${photo.id}`} />
-                    <span className="site-gallery-overlay">
-                      <strong>{photo.title}</strong>
-                      <small>{photo.date}</small>
-                    </span>
-                  </a>
-                ))}
+              <div className="site-presse-photo-shell" data-testid="presse-photo-shell">
+                <a href={PRESS_PHOTOS[0].src} target="_blank" rel="noreferrer" className="site-presse-photo-link" data-testid={`presse-photo-link-${PRESS_PHOTOS[0].id}`}>
+                  <Image src={PRESS_PHOTOS[0].src} alt={PRESS_PHOTOS[0].title} width={1200} height={900} sizes={PUBLIC_IMAGE_SIZES_ATTR} quality={IMAGE_QUALITY_GALLERY} className="site-presse-photo-image" data-testid={`presse-photo-image-${PRESS_PHOTOS[0].id}`} />
+                </a>
               </div>
             </section>
 
