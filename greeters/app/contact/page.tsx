@@ -39,7 +39,14 @@ export default async function ContactPage() {
           </div>
         </section>
 
-        <ContactPageClient introText={intro} />
+        {/* Section texte intro - fond blanc */}
+        <section className="bg-white py-10" data-testid="contact-intro-section">
+          <div className="max-w-4xl mx-auto px-4">
+            <p className="text-gray-700 leading-relaxed text-center text-lg">{intro}</p>
+          </div>
+        </section>
+
+        <ContactPageClient introText="" />
       </>
     </PublicPageShell>
   );

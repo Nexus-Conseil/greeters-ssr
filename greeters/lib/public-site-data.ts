@@ -77,7 +77,7 @@ export const HOME_PAGE_FALLBACK = {
       "Les greeters ne sont pas des guides professionnels. Ne leur demandez pas des visites de musées ou visites historiques !",
     ],
     ctaText: "Rencontrez un Greeter",
-    image: "/images/uploads/greeters-balade-1.webp",
+    image: "/images/uploads/greeters-balade-1.jpg",
     imageAlt: "Les Greeters de Paris lors d’une balade",
     videoThumbnail: "https://i.vimeocdn.com/video/1984451931-f56d4946f5aa304557cbdbfc0c251657c6600138b42e670092d38597918bc7d2-d?mw=800&q=85",
     videoTitle: "Les Greeters de Paris",

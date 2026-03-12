@@ -54,13 +54,15 @@ export const ContactPageClient = ({ introText }: { introText: string }) => {
   };
 
   return (
-    <section className="py-12" data-testid="contact-page-content">
+    <section className="bg-gray-100 py-12" data-testid="contact-page-content">
       <div className="max-w-5xl mx-auto px-4">
-        <div className="bg-gray-50 rounded-lg p-6 mb-8" data-testid="contact-page-intro-panel">
-          <p className="text-gray-700 leading-relaxed">{introText}</p>
-        </div>
+        {introText && (
+          <div className="bg-white rounded-lg p-6 mb-8" data-testid="contact-page-intro-panel">
+            <p className="text-gray-700 leading-relaxed">{introText}</p>
+          </div>
+        )}
 
-        <div className="bg-white border border-gray-200 rounded-lg p-6" data-testid="contact-page-form-wrapper">
+        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm" data-testid="contact-page-form-wrapper">
           <h3 className="text-lg font-semibold text-gray-800 mb-6 flex items-center justify-center gap-2" data-testid="contact-page-form-title">
             <Mail className="w-5 h-5 text-[#558b2f]" />
             Formulaire de contact

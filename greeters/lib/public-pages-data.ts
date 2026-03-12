@@ -86,7 +86,7 @@ export const GALLERY_PAGE_IMAGES: GalleryImage[] = [
   { id: "gallery-page-9", title: "Paris slider 4", date: "2024", src: "/images/uploads/slider-home-4.jpg" },
   { id: "gallery-page-10", title: "Bannière Greeters 1", date: "2024", src: "/images/uploads/greeters-banner-1.jpg" },
   { id: "gallery-page-11", title: "Bannière Greeters 2", date: "2024", src: "/images/uploads/greeters-banner-2.jpg" },
-  { id: "gallery-page-12", title: "Groupe espagnol", date: "2024", src: "/images/uploads/groupe-espagnol.png" },
+  { id: "gallery-page-12", title: "Bannière Greeters 3", date: "2024", src: "/images/uploads/greeters-banner-3.jpg" },
 ];
 
 export const WHO_WE_ARE_VALUES = [
@@ -133,5 +133,5 @@ export const PRESS_PHOTOS = [
   { id: "press-3", title: "Visite de quartier", src: "/images/uploads/greeters-balade-3.jpg", date: "2024" },
   { id: "press-4", title: "Promenade parisienne", src: "/images/uploads/greeters-balade-4.jpg", date: "2024" },
   { id: "press-5", title: "Balade à Montmartre", src: "/images/uploads/balade-montmartre.jpg", date: "2024" },
-  { id: "press-6", title: "Groupe de visiteurs", src: "/images/uploads/groupe-espagnol.png", date: "2024" },
+  { id: "press-6", title: "Bannière Greeters", src: "/images/uploads/greeters-banner-3.jpg", date: "2024" },
 ];

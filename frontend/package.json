@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "cd /app/greeters && npm run start"
-  }
+    "start": "bash /app/frontend/start.sh"
+  },
+  "dependencies": {}
 }

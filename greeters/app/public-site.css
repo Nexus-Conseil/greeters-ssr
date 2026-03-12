@@ -341,12 +341,60 @@
 }
 
 .site-script-title {
-  max-width: 12ch;
+  max-width: 100%;
   font-family: var(--font-script), cursive;
   font-size: clamp(2.5rem, 6.2vw, 6.2rem);
   line-height: 1.04;
   color: #111;
   text-shadow: 0 3px 14px rgba(255, 255, 255, 0.45);
+}
+
+/* Responsive slogan - Desktop: single line */
+.site-script-title .slogan-full {
+  display: inline;
+}
+.site-script-title .slogan-tablet,
+.site-script-title .slogan-mobile {
+  display: none;
+}
+
+/* Responsive slogan - Tablet: 2 lines */
+@media (max-width: 1100px) and (min-width: 481px) {
+  .site-script-title {
+    font-size: clamp(2rem, 8vw, 4rem);
+  }
+  .site-script-title .slogan-full {
+    display: none;
+  }
+  .site-script-title .slogan-tablet {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .site-script-title .slogan-line {
+    display: block;
+    white-space: nowrap;
+  }
+}
+
+/* Responsive slogan - Mobile: 4 lines */
+@media (max-width: 480px) {
+  .site-script-title {
+    font-size: clamp(1.8rem, 10vw, 2.5rem);
+  }
+  .site-script-title .slogan-full,
+  .site-script-title .slogan-tablet {
+    display: none;
+  }
+  .site-script-title .slogan-mobile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .site-script-title .slogan-word {
+    display: block;
+    white-space: nowrap;
+  }
 }
 
 .site-hero-subtitle {
@@ -374,7 +422,15 @@
   text-align: center;
 }
 
-.site-section-title,
+/* Centered section titles for specific sections */
+.site-section-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 300;
+  line-height: 1.15;
+  color: #2f2f2f;
+  text-align: center;
+}
+
 .site-static-title {
   font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 300;
