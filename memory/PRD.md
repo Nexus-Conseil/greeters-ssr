@@ -60,6 +60,7 @@
 - Protocole Lighthouse mobile automatisé ajouté : script `scripts/lighthouse-mobile-reference.sh` + documentation `docs/lighthouse-mobile-protocol.md`, avec campagnes multi-runs, synthèse best/median/average/worst et seuil médian configurable pour détecter les régressions.
 - Ajustements UI supplémentaires : espacement accru entre le titre social du footer et les icônes, bouton CMS de `/devenez-benevole` harmonisé avec les CTA glow verts du site, galerie resserrée et rapprochée visuellement du live (titre, container, coins, rythme vertical).
 - Diagnostic chatbot confirmé : le chatbot public n’a pas “cassé”, il n’a simplement pas été porté dans la SSR ; il existe dans la CSR de référence mais n’est pas monté dans l’app publique Next.js actuelle.
+- Nouvelle passe UI demandée par l’utilisateur : tous les CTA/contrôles publics visibles sont désormais en rectangles à coins arrondis (plus de pilules), avec conservation des animations subtiles ; espacement augmenté sous « Venez en visiteur, repartez en ami ! » sur l’accueil ; `Nos partenaires` centré avec logos plus petits et plus nets ; page `/presse` réduite à une seule image ; suppression des noms/années/légendes sur galerie/lightbox/captions CMS ; alternance blanc/gris clair renforcée sur les sections publiques et les sections CMS non colorées.
 
 ## Validation réalisée
 - `eslint` OK sur `/app/greeters`
@@ -108,6 +109,13 @@
   - `/galerie` structure cohérente et plus proche du live PASS
   - `/devenez-benevole` CTA glow CMS PASS après correctif `globals.css`
   - protocole Lighthouse script testé localement (génération des rapports + `summary.md` OK)
+- Validation UI finale OK par agent frontend
+  - boutons non pilules PASS
+  - espacement homepage avant vidéo PASS
+  - footer partenaires centré / logos propres PASS
+  - `/presse` une seule image PASS
+  - `/galerie` sans noms/années/légendes PASS
+  - alternance blanc / gris clair PASS
 
 ## Blocages connus
 - Aucun blocage majeur sur le flux contact : Emailit est opérationnel sur l’environnement actuel.
@@ -123,6 +131,7 @@
 - Vérifier côté utilisateur que l’onglet Preview Emergent s’est bien réinitialisé après le correctif (refresh complet / réouverture si cache navigateur côté UI plateforme).
 - Mesurer le vrai domaine de production une fois branché, car MultiLipi autorisé en prod pourra encore coûter quelques points Lighthouse réels.
 - Décider si le chatbot public historique doit être restauré à l’identique depuis la CSR dans la SSR publique.
+- Restaurer le chatbot public historique si l’utilisateur confirme qu’il doit revenir dans la SSR.
 
 ## P1
 - Étendre le sitemap dynamique avec toutes les pages/articles réellement souhaités au référencement final.
@@ -145,3 +154,4 @@
 5. Ajuster la stratégie SEO finale (pages à indexer/non indexer, priorités, éventuelles pages utilitaires à exclure).
 6. Refaire une passe Lighthouse sur le domaine de production réel et décider ensuite, si nécessaire, d’un traitement spécifique de MultiLipi pour viser 98–100 mobile.
 7. Si souhaité par l’utilisateur, porter ensuite le chatbot public depuis la CSR vers la SSR avec comportement et style équivalents.
+8. Lancer la baseline Lighthouse de production et fixer le budget de release définitif.
