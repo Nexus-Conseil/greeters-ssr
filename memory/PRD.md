@@ -20,21 +20,18 @@ Migration "pixel-perfect" de l'application React CSR (`https://greeters.paris`) 
 
 ### Pages publiques (Tailwind pixel-perfect) — 12 Mars 2026
 Toutes les pages publiques réécrites avec les classes Tailwind exactes du code CSR de référence :
-- `/qui-sommes-nous` — Titre vert, panneaux gris, IGA panel, grille de valeurs, warning ambre
-- `/devenez-benevole` — Hero dark green, image, bénéfices grid, exigences, CTA
-- `/faire-un-don` — Titre vert, PayPal/Chèque/Virement/Don direct, image
-- `/mentions-legales` — Éditeur, charte avec icônes, responsabilités cards, hébergement
-- `/presse` — Dossier de presse, galerie photo 3 cols, contact presse
-- `/contact` — Formulaire 2 colonnes, panneau intro gris, envoi via Emailit
-- `/actualites` — Grille 3 colonnes articles avec images/dates/extraits
-- `/galerie` — Grille 4 colonnes images, lightbox avec navigation
-- `/livre-dor` — Testimonials avec Quote icon, navigation dots
-- `/` (accueil) — Hero, Intro, Greeters, Visit, Actualités, Testimonials, Gallery
+- `/qui-sommes-nous`, `/devenez-benevole`, `/faire-un-don`, `/mentions-legales`
+- `/presse`, `/contact`, `/actualites`, `/galerie`, `/livre-dor`, `/` (accueil)
+
+### Corrections UI — 12 Mars 2026
+- Favicon remplacé par PNG du CSR (icon.png + apple-icon.png)
+- Icônes réseaux sociaux : carrées avec coins arrondis (border-radius: 0.75rem)
+- Carrousel partenaires : espacement uniforme (gap: 3rem, flex-shrink-0, h-auto)
 
 ### Infrastructure CSS — 12 Mars 2026
-- Installation et configuration Tailwind CSS v4.2.1 avec `@tailwindcss/postcss`
-- CSS custom wrappé dans `@layer base` et `@layer components` pour permettre aux utilitaires Tailwind de prendre la priorité
-- `PublicPageShell` avec `bg-white` pour isoler le fond blanc des pages publiques
+- Tailwind CSS v4.2.1 avec `@tailwindcss/postcss`
+- CSS custom wrappé dans `@layer base/components`
+- `PublicPageShell` avec `bg-white`
 
 ### Backend / CMS
 - Authentification admin (NextAuth.js)
@@ -47,9 +44,6 @@ Toutes les pages publiques réécrites avec les classes Tailwind exactes du code
 - Testing agent iteration 15: **100% frontend** (12 pages validées)
 
 ## Backlog priorité
-
-### P0 (Critique)
-- ~~Migration pixel-perfect des pages publiques~~ ✅ FAIT
 
 ### P1 (Important)
 - [ ] Réintégrer le chatbot public depuis le code CSR
@@ -64,12 +58,3 @@ Toutes les pages publiques réécrites avec les classes Tailwind exactes du code
 ## Credentials
 - Admin: `contact@nexus-conseil.ch` / `Greeters&58!2026`
 - Preview URL: `https://greeters-ssr-rebuild.preview.emergentagent.com`
-
-## Intégrations tierces
-- Supabase (PostgreSQL)
-- NextAuth.js
-- Emailit
-- ShortPixel
-- Cloudinary (next-cloudinary)
-- Google Gemini API (en pause)
-- MultiLipi (script de traduction)
