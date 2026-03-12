@@ -56,6 +56,7 @@ export async function generateMetadata({ params }: PublicPlaceholderPageProps): 
   const { slug } = await params;
   const locale = await getRequestLocale();
   const livePage = await findPublicPageBySlug(slug, locale).catch(() => null);
+  const currentPath = livePage?.slug?.startsWith("/") ? livePage.slug : `/${slug}`;
   const content = PUBLIC_PLACEHOLDERS[slug];
 
   if (livePage) {
@@ -82,7 +83,7 @@ export default async function PublicPlaceholderPage({ params }: PublicPlaceholde
     return (
       <main className="site-page" data-testid={`public-live-page-${slug}`}>
         <TopBar initialLocale={locale} />
-        <Header />
+        <Header currentPath={currentPath} />
         <StructuredDataScript page={livePage} locale={locale} path={livePage.slug} />
         <div className="site-live-page" data-testid={`public-live-page-content-${slug}`}>
           <DynamicPageRenderer page={livePage} />
@@ -101,7 +102,7 @@ export default async function PublicPlaceholderPage({ params }: PublicPlaceholde
   return (
     <main className="site-page" data-testid={`public-placeholder-page-${slug}`}>
       <TopBar initialLocale={locale} />
-      <Header />
+      <Header currentPath={currentPath} />
       <StructuredDataScript page={{ title: content.title, slug, metaDescription: content.description }} locale={locale} path={slug} />
       <section className="site-static-shell" data-testid={`public-placeholder-shell-${slug}`}>
         <section className="site-static-card" data-testid={`public-placeholder-panel-${slug}`}>

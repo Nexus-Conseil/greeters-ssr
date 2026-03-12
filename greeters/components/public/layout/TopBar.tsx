@@ -7,11 +7,18 @@ import { getPublicCopy } from "@/lib/i18n/site-copy";
 import { getBookingUrl } from "@/lib/public-site-data";
 
 export const TopBar = ({ initialLocale = "fr" }: { initialLocale?: AppLocale }) => {
+  const [isHydrated, setIsHydrated] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [bookingUrl, setBookingUrl] = useState(getBookingUrl(initialLocale));
-  const [bookingLabel, setBookingLabel] = useState(getPublicCopy(initialLocale).bookingCta);
+  const [resolvedLocale, setResolvedLocale] = useState<AppLocale>(initialLocale);
+
+  const bookingUrl = getBookingUrl(resolvedLocale);
+  const bookingLabel = getPublicCopy(resolvedLocale).bookingCta;
 
   const scrollToTop = () => {
+    if (!isHydrated) {
+      return;
+    }
+
     const duration = 1000;
     const start = window.scrollY;
     const startTime = performance.now();
@@ -33,14 +40,15 @@ export const TopBar = ({ initialLocale = "fr" }: { initialLocale?: AppLocale }) 
   };
 
   useEffect(() => {
+    setIsHydrated(true);
+
     const onScroll = () => setShowBackToTop(window.scrollY > 280);
     const host = window.location.hostname;
     const path = host.split(".")[0];
     const locale = (SUPPORTED_LOCALES as readonly string[]).includes(path) ? (path as AppLocale) : initialLocale;
 
     onScroll();
-    setBookingUrl(getBookingUrl(locale));
-    setBookingLabel(getPublicCopy(locale).bookingCta);
+    setResolvedLocale(locale);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [initialLocale]);
@@ -61,6 +69,7 @@ export const TopBar = ({ initialLocale = "fr" }: { initialLocale?: AppLocale }) 
         className={`site-backtotop${showBackToTop ? " is-visible" : ""}`}
         onClick={scrollToTop}
         aria-label="Retour en haut"
+        aria-hidden={!showBackToTop}
         data-testid="public-site-backtotop-button"
       >
         <svg viewBox="0 0 24 24" aria-hidden="true">

@@ -24,7 +24,7 @@ export default async function Home() {
   return (
     <main className="min-h-screen flex flex-col bg-white" data-testid="public-home-page">
       <TopBar initialLocale={locale} />
-      <Header />
+      <Header currentPath="/" />
       <StructuredDataScript
         page={homepage ?? { title: "Paris Greeters", slug: "/", metaDescription: "Découvrez Paris autrement avec les Greeters : des balades gratuites, humaines et locales au cœur de la ville." }}
         locale={locale}

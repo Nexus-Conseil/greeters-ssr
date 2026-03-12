@@ -8,7 +8,7 @@ function hasRequiredPrimaryLinks(hrefs: string[]) {
   return hrefs.includes("/") && hrefs.some((href) => href === "BOOKING_URL_PLACEHOLDER" || href.includes("parisiendunjour.fr"));
 }
 
-export const Header = async () => {
+export const Header = async ({ currentPath = "/" }: { currentPath?: string }) => {
   const locale = await getRequestLocale();
   const fallbackNavigation = getLocalizedHeaderFallbackNav(locale);
   const navigation = await getMenu(locale)
@@ -24,5 +24,5 @@ export const Header = async () => {
     })
     .catch(() => fallbackNavigation);
 
-  return <HeaderClient currentLocale={locale} navigation={navigation} />;
+  return <HeaderClient currentLocale={locale} navigation={navigation} initialPathname={currentPath} />;
 };

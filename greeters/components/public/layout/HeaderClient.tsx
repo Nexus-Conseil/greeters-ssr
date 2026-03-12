@@ -37,6 +37,7 @@ function isActivePath(pathname: string, href: string) {
 
 type HeaderClientProps = {
   currentLocale: AppLocale;
+  initialPathname?: string;
   navigation: SiteNavigationItem[];
 };
 
@@ -52,17 +53,31 @@ const CloseGlyph = () => (
   </svg>
 );
 
-export const HeaderClient = ({ currentLocale, navigation }: HeaderClientProps) => {
-  const pathname = usePathname() ?? "/";
+export const HeaderClient = ({ currentLocale, initialPathname = "/", navigation }: HeaderClientProps) => {
+  const pathname = usePathname();
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [resolvedPathname, setResolvedPathname] = useState(initialPathname);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showMenuText, setShowMenuText] = useState(false);
 
   useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
+    setIsHydrated(true);
+  }, []);
 
   useEffect(() => {
-    if (mobileMenuOpen) {
+    if (!isHydrated) {
+      return;
+    }
+
+    setResolvedPathname(pathname ?? initialPathname);
+  }, [initialPathname, isHydrated, pathname]);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [resolvedPathname]);
+
+  useEffect(() => {
+    if (!isHydrated || mobileMenuOpen) {
       return;
     }
 
@@ -71,13 +86,15 @@ export const HeaderClient = ({ currentLocale, navigation }: HeaderClientProps) =
     }, 3000);
 
     return () => window.clearInterval(interval);
-  }, [mobileMenuOpen]);
+  }, [isHydrated, mobileMenuOpen]);
 
   const resolvedNavigation = useMemo(() => {
     return navigation
       .filter((item) => item.isVisible)
       .sort((left, right) => left.order - right.order);
   }, [navigation]);
+
+  const currentPathname = resolvedPathname || "/";
 
   return (
     <header className="site-header" data-testid="public-site-header">
@@ -86,7 +103,7 @@ export const HeaderClient = ({ currentLocale, navigation }: HeaderClientProps) =
           {(Object.keys(LOCALE_LABELS) as AppLocale[]).map((locale) => (
             <a
               key={locale}
-              href={buildLocaleUrl(locale, pathname)}
+              href={buildLocaleUrl(locale, currentPathname)}
               className={`site-language-link${locale === currentLocale ? " is-active" : ""}`}
               title={LOCALE_LABELS[locale]}
               data-testid={`language-switch-${locale}`}
@@ -106,7 +123,7 @@ export const HeaderClient = ({ currentLocale, navigation }: HeaderClientProps) =
       <nav className="site-nav site-nav-desktop" data-testid="public-site-navigation-desktop">
         {resolvedNavigation.map((item) => {
           const href = item.href === "BOOKING_URL_PLACEHOLDER" ? getBookingUrl(currentLocale) : item.href;
-          const active = !item.isExternal && isActivePath(pathname, item.href);
+          const active = !item.isExternal && isActivePath(currentPathname, item.href);
 
           return item.isExternal ? (
             <a key={item.id} href={href} target="_blank" rel="noreferrer" className="site-nav-link" data-testid={`public-site-nav-link-${toTestId(item.href)}`}>
@@ -156,7 +173,7 @@ export const HeaderClient = ({ currentLocale, navigation }: HeaderClientProps) =
                 {item.label}
               </a>
             ) : (
-              <Link key={item.id} href={item.href as Route} prefetch={false} className={`site-mobile-link${isActivePath(pathname, item.href) ? " is-active" : ""}`} data-testid={`public-site-mobile-link-${toTestId(item.href)}`}>
+              <Link key={item.id} href={item.href as Route} prefetch={false} className={`site-mobile-link${isActivePath(currentPathname, item.href) ? " is-active" : ""}`} data-testid={`public-site-mobile-link-${toTestId(item.href)}`}>
                 {item.label}
               </Link>
             );
