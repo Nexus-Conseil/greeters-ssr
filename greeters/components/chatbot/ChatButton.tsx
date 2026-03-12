@@ -72,7 +72,7 @@ export default function ChatButton({ onClick, isOpen }: { onClick: () => void; i
           <span className="text-sm sm:text-base leading-tight">Des questions ? On vous répond 24h/24</span>
         </button>
 
-        <div className="absolute left-1/2 -translate-x-1/2" style={{ zIndex: 10, bottom: "100%", marginBottom: -32 }}>
+        <div className="absolute left-1/2 -translate-x-1/2" style={{ zIndex: 10, bottom: "100%", marginBottom: -27 }}>
           <Image
             src="/couple-greeters.png"
             alt="Greeters de Paris"
