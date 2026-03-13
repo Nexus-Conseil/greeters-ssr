@@ -33,11 +33,15 @@ Installer ce site Next.js en SSR : https://github.com/Nexus-Conseil/greeters-ssr
 - Conversion du frontend wrapper en build/start Next propre avec `postinstall` pour installer les dépendances de `/app/greeters`
 - Ajout des endpoints backend `/api/health` et `/api/pages/public` pour les checks publics de readiness
 - Vérifications finales réussies : `/`, `/contact`, `/api/health`, `/api/pages/public`, chatbot, build prod Next
+- AUTH_SECRET final fort généré et appliqué
+- Compte admin final `florence.levot@nexus-conseil.ch` créé/mis à jour en `SUPER_ADMIN`
+- Proxy public des routes auth Next (`/api/auth/login`, `/api/auth/me`, `/api/auth/logout`) via FastAPI pour permettre le login sur le domaine public
+- Flux final admin/auth validés en API + UI (login, session, accès `/admin`, logout, 401 post-logout)
 
 ## Backlog priorisé
 ### P0
-- Remplacer le secret/admin et les URLs d'environnement par des valeurs finales de production côté plateforme
-- Valider les flux admin/auth complets avec identifiants connus côté métier
+- Compléter les clés métier encore absentes pour les flux non-auth (Emailit contact, Gemini IA admin si ces fonctionnalités doivent être actives)
+- Basculer `NEXT_PUBLIC_CHAT_API_URL` vers `https://greeters.nexus-conseil.ch` dès que le domaine de validation résout effectivement, puis vers `https://greeters.paris` au go-live
 - Décider de la stratégie finale de merge de `1203` (idéalement ciblée)
 
 ### P1
@@ -51,7 +55,7 @@ Installer ce site Next.js en SSR : https://github.com/Nexus-Conseil/greeters-ssr
 - Formaliser une procédure d'import/rebuild DB documentée
 
 ## Next tasks
-1. Injecter les variables finales de production dans l'environnement cible
-2. Valider admin/auth/contact avec données réelles et comptes finaux
+1. Fournir/configurer les clés métier encore manquantes (Emailit, Gemini admin, éventuellement ShortPixel)
+2. Basculer l'URL de chat sur le domaine de validation dès que `greeters.nexus-conseil.ch` est résolu
 3. Préparer un diff de merge “safe” de `1203`
 4. Si nécessaire, convertir la stratégie Prisma en migrations déployables classiques selon l'environnement cible
