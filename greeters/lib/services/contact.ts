@@ -220,6 +220,24 @@ function buildIconInfoRow({
   `;
 }
 
+function buildIconOnlyLink(href: string, icon: string) {
+  return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; margin-top: 14px;">
+      <tr>
+        <td align="center" style="padding-top: 2px;">
+          <a href="${escapeHtml(href)}" target="_blank" style="display:inline-block; text-decoration:none;">
+            <table width="38" height="38" border="0" cellspacing="0" cellpadding="0" role="presentation" style="width:38px; height:38px; border-radius:${EMAIL_BRAND.buttonRadius}; background-color:#ffffff; border:1px solid ${EMAIL_BRAND.brandGreen};">
+              <tr>
+                <td align="center" valign="middle">${icon}</td>
+              </tr>
+            </table>
+          </a>
+        </td>
+      </tr>
+    </table>
+  `;
+}
+
 function buildEmailShell({
   preheader,
   eyebrow,
@@ -233,6 +251,7 @@ function buildEmailShell({
   footerLabel,
   footerEmail,
   footerUrl,
+  softBoxPaddingBottom,
 }: {
   preheader: string;
   eyebrow: string;
@@ -246,6 +265,7 @@ function buildEmailShell({
   footerLabel?: string;
   footerEmail?: string;
   footerUrl?: string;
+  softBoxPaddingBottom?: string;
 }) {
   const safeFooterEmail = footerEmail ? escapeHtml(footerEmail) : "";
   const safeFooterUrl = footerUrl ? escapeHtml(footerUrl) : "";
@@ -315,7 +335,7 @@ function buildEmailShell({
                           </td>
                         </tr>`
                           : ""}
-                        ${softBox ? `<tr><td style="padding: 0 48px 0 48px;">${softBox}</td></tr>` : ""}
+                        ${softBox ? `<tr><td style="padding: 0 48px ${softBoxPaddingBottom ?? "0"} 48px;">${softBox}</td></tr>` : ""}
                         ${detailsSection ? `<tr><td style="padding: 28px 48px 0 48px;">${detailsSection}</td></tr>` : ""}
                         ${secondaryCta ? `<tr><td style="padding: 30px 48px 0 48px;">${secondaryCta}</td></tr>` : ""}
                         ${footerLabel && footerEmail && footerUrl
@@ -404,6 +424,7 @@ export function buildAdminContactRequestBody(
         "Message",
         `${safeMessage}`,
       ),
+      softBoxPaddingBottom: "24px",
     }),
     tracking: {
       loads: false,
@@ -431,8 +452,6 @@ export function buildAuthorConfirmationRequestBody(
       "",
       "Copie de votre message :",
       payload.message,
-      "",
-      config.siteUrl,
     ].join("\n"),
     html: buildEmailShell({
       preheader: "Nous avons bien reçu votre message pour Paris Greeters.",
@@ -445,13 +464,7 @@ export function buildAuthorConfirmationRequestBody(
         "Copie de votre message",
         `${safeMessage}`,
       ),
-      detailsSection: buildIconInfoRow({
-        label: "Site web",
-        href: normalizedSiteUrl,
-        value: normalizedSiteUrl,
-        description: "",
-        icon: buildGlobeIconSvg(),
-      }),
+      detailsSection: buildIconOnlyLink(normalizedSiteUrl, buildGlobeIconSvg()),
     }),
     tracking: {
       loads: false,

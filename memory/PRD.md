@@ -66,6 +66,8 @@ Déployer le site `Nexus-Conseil/greeters-ssr` branche `1303` en Next.js SSR dan
   - sujet des 2 emails désormais exactement égal au sujet saisi par l’auteur
   - coordonnées admin compactées sur une seule ligne (`nom • email`)
   - affichage email neutralisé pour éviter rendu bleu/souligné dans l’email HTML
+  - suppression du texte de site web en bas de l’email auteur, avec conservation d’un simple picto cliquable
+  - ajout d’un espace sous la carte message dans l’email admin
 - Régression ajoutée pour les templates email via builders TS + tests Python sans envoi réel d’email
 - Préparation merge safe documentée dans `/app/memory/MERGE_SAFE_1203_TO_1303.md`
 - Tests validés:

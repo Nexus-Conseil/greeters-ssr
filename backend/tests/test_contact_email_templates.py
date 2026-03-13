@@ -77,6 +77,7 @@ def test_author_template_contains_warm_confirmation_and_message_copy():
     assert "Copie de votre message" in author["html"]
     assert "Merci pour votre aide" in author["html"]
     assert author["subject"] == "Balade personnalisée"
+    assert "Site web" not in author["html"]
 
 
 def test_branding_shell_and_signature_are_consistent_with_site_style():
@@ -90,4 +91,4 @@ def test_branding_shell_and_signature_are_consistent_with_site_style():
         assert "#f4f4f1" in html
         assert "/logo_greeters.png" in html
 
-    assert "https://parisgreeters.org" in author_html
+    assert "https://parisgreeters.org" not in data["author"]["text"]
