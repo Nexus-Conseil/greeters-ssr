@@ -49,7 +49,18 @@ const EMAIL_BRAND = {
   textPrimary: "#183129",
   textMuted: "#5f6d66",
   border: "#d8e2cf",
+  radius: "0.25rem",
+  headingFont: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  bodyFont: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
 };
+
+function buildEmailIconSvg() {
+  return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4 7.5L11.058 12.086C11.648 12.469 12.352 12.469 12.942 12.086L20 7.5" stroke="#36543a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><rect x="3.15" y="5.15" width="17.7" height="13.7" rx="2.85" stroke="#36543a" stroke-width="1.7"/></svg>`;
+}
+
+function buildGlobeIconSvg() {
+  return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="8.25" stroke="#36543a" stroke-width="1.7"/><path d="M3.75 12H20.25" stroke="#36543a" stroke-width="1.7" stroke-linecap="round"/><path d="M12 3.75C14.517 6.473 15.947 9.99 16.029 13.699C15.947 17.408 14.517 20.925 12 23.648C9.483 20.925 8.053 17.408 7.971 13.699C8.053 9.99 9.483 6.473 12 3.75Z" stroke="#36543a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
 
 function escapeHtml(value: string) {
   return value
@@ -98,38 +109,47 @@ function buildEmailShell({
   ctaLabel?: string;
   ctaHref?: string;
 }) {
+  const safeFooterEmail = escapeHtml(footerEmail);
+  const safeFooterUrl = escapeHtml(footerUrl);
+  const safeCtaHref = ctaHref ? escapeHtml(ctaHref) : "";
+  const logoUrl = `${footerUrl.replace(/\/$/, "")}/images/logo_greeters.png`;
+
   return `
-    <div style="margin: 0; padding: 32px 16px; background: ${EMAIL_BRAND.pageBackground}; font-family: Georgia, 'Times New Roman', serif; color: ${EMAIL_BRAND.textPrimary};">
+    <div style="margin: 0; padding: 32px 16px; background: ${EMAIL_BRAND.pageBackground}; font-family: ${EMAIL_BRAND.bodyFont}; color: ${EMAIL_BRAND.textPrimary};">
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 680px; margin: 0 auto; border-collapse: collapse;">
         <tr>
           <td>
-            <div style="background: linear-gradient(135deg, ${EMAIL_BRAND.brandGreenDark}, ${EMAIL_BRAND.brandGreen}); border-radius: 28px 28px 0 0; padding: 28px 32px; text-align: center;">
-              <div style="display: inline-block; padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,0.16); color: #ffffff; letter-spacing: 0.16em; font-size: 11px; text-transform: uppercase;">
-                Paris Greeters
-              </div>
-              <h1 style="margin: 18px 0 0; color: #ffffff; font-size: 34px; line-height: 1.18; font-weight: 400;">
-                ${title}
-              </h1>
+            <div style="background: #ffffff; border: 1px solid ${EMAIL_BRAND.border}; border-bottom: none; border-radius: ${EMAIL_BRAND.radius} ${EMAIL_BRAND.radius} 0 0; padding: 28px 32px; text-align: center;">
+              <img src="${logoUrl}" alt="Paris Greeters" width="200" style="display: block; width: 200px; max-width: 100%; height: auto; margin: 0 auto;" />
             </div>
-            <div style="background: ${EMAIL_BRAND.cardBackground}; border: 1px solid ${EMAIL_BRAND.border}; border-top: none; border-radius: 0 0 28px 28px; padding: 32px; box-shadow: 0 14px 36px rgba(24, 49, 41, 0.06);">
+            <div style="background: ${EMAIL_BRAND.cardBackground}; border: 1px solid ${EMAIL_BRAND.border}; border-top: none; border-radius: 0 0 ${EMAIL_BRAND.radius} ${EMAIL_BRAND.radius}; padding: 32px; box-shadow: 0 14px 36px rgba(24, 49, 41, 0.06);">
               <p style="margin: 0 0 12px; color: ${EMAIL_BRAND.brandGreen}; letter-spacing: 0.14em; font-size: 11px; text-transform: uppercase;">
                 ${eyebrow}
               </p>
+              <h1 style="margin: 0 0 16px; color: ${EMAIL_BRAND.textPrimary}; font-family: ${EMAIL_BRAND.headingFont}; font-size: 34px; line-height: 1.12; font-weight: 400;">
+                ${title}
+              </h1>
               <p style="margin: 0 0 24px; font-size: 17px; line-height: 1.8; color: ${EMAIL_BRAND.textPrimary};">
                 ${intro}
               </p>
               ${body}
               ${ctaLabel && ctaHref ? `
                 <div style="margin-top: 28px; text-align: center;">
-                  <a href="${ctaHref}" style="display: inline-block; padding: 14px 22px; border-radius: 999px; background: ${EMAIL_BRAND.brandGreen}; color: #ffffff; text-decoration: none; font-size: 15px; letter-spacing: 0.04em;">
+                  <a href="${safeCtaHref}" style="display: inline-block; padding: 14px 22px; border-radius: ${EMAIL_BRAND.radius}; background: ${EMAIL_BRAND.brandGreen}; color: #ffffff; text-decoration: none; font-family: ${EMAIL_BRAND.headingFont}; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;">
                     ${ctaLabel}
                   </a>
                 </div>
               ` : ""}
               <div style="margin-top: 32px; padding-top: 22px; border-top: 1px solid ${EMAIL_BRAND.border}; color: ${EMAIL_BRAND.textMuted}; font-size: 14px; line-height: 1.8;">
                 <strong style="color: ${EMAIL_BRAND.textPrimary};">${footerLabel}</strong><br />
-                <a href="mailto:${footerEmail}" style="color: ${EMAIL_BRAND.brandGreenDark}; text-decoration: none;">${footerEmail}</a><br />
-                <a href="${footerUrl}" style="color: ${EMAIL_BRAND.brandGreenDark}; text-decoration: none;">${footerUrl}</a>
+                <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px; color: ${EMAIL_BRAND.textPrimary};">
+                  <span style="display: inline-flex; width: 18px; height: 18px; vertical-align: middle;">${buildEmailIconSvg()}</span>
+                  <a href="mailto:${safeFooterEmail}" style="color: ${EMAIL_BRAND.brandGreenDark}; text-decoration: none;">${safeFooterEmail}</a>
+                </div>
+                <div style="margin-top: 8px; display: flex; align-items: center; gap: 10px; color: ${EMAIL_BRAND.textPrimary};">
+                  <span style="display: inline-flex; width: 18px; height: 18px; vertical-align: middle;">${buildGlobeIconSvg()}</span>
+                  <a href="${safeFooterUrl}" style="color: ${EMAIL_BRAND.brandGreenDark}; text-decoration: none;">${safeFooterUrl}</a>
+                </div>
               </div>
             </div>
           </td>
@@ -146,7 +166,7 @@ function buildFieldGrid(fields: Array<{ label: string; value: string; background
         .map(
           (field) => `
             <tr>
-              <td style="padding: 16px 18px; border-radius: 18px; background: ${field.background ?? EMAIL_BRAND.softGreen}; border: 1px solid ${EMAIL_BRAND.border};">
+              <td style="padding: 16px 18px; border-radius: ${EMAIL_BRAND.radius}; background: ${field.background ?? EMAIL_BRAND.softGreen}; border: 1px solid ${EMAIL_BRAND.border};">
                 <div style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: ${EMAIL_BRAND.brandGreenDark}; margin-bottom: 8px;">
                   ${field.label}
                 </div>
@@ -170,8 +190,19 @@ export function buildAdminContactRequestBody(
   const safeEmail = escapeHtml(payload.email);
   const safeSubject = escapeHtml(payload.subject);
   const safeMessage = escapeHtml(payload.message).replaceAll("\n", "<br />");
+  const emailLine = `
+    <div style="margin-top: 18px; padding: 16px 18px; border-radius: ${EMAIL_BRAND.radius}; background: ${EMAIL_BRAND.softGreen}; border: 1px solid ${EMAIL_BRAND.border};">
+      <div style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: ${EMAIL_BRAND.brandGreenDark}; margin-bottom: 8px;">
+        Email
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; color: ${EMAIL_BRAND.textPrimary};">
+        <span style="display: inline-flex; width: 18px; height: 18px; vertical-align: middle;">${buildEmailIconSvg()}</span>
+        <span style="font-size: 15px; line-height: 1.6;">${safeEmail}</span>
+      </div>
+    </div>
+  `;
   const messageCard = `
-    <div style="margin-top: 18px; padding: 22px 22px 24px; border-radius: 22px; background: ${EMAIL_BRAND.softSand}; border: 1px solid #ead8b7;">
+    <div style="margin-top: 18px; padding: 22px 22px 24px; border-radius: ${EMAIL_BRAND.radius}; background: ${EMAIL_BRAND.softSand}; border: 1px solid #ead8b7;">
       <div style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: ${EMAIL_BRAND.brandGreenDark}; margin-bottom: 10px;">
         Message
       </div>
@@ -202,9 +233,8 @@ export function buildAdminContactRequestBody(
       body:
         buildFieldGrid([
           { label: "Nom", value: safeName },
-          { label: "Email", value: safeEmail },
           { label: "Sujet", value: safeSubject },
-        ]) + messageCard,
+        ]) + emailLine + messageCard,
       footerLabel: "Paris Greeters",
       footerEmail: config.fromEmail,
       footerUrl: config.siteUrl,
@@ -225,6 +255,14 @@ export function buildAuthorConfirmationRequestBody(
   const safeName = escapeHtml(payload.name);
   const safeSubject = escapeHtml(payload.subject);
   const safeMessage = escapeHtml(payload.message).replaceAll("\n", "<br />");
+  const websiteCard = `
+    <div style="margin: 18px 0 0; padding: 16px 18px; border-radius: ${EMAIL_BRAND.radius}; background: ${EMAIL_BRAND.softGreen}; border: 1px solid ${EMAIL_BRAND.border};">
+      <div style="display: flex; align-items: center; gap: 10px; color: ${EMAIL_BRAND.textPrimary};">
+        <span style="display: inline-flex; width: 18px; height: 18px; vertical-align: middle;">${buildGlobeIconSvg()}</span>
+        <a href="${escapeHtml(config.siteUrl)}" style="color: ${EMAIL_BRAND.brandGreenDark}; text-decoration: none; font-size: 15px; line-height: 1.6;">${escapeHtml(config.siteUrl)}</a>
+      </div>
+    </div>
+  `;
 
   return {
     from: `${config.fromName} <${config.fromEmail}>`,
@@ -253,7 +291,7 @@ export function buildAuthorConfirmationRequestBody(
         buildFieldGrid([
           { label: "Sujet", value: safeSubject },
           { label: "Copie de votre message", value: safeMessage, background: EMAIL_BRAND.softSand },
-        ]),
+        ]) + websiteCard,
       footerLabel: "Paris Greeters",
       footerEmail: config.fromEmail,
       footerUrl: config.siteUrl,

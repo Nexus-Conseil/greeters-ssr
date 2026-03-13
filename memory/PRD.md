@@ -54,6 +54,10 @@ Déployer le site `Nexus-Conseil/greeters-ssr` branche `1303` en Next.js SSR dan
   - email de confirmation auteur ajouté, chaleureux et cohérent avec le style du site
   - signature harmonisée avec Paris Greeters + email + lien vers le site
   - URL publique d’email séparée dans `PUBLIC_SITE_URL`
+  - header blanc avec le logo du site
+  - pictogrammes email + site web intégrés dans le rendu
+  - polices alignées sur celles du site
+  - corner-radius aligné sur les boutons du site pour les boutons et cartes email
 - Régression ajoutée pour les templates email via builders TS + tests Python sans envoi réel d’email
 - Préparation merge safe documentée dans `/app/memory/MERGE_SAFE_1203_TO_1303.md`
 - Tests validés:
