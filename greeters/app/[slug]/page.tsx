@@ -78,6 +78,7 @@ export default async function PublicPlaceholderPage({ params }: PublicPlaceholde
   const { slug } = await params;
   const locale = await getRequestLocale();
   const livePage = await findPublicPageBySlug(slug, locale).catch(() => null);
+  const currentPath = livePage?.slug?.startsWith("/") ? livePage.slug : `/${slug}`;
 
   if (livePage) {
     return (

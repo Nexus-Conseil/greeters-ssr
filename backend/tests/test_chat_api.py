@@ -14,7 +14,7 @@ def _load_public_base_url() -> str:
         values = dotenv_values("/app/greeters/.env")
         base_url = values.get("NEXT_PUBLIC_CHAT_API_URL")
     if not base_url:
-        pytest.skip("NEXT_PUBLIC_CHAT_API_URL is not configured")
+        pytest.skip("NEXT_PUBLIC_CHAT_API_URL is not configured", allow_module_level=True)
     return str(base_url).rstrip("/")
 
 

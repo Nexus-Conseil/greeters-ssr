@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Send, X, Loader2, ChevronDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_CHAT_API_URL || "";
+const BACKEND_URL = process.env.NEXT_PUBLIC_CHAT_API_URL?.trim() ?? "";
 
 const TRANSLATIONS: Record<string, { placeholder: string; welcome: string }> = {
   fr: { placeholder: "Posez votre question...", welcome: "Bonjour ! 👋 Vous avez envie de profiter d'une balade à Paris avec un Greeters ? Qu'est-ce qui vous plairait tout particulièrement ? 😊" },
