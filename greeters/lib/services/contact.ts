@@ -187,9 +187,11 @@ function buildIconInfoRow({
                 <a href="${escapeHtml(href)}" target="_blank" style="font-family:${EMAIL_BRAND.bodyFont}; font-size:16px; line-height:22px; color:${EMAIL_BRAND.textPrimary}; font-weight:700; text-decoration:none;">
                   ${value}
                 </a><br />
-                <span style="font-family:${EMAIL_BRAND.bodyFont}; font-size:14px; line-height:20px; color:#6c6c6c; font-weight:400;">
+                ${description
+                  ? `<span style="font-family:${EMAIL_BRAND.bodyFont}; font-size:14px; line-height:20px; color:#6c6c6c; font-weight:400;">
                   ${description}
-                </span>
+                </span>`
+                  : ""}
               </td>
             </tr>
           </table>
@@ -222,13 +224,13 @@ function buildEmailShell({
   softBox?: string;
   detailsSection?: string;
   secondaryCta?: string;
-  footerLabel: string;
-  footerEmail: string;
-  footerUrl: string;
+  footerLabel?: string;
+  footerEmail?: string;
+  footerUrl?: string;
 }) {
-  const safeFooterEmail = escapeHtml(footerEmail);
-  const safeFooterUrl = escapeHtml(footerUrl);
-  const normalizedSiteUrl = normalizeSiteUrl(footerUrl);
+  const safeFooterEmail = footerEmail ? escapeHtml(footerEmail) : "";
+  const safeFooterUrl = footerUrl ? escapeHtml(footerUrl) : "";
+  const normalizedSiteUrl = normalizeSiteUrl(footerUrl ?? "");
   const logoUrl = `${normalizedSiteUrl}/logo_greeters.png`;
 
   return `
@@ -278,15 +280,18 @@ function buildEmailShell({
                             </table>
                           </td>
                         </tr>
-                        <tr>
+                        ${mainSection
+                          ? `<tr>
                           <td style="padding: 10px 48px 0 48px; font-family:${EMAIL_BRAND.bodyFont};">
                             ${mainSection}
                           </td>
-                        </tr>
+                        </tr>`
+                          : ""}
                         ${softBox ? `<tr><td style="padding: 0 48px 0 48px;">${softBox}</td></tr>` : ""}
                         ${detailsSection ? `<tr><td style="padding: 28px 48px 0 48px;">${detailsSection}</td></tr>` : ""}
                         ${secondaryCta ? `<tr><td style="padding: 30px 48px 0 48px;">${secondaryCta}</td></tr>` : ""}
-                        <tr>
+                        ${footerLabel && footerEmail && footerUrl
+                          ? `<tr>
                           <td style="padding: 34px 48px 36px 48px; font-family:${EMAIL_BRAND.bodyFont};">
                             <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="border-top:1px solid ${EMAIL_BRAND.border}; border-collapse:collapse;">
                               <tr>
@@ -299,7 +304,8 @@ function buildEmailShell({
                               </tr>
                             </table>
                           </td>
-                        </tr>
+                        </tr>`
+                          : ""}
                       </table>
                     </td>
                   </tr>
@@ -340,64 +346,38 @@ export function buildAdminContactRequestBody(
   payload: ContactPayload,
   config: Pick<ContactConfig, "fromEmail" | "fromName" | "toEmail" | "siteUrl">,
 ): EmailitRequestBody {
-  const safeName = escapeHtml(payload.name);
-  const safeEmail = escapeHtml(payload.email);
-  const safeSubject = escapeHtml(payload.subject);
   const safeMessage = escapeHtml(payload.message).replaceAll("\n", "<br />");
-  const normalizedSiteUrl = normalizeSiteUrl(config.siteUrl);
 
   return {
     from: `${config.fromName} <${config.fromEmail}>`,
     to: [config.toEmail],
     reply_to: `${payload.name} <${payload.email}>`,
-    subject: `[Paris Greeters] ${payload.subject}`,
+    subject: payload.subject,
     text: [
-      "Nouvelle demande depuis le formulaire de contact Paris Greeters",
+      "Nouveau message",
       "",
+      "Coordonnées du contact",
       `Nom : ${payload.name}`,
       `Email : ${payload.email}`,
-      `Sujet : ${payload.subject}`,
       "",
+      "Message",
       payload.message,
     ].join("\n"),
     html: buildEmailShell({
-      preheader: `Nouveau message de ${payload.name} — ${payload.subject}`,
+      preheader: `Nouveau message de ${payload.name}`,
       eyebrow: "Formulaire de contact",
       title: "Nouveau message reçu",
       intro:
         "Un visiteur vient de vous écrire depuis le formulaire de contact. Vous trouverez ci-dessous ses coordonnées ainsi que le contenu complet de sa demande.",
-      primaryCta: buildButton("Voir le site", normalizedSiteUrl, "primary"),
-      mainSection: buildSection("Coordonnées du contact", [
-        "Vous pouvez utiliser ce message pour reprendre contact directement avec la personne et traiter sa demande dans les meilleures conditions.",
-      ]),
+      mainSection: buildSection("Coordonnées du contact", []),
       softBox: buildSoftBox(
         "Message",
         `${safeMessage}`,
       ),
-      detailsSection:
-        buildFieldGrid([
-          { label: "Nom", value: safeName },
-          { label: "Email", value: safeEmail },
-          { label: "Sujet", value: safeSubject },
-        ]) +
-        buildIconInfoRow({
-          label: "Email",
-          href: `mailto:${safeEmail}`,
-          value: safeEmail,
-          description: "Répondre directement à l’expéditeur depuis votre messagerie.",
-          icon: buildEmailIconSvg(),
-        }) +
-        buildIconInfoRow({
-          label: "Site web",
-          href: normalizedSiteUrl,
-          value: normalizedSiteUrl,
-          description: "Accéder au site Paris Greeters et retrouver le contexte de la demande.",
-          icon: buildArrowIconSvg(),
-        }),
-      secondaryCta: buildButton("Répondre au contact", `mailto:${safeEmail}`, "secondary"),
-      footerLabel: "Paris Greeters",
-      footerEmail: config.fromEmail,
-      footerUrl: config.siteUrl,
+      detailsSection: buildFieldGrid([
+        { label: "Nom", value: escapeHtml(payload.name) },
+        { label: "Email", value: escapeHtml(payload.email) },
+      ]),
     }),
     tracking: {
       loads: false,
@@ -410,8 +390,6 @@ export function buildAuthorConfirmationRequestBody(
   payload: ContactPayload,
   config: Pick<ContactConfig, "fromEmail" | "fromName" | "siteUrl">,
 ): EmailitRequestBody {
-  const safeName = escapeHtml(payload.name);
-  const safeSubject = escapeHtml(payload.subject);
   const safeMessage = escapeHtml(payload.message).replaceAll("\n", "<br />");
   const normalizedSiteUrl = normalizeSiteUrl(config.siteUrl);
 
@@ -419,57 +397,35 @@ export function buildAuthorConfirmationRequestBody(
     from: `${config.fromName} <${config.fromEmail}>`,
     to: [payload.email],
     reply_to: `${config.fromName} <${config.fromEmail}>`,
-    subject: "[Paris Greeters] Nous avons bien reçu votre message",
+    subject: payload.subject,
     text: [
-      `Bonjour ${payload.name},`,
+      "Merci pour votre message",
       "",
-      "Nous avons bien reçu votre message et vous remercions de nous avoir contactés.",
-      "",
-      `Sujet : ${payload.subject}`,
+      "Bonjour, nous avons bien reçu votre message, dont vous trouverez la copie ci-dessous. Nous reviendrons vers vous très rapidement.",
       "",
       "Copie de votre message :",
       payload.message,
       "",
-      "L'équipe Paris Greeters",
-      config.fromEmail,
       config.siteUrl,
     ].join("\n"),
     html: buildEmailShell({
       preheader: "Nous avons bien reçu votre message pour Paris Greeters.",
       eyebrow: "Confirmation",
       title: "Merci pour votre message",
-      intro: `Bonjour ${safeName}, nous avons bien reçu votre demande. Merci d’avoir pris le temps de nous écrire : notre équipe reviendra vers vous avec plaisir.`,
-      primaryCta: buildButton("Découvrir le site", normalizedSiteUrl, "primary"),
-      mainSection: buildSection("Votre demande a bien été transmise", [
-        "Nous gardons précieusement votre message et reviendrons vers vous dès que possible.",
-        "En attendant, vous pouvez découvrir l’univers Paris Greeters et préparer votre prochaine balade sur notre site.",
-      ]),
+      intro:
+        "Bonjour, nous avons bien reçu votre message, dont vous trouverez la copie ci-dessous. Nous reviendrons vers vous très rapidement.",
+      mainSection: "",
       softBox: buildSoftBox(
         "Copie de votre message",
         `${safeMessage}`,
       ),
-      detailsSection:
-        buildFieldGrid([
-          { label: "Sujet", value: safeSubject },
-        ]) +
-        buildIconInfoRow({
-          label: "Email",
-          href: `mailto:${escapeHtml(config.fromEmail)}`,
-          value: escapeHtml(config.fromEmail),
-          description: "Notre adresse de contact si vous souhaitez nous écrire directement.",
-          icon: buildEmailIconSvg(),
-        }) +
-        buildIconInfoRow({
-          label: "Site web",
-          href: normalizedSiteUrl,
-          value: normalizedSiteUrl,
-          description: "Découvrir le site et préparer sa balade.",
-          icon: buildGlobeIconSvg(),
-        }),
-      secondaryCta: buildButton("Nous écrire", `mailto:${escapeHtml(config.fromEmail)}`, "secondary"),
-      footerLabel: "Paris Greeters",
-      footerEmail: config.fromEmail,
-      footerUrl: config.siteUrl,
+      detailsSection: buildIconInfoRow({
+        label: "Site web",
+        href: normalizedSiteUrl,
+        value: normalizedSiteUrl,
+        description: "",
+        icon: buildGlobeIconSvg(),
+      }),
     }),
     tracking: {
       loads: false,

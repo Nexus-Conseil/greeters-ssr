@@ -60,6 +60,10 @@ Déployer le site `Nexus-Conseil/greeters-ssr` branche `1303` en Next.js SSR dan
   - corner-radius aligné sur les boutons du site pour les boutons et cartes email
   - logo public ajouté à la racine du site: `/logo_greeters.png`
   - gabarits email reconstruits à partir du template HTML de référence fourni par le client
+  - simplification finale des 2 emails selon consigne métier:
+    - auteur: confirmation + copie du message + picto site web uniquement
+    - admin: intro + coordonnées + message, sans blocs supplémentaires
+  - sujet des 2 emails désormais exactement égal au sujet saisi par l’auteur
 - Régression ajoutée pour les templates email via builders TS + tests Python sans envoi réel d’email
 - Préparation merge safe documentée dans `/app/memory/MERGE_SAFE_1203_TO_1303.md`
 - Tests validés:

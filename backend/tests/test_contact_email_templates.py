@@ -41,7 +41,8 @@ def test_admin_and_author_templates_are_differentiated():
     assert author["to"] == [data["payload"]["email"]]
     assert "Nouveau message reçu" in admin["html"]
     assert "Merci pour votre message" in author["html"]
-    assert admin["subject"] != author["subject"]
+    assert admin["subject"] == data["payload"]["subject"]
+    assert author["subject"] == data["payload"]["subject"]
 
 
 def test_admin_template_contains_contact_details_subject_and_full_message():
@@ -56,9 +57,9 @@ def test_admin_template_contains_contact_details_subject_and_full_message():
 
     assert "Nom" in admin["html"] and "Alice Martin" in admin["html"]
     assert "Email" in admin["html"] and "alice@example.com" in admin["html"]
-    assert "Sujet" in admin["html"] and "Question tarifs" in admin["html"]
     assert "Message" in admin["html"]
     assert "Bonjour<br />Je veux un devis." in admin["html"]
+    assert admin["subject"] == "Question tarifs"
 
 
 def test_author_template_contains_warm_confirmation_and_message_copy():
@@ -71,10 +72,10 @@ def test_author_template_contains_warm_confirmation_and_message_copy():
     data = _build_email_bodies(payload)
     author = data["author"]
 
-    assert "Bonjour Lucas" in author["html"]
-    assert "nous avons bien reçu votre demande" in author["html"].lower()
+    assert "Bonjour, nous avons bien reçu votre message" in author["html"]
     assert "Copie de votre message" in author["html"]
     assert "Merci pour votre aide" in author["html"]
+    assert author["subject"] == "Balade personnalisée"
 
 
 def test_branding_shell_and_signature_are_consistent_with_site_style():
@@ -86,6 +87,6 @@ def test_branding_shell_and_signature_are_consistent_with_site_style():
         assert "Paris Greeters" in html
         assert "#7daa2f" in html
         assert "#f4f4f1" in html
-        assert "contact@parisgreeters.org" in html
-        assert "https://parisgreeters.org" in html
         assert "/logo_greeters.png" in html
+
+    assert "https://parisgreeters.org" in author_html
