@@ -1,0 +1,45 @@
+{
+  "summary": "Validated contact email template builders by code inspection and local TypeScript execution only (no live /api/contact/send call). Admin and author templates are differentiated and match requested content/tone/branding.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "greeters/lib/services/contact.ts#getContactConfig",
+        "issue": "footer/site URL source uses NEXT_PUBLIC_CHAT_API_URL, which appears chat-API oriented and may not always match the public website link expected in email signature."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_contact_email_templates.py",
+    "/app/backend/tests/contact_builder_probe.ts",
+    "/app/test_reports/pytest/pytest_contact_templates.xml",
+    "/app/greeters/lib/services/contact.ts"
+  ],
+  "action_items": [
+    "Confirm whether signature/footer URL should come from the main site URL env (not NEXT_PUBLIC_CHAT_API_URL) to avoid wrong links in outbound emails."
+  ],
+  "critical_code_review_comments": [
+    "Email template responsibilities are cleanly separated via buildAdminContactRequestBody and buildAuthorConfirmationRequestBody.",
+    "HTML escaping is correctly applied before interpolation in both templates.",
+    "Potential config coupling risk: NEXT_PUBLIC_CHAT_API_URL naming suggests API endpoint, not canonical website URL used in signature/CTA."
+  ],
+  "updated_files": [
+    "/app/backend/tests/contact_builder_probe.ts",
+    "/app/backend/tests/test_contact_email_templates.py",
+    "/app/test_reports/iteration_2.json"
+  ],
+  "success_rate": {
+    "backend": "100% (5/5 tests passed)",
+    "frontend": "Not run (backend-only request)"
+  },
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Live send endpoint intentionally not invoked to avoid real emails. Validation done via direct execution of exported builders using tsx runner. Verified admin contains coordinates+subject+full message, author contains warm confirmation + message copy, and both share brand shell/signature.",
+  "rca of the issue": "No functional template bug reproduced. Only configuration risk identified: site URL in email shell is sourced from NEXT_PUBLIC_CHAT_API_URL; if this env points to API/chat host, email CTA/signature links can be incorrect."
+}
