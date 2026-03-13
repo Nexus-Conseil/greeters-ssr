@@ -62,12 +62,12 @@ function buildEmailIconSvg() {
   return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4 7.5L11.058 12.086C11.648 12.469 12.352 12.469 12.942 12.086L20 7.5" stroke="#36543a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><rect x="3.15" y="5.15" width="17.7" height="13.7" rx="2.85" stroke="#36543a" stroke-width="1.7"/></svg>`;
 }
 
-function buildGlobeIconSvg() {
-  return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="8.25" stroke="#36543a" stroke-width="1.7"/><path d="M3.75 12H20.25" stroke="#36543a" stroke-width="1.7" stroke-linecap="round"/><path d="M12 3.75C14.517 6.473 15.947 9.99 16.029 13.699C15.947 17.408 14.517 20.925 12 23.648C9.483 20.925 8.053 17.408 7.971 13.699C8.053 9.99 9.483 6.473 12 3.75Z" stroke="#36543a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-}
-
-function buildArrowIconSvg() {
-  return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M7 17L17 7" stroke="#7daa2f" stroke-width="2" stroke-linecap="round"/><path d="M9 7H17V15" stroke="#7daa2f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+function buildSiteGlyph() {
+  return `
+    <span style="display:inline-block; font-family:${EMAIL_BRAND.bodyFont}; font-size:18px; line-height:18px; color:${EMAIL_BRAND.brandGreen}; font-weight:700;">
+      ↗
+    </span>
+  `;
 }
 
 function escapeHtml(value: string) {
@@ -290,9 +290,6 @@ function buildEmailShell({
         </style>
       </head>
       <body style="margin:0; padding:0; background-color:${EMAIL_BRAND.pageBackground};">
-        <div style="display:none; max-height:0; overflow:hidden; opacity:0; mso-hide:all; visibility:hidden; font-size:1px; line-height:1px; color:${EMAIL_BRAND.pageBackground};">
-          ${preheader}
-        </div>
         <center style="width:100%; background-color:${EMAIL_BRAND.pageBackground};">
           <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="${EMAIL_BRAND.pageBackground}" style="background-color:${EMAIL_BRAND.pageBackground};">
             <tr>
@@ -464,7 +461,7 @@ export function buildAuthorConfirmationRequestBody(
         "Copie de votre message",
         `${safeMessage}`,
       ),
-      detailsSection: buildIconOnlyLink(normalizedSiteUrl, buildGlobeIconSvg()),
+      detailsSection: buildIconOnlyLink(normalizedSiteUrl, buildSiteGlyph()),
     }),
     tracking: {
       loads: false,

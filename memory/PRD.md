@@ -68,6 +68,8 @@ Déployer le site `Nexus-Conseil/greeters-ssr` branche `1303` en Next.js SSR dan
   - affichage email neutralisé pour éviter rendu bleu/souligné dans l’email HTML
   - suppression du texte de site web en bas de l’email auteur, avec conservation d’un simple picto cliquable
   - ajout d’un espace sous la carte message dans l’email admin
+  - remplacement du picto SVG par un glyphe email-safe compatible Gmail
+  - suppression du bloc de préheader masqué pour éliminer les artefacts visuels type `...`
 - Régression ajoutée pour les templates email via builders TS + tests Python sans envoi réel d’email
 - Préparation merge safe documentée dans `/app/memory/MERGE_SAFE_1203_TO_1303.md`
 - Tests validés:
