@@ -221,7 +221,7 @@ function buildIconOnlyLink(href: string, iconUrl: string) {
             <table width="38" height="38" border="0" cellspacing="0" cellpadding="0" role="presentation" style="width:38px; height:38px; border-radius:${EMAIL_BRAND.buttonRadius}; background-color:#ffffff; border:1px solid ${EMAIL_BRAND.brandGreen};">
               <tr>
                 <td align="center" valign="middle" style="padding: 6px;">
-                  <img src="${escapeHtml(iconUrl)}" alt="" width="20" height="20" style="display:block; width:20px; height:20px; margin:0 auto;" />
+                  <img src="${escapeHtml(iconUrl)}" alt="" width="22" height="22" style="display:block; width:22px; height:22px; margin:0 auto; border:0; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic; image-rendering:-webkit-optimize-contrast;" />
                 </td>
               </tr>
             </table>
@@ -293,8 +293,8 @@ function buildEmailShell({
                     <td>
                       <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="${EMAIL_BRAND.cardBackground}" style="background-color:${EMAIL_BRAND.cardBackground}; border-radius:${EMAIL_BRAND.radius}; overflow:hidden;">
                         <tr>
-                          <td align="center" style="padding: 26px 32px 18px 32px; border-bottom: 1px solid ${EMAIL_BRAND.border}; background:#ffffff;">
-                            <img src="${logoUrl}" alt="Paris Greeters" width="220" style="display:block; width:220px; max-width:220px; height:auto; margin:0 auto;" />
+                          <td align="center" style="padding: 24px 32px 16px 32px; border-bottom: 1px solid ${EMAIL_BRAND.border}; background:#ffffff;">
+                            <img src="${logoUrl}" alt="Paris Greeters" width="240" style="display:block; width:240px; max-width:240px; height:auto; margin:0 auto; border:0; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic; image-rendering:-webkit-optimize-contrast;" />
                           </td>
                         </tr>
                         <tr>
