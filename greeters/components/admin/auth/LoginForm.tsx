@@ -16,24 +16,42 @@ export const LoginForm = ({ redirectTo }: LoginFormProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  async function submitLogin(attempt = 0) {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const rawBody = await response.text();
+    let detail = "Connexion impossible.";
+
+    try {
+      const parsed = JSON.parse(rawBody) as { detail?: string };
+      detail = parsed.detail ?? detail;
+    } catch {
+      if (rawBody.trim()) {
+        detail = rawBody.trim();
+      }
+    }
+
+    if (!response.ok && response.status >= 500 && attempt === 0) {
+      await new Promise((resolve) => window.setTimeout(resolve, 350));
+      return submitLogin(1);
+    }
+
+    if (!response.ok) {
+      throw new Error(detail);
+    }
+  }
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = (await response.json()) as { detail?: string };
-
-      if (!response.ok) {
-        throw new Error(data.detail ?? "Connexion impossible.");
-      }
-
+      await submitLogin();
       router.push((redirectTo || "/admin") as Route);
       router.refresh();
     } catch (submissionError) {

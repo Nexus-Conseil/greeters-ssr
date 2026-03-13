@@ -99,12 +99,24 @@ Déployer le site `Nexus-Conseil/greeters-ssr` branche `1303` en Next.js SSR dan
 - Durcissement backend chatbot :
   - suppression défensive des `ObjectId` Mongo dans les payloads de réponse
   - retry léger côté frontend sur la récupération initiale de session chatbot
+- Comparateur visuel chatbot enrichi :
+  - affichage côte à côte de la réponse historique et de la nouvelle réponse générée depuis un message visiteur
+  - comparaison immédiate pour affiner les consignes métier plus rapidement
+- Reprise de la coquille admin SSR dans la direction CSR :
+  - sidebar redesignée avec navigation étendue
+  - écran de login redesigné
+  - dashboard redesigné
+  - premières pages SSR `/admin/users` et `/admin/documents` ajoutées pour matérialiser l’étape suivante
+- Durcissement du login admin :
+  - parsing d’erreur résilient aux réponses non JSON
+  - retry léger sur erreur gateway 5xx au moment de la connexion
 - Tests validés:
   - self-tests complets via preview publique
   - screenshots homepage + login admin + studio IA
   - testing agent: proxies/auth/chat/contact/pages/menu/IA validés
   - testing agent: templates email admin/auteur validés sans appel live à `/api/contact/send`
   - testing agent: module chatbot admin SSR validé (APIs + UI), puis correctif appliqué sur la sérialisation Mongo et revalidation self-test complète
+  - testing agent: redesign admin + comparateur chatbot validés, puis correctif appliqué sur la robustesse du login admin
 
 ## Backlog priorisé
 ### P0
@@ -114,12 +126,14 @@ Déployer le site `Nexus-Conseil/greeters-ssr` branche `1303` en Next.js SSR dan
 - Permettre la gestion admin de l’URL publique utilisée dans les emails si elle doit différer selon l’environnement
 - Reprendre maintenant la coquille design admin CSR (`main`) sur l’ensemble du back-office SSR, chatbot inclus
 - Ajouter les écrans/admin manquants pour atteindre la parité CSR: forgot password, users management, documents management
+- Transformer les pages SSR `/admin/users` et `/admin/documents` en modules CRUD complets alignés CSR
 
 ### P1
 - Modulariser `/app/backend/server.py` en services/routes séparés (proxy, auth, IA, chat)
 - Remplacer le mode SSL `no-verify` par une configuration CA propre si l’environnement de déploiement le permet
 - Aligner si souhaité les flows IA côté Next interne avec la même stratégie de clé/runtime que le domaine public
 - Compléter le module chatbot admin avec des résumés de conversation, filtres avancés, et meilleure ergonomie CSR
+- Implémenter forgot password / reset password avec emails transactionnels sur la base email désormais validée
 - Prévoir un bouton explicite “réinitialiser la conversation” côté visiteur pour repartir de zéro malgré la mémoire persistante
 
 ### P2
