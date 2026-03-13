@@ -84,7 +84,8 @@ def test_branding_shell_and_signature_are_consistent_with_site_style():
 
     for html in (admin_html, author_html):
         assert "Paris Greeters" in html
-        assert "#7da33b" in html
-        assert "#f5f3ec" in html
+        assert "#7daa2f" in html
+        assert "#f4f4f1" in html
         assert "contact@parisgreeters.org" in html
         assert "https://parisgreeters.org" in html
+        assert "/logo_greeters.png" in html

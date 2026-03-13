@@ -40,18 +40,22 @@ type ContactConfig = {
 };
 
 const EMAIL_BRAND = {
-  pageBackground: "#f5f3ec",
+  pageBackground: "#f4f4f1",
   cardBackground: "#ffffff",
-  brandGreen: "#7da33b",
-  brandGreenDark: "#36543a",
-  softGreen: "#edf4e3",
-  softSand: "#f8f1e5",
-  textPrimary: "#183129",
-  textMuted: "#5f6d66",
-  border: "#d8e2cf",
-  radius: "0.25rem",
-  headingFont: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-  bodyFont: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  brandGreen: "#7daa2f",
+  brandGreenDark: "#5d8120",
+  softGreen: "#f7f8f2",
+  softSand: "#f7f8f2",
+  textPrimary: "#111111",
+  textMuted: "#4d4d4d",
+  textFooter: "#7a7a7a",
+  border: "#ececdf",
+  softBorder: "#e7ecd6",
+  radius: "12px",
+  innerRadius: "10px",
+  buttonRadius: "6px",
+  headingFont: "Arial, Helvetica, sans-serif",
+  bodyFont: "Arial, Helvetica, sans-serif",
 };
 
 function buildEmailIconSvg() {
@@ -60,6 +64,10 @@ function buildEmailIconSvg() {
 
 function buildGlobeIconSvg() {
   return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="8.25" stroke="#36543a" stroke-width="1.7"/><path d="M3.75 12H20.25" stroke="#36543a" stroke-width="1.7" stroke-linecap="round"/><path d="M12 3.75C14.517 6.473 15.947 9.99 16.029 13.699C15.947 17.408 14.517 20.925 12 23.648C9.483 20.925 8.053 17.408 7.971 13.699C8.053 9.99 9.483 6.473 12 3.75Z" stroke="#36543a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+function buildArrowIconSvg() {
+  return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M7 17L17 7" stroke="#7daa2f" stroke-width="2" stroke-linecap="round"/><path d="M9 7H17V15" stroke="#7daa2f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 }
 
 function escapeHtml(value: string) {
@@ -88,74 +96,220 @@ function getContactConfig(): ContactConfig {
   return { apiKey, fromEmail, fromName, toEmail, siteUrl };
 }
 
+function normalizeSiteUrl(url: string) {
+  return url.replace(/\/$/, "");
+}
+
+function buildButton(label: string, href: string, variant: "primary" | "secondary" = "primary") {
+  const isPrimary = variant === "primary";
+
+  return `
+    <table border="0" cellspacing="0" cellpadding="0" role="presentation">
+      <tr>
+        <td align="center" bgcolor="${isPrimary ? EMAIL_BRAND.brandGreen : EMAIL_BRAND.textPrimary}" style="border-radius: ${EMAIL_BRAND.buttonRadius};">
+          <a href="${escapeHtml(href)}" target="_blank" style="display:inline-block; font-family:${EMAIL_BRAND.bodyFont}; font-size:${isPrimary ? 15 : 14}px; line-height:${isPrimary ? 15 : 14}px; font-weight:700; color:#ffffff; text-decoration:none; padding:${isPrimary ? "15px 24px" : "14px 22px"}; border-radius:${EMAIL_BRAND.buttonRadius};">
+            ${label}
+          </a>
+        </td>
+      </tr>
+    </table>
+  `;
+}
+
+function buildSection(title: string, paragraphs: string[]) {
+  return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; border-top: 1px solid ${EMAIL_BRAND.border};">
+      <tr>
+        <td style="padding-top: 28px; font-family: ${EMAIL_BRAND.bodyFont}; font-size: 22px; line-height: 28px; color: ${EMAIL_BRAND.textPrimary}; font-weight: 700; padding-bottom: 12px;">
+          ${title}
+        </td>
+      </tr>
+      ${paragraphs
+        .map(
+          (paragraph, index) => `
+            <tr>
+              <td style="font-family: ${EMAIL_BRAND.bodyFont}; font-size: 16px; line-height: 27px; color: ${EMAIL_BRAND.textMuted}; padding-bottom: ${index === paragraphs.length - 1 ? "24px" : "18px"};">
+                ${paragraph}
+              </td>
+            </tr>
+          `,
+        )
+        .join("")}
+    </table>
+  `;
+}
+
+function buildSoftBox(title: string, body: string) {
+  return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="${EMAIL_BRAND.softGreen}" style="background-color:${EMAIL_BRAND.softGreen}; border:1px solid ${EMAIL_BRAND.softBorder}; border-radius:${EMAIL_BRAND.innerRadius}; border-collapse:separate;">
+      <tr>
+        <td style="padding: 22px 24px; font-family:${EMAIL_BRAND.bodyFont}; font-size:15px; line-height:25px; color:${EMAIL_BRAND.textMuted};">
+          <strong style="color:${EMAIL_BRAND.textPrimary};">${title}</strong><br />
+          ${body}
+        </td>
+      </tr>
+    </table>
+  `;
+}
+
+function buildIconInfoRow({
+  label,
+  href,
+  value,
+  description,
+  icon,
+}: {
+  label: string;
+  href: string;
+  value: string;
+  description: string;
+  icon: string;
+}) {
+  return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; margin-top: 14px;">
+      <tr>
+        <td style="font-family: ${EMAIL_BRAND.bodyFont}; font-size: 13px; line-height: 18px; letter-spacing: 1.8px; text-transform: uppercase; color: ${EMAIL_BRAND.brandGreen}; font-weight: 700; padding-bottom: 14px;">
+          ${label}
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <table border="0" cellspacing="0" cellpadding="0" role="presentation">
+            <tr>
+              <td valign="middle" style="padding-right: 12px;">
+                <table width="38" height="38" border="0" cellspacing="0" cellpadding="0" role="presentation" style="width:38px; height:38px; border-radius:${EMAIL_BRAND.buttonRadius}; background-color:#ffffff; border:1px solid ${EMAIL_BRAND.brandGreen};">
+                  <tr>
+                    <td align="center" valign="middle">${icon}</td>
+                  </tr>
+                </table>
+              </td>
+              <td valign="middle">
+                <a href="${escapeHtml(href)}" target="_blank" style="font-family:${EMAIL_BRAND.bodyFont}; font-size:16px; line-height:22px; color:${EMAIL_BRAND.textPrimary}; font-weight:700; text-decoration:none;">
+                  ${value}
+                </a><br />
+                <span style="font-family:${EMAIL_BRAND.bodyFont}; font-size:14px; line-height:20px; color:#6c6c6c; font-weight:400;">
+                  ${description}
+                </span>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  `;
+}
+
 function buildEmailShell({
+  preheader,
   eyebrow,
   title,
   intro,
-  body,
+  primaryCta,
+  mainSection,
+  softBox,
+  detailsSection,
+  secondaryCta,
   footerLabel,
   footerEmail,
   footerUrl,
-  ctaLabel,
-  ctaHref,
 }: {
+  preheader: string;
   eyebrow: string;
   title: string;
   intro: string;
-  body: string;
+  primaryCta?: string;
+  mainSection: string;
+  softBox?: string;
+  detailsSection?: string;
+  secondaryCta?: string;
   footerLabel: string;
   footerEmail: string;
   footerUrl: string;
-  ctaLabel?: string;
-  ctaHref?: string;
 }) {
   const safeFooterEmail = escapeHtml(footerEmail);
   const safeFooterUrl = escapeHtml(footerUrl);
-  const safeCtaHref = ctaHref ? escapeHtml(ctaHref) : "";
-  const logoUrl = `${footerUrl.replace(/\/$/, "")}/images/logo_greeters.png`;
+  const normalizedSiteUrl = normalizeSiteUrl(footerUrl);
+  const logoUrl = `${normalizedSiteUrl}/logo_greeters.png`;
 
   return `
-    <div style="margin: 0; padding: 32px 16px; background: ${EMAIL_BRAND.pageBackground}; font-family: ${EMAIL_BRAND.bodyFont}; color: ${EMAIL_BRAND.textPrimary};">
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 680px; margin: 0 auto; border-collapse: collapse;">
-        <tr>
-          <td>
-            <div style="background: #ffffff; border: 1px solid ${EMAIL_BRAND.border}; border-bottom: none; border-radius: ${EMAIL_BRAND.radius} ${EMAIL_BRAND.radius} 0 0; padding: 28px 32px; text-align: center;">
-              <img src="${logoUrl}" alt="Paris Greeters" width="200" style="display: block; width: 200px; max-width: 100%; height: auto; margin: 0 auto;" />
-            </div>
-            <div style="background: ${EMAIL_BRAND.cardBackground}; border: 1px solid ${EMAIL_BRAND.border}; border-top: none; border-radius: 0 0 ${EMAIL_BRAND.radius} ${EMAIL_BRAND.radius}; padding: 32px; box-shadow: 0 14px 36px rgba(24, 49, 41, 0.06);">
-              <p style="margin: 0 0 12px; color: ${EMAIL_BRAND.brandGreen}; letter-spacing: 0.14em; font-size: 11px; text-transform: uppercase;">
-                ${eyebrow}
-              </p>
-              <h1 style="margin: 0 0 16px; color: ${EMAIL_BRAND.textPrimary}; font-family: ${EMAIL_BRAND.headingFont}; font-size: 34px; line-height: 1.12; font-weight: 400;">
-                ${title}
-              </h1>
-              <p style="margin: 0 0 24px; font-size: 17px; line-height: 1.8; color: ${EMAIL_BRAND.textPrimary};">
-                ${intro}
-              </p>
-              ${body}
-              ${ctaLabel && ctaHref ? `
-                <div style="margin-top: 28px; text-align: center;">
-                  <a href="${safeCtaHref}" style="display: inline-block; padding: 14px 22px; border-radius: ${EMAIL_BRAND.radius}; background: ${EMAIL_BRAND.brandGreen}; color: #ffffff; text-decoration: none; font-family: ${EMAIL_BRAND.headingFont}; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;">
-                    ${ctaLabel}
-                  </a>
-                </div>
-              ` : ""}
-              <div style="margin-top: 32px; padding-top: 22px; border-top: 1px solid ${EMAIL_BRAND.border}; color: ${EMAIL_BRAND.textMuted}; font-size: 14px; line-height: 1.8;">
-                <strong style="color: ${EMAIL_BRAND.textPrimary};">${footerLabel}</strong><br />
-                <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px; color: ${EMAIL_BRAND.textPrimary};">
-                  <span style="display: inline-flex; width: 18px; height: 18px; vertical-align: middle;">${buildEmailIconSvg()}</span>
-                  <a href="mailto:${safeFooterEmail}" style="color: ${EMAIL_BRAND.brandGreenDark}; text-decoration: none;">${safeFooterEmail}</a>
-                </div>
-                <div style="margin-top: 8px; display: flex; align-items: center; gap: 10px; color: ${EMAIL_BRAND.textPrimary};">
-                  <span style="display: inline-flex; width: 18px; height: 18px; vertical-align: middle;">${buildGlobeIconSvg()}</span>
-                  <a href="${safeFooterUrl}" style="color: ${EMAIL_BRAND.brandGreenDark}; text-decoration: none;">${safeFooterUrl}</a>
-                </div>
-              </div>
-            </div>
-          </td>
-        </tr>
-      </table>
-    </div>
+    <!DOCTYPE html>
+    <html lang="fr">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>${title}</title>
+      </head>
+      <body style="margin:0; padding:0; background-color:${EMAIL_BRAND.pageBackground};">
+        <div style="display:none; max-height:0; overflow:hidden; opacity:0; mso-hide:all; visibility:hidden; font-size:1px; line-height:1px; color:${EMAIL_BRAND.pageBackground};">
+          ${preheader}
+        </div>
+        <center style="width:100%; background-color:${EMAIL_BRAND.pageBackground};">
+          <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="${EMAIL_BRAND.pageBackground}" style="background-color:${EMAIL_BRAND.pageBackground};">
+            <tr>
+              <td align="center" style="padding: 28px 12px;">
+                <table role="presentation" width="640" border="0" cellspacing="0" cellpadding="0" style="width:640px; max-width:640px; border-collapse:separate;">
+                  <tr>
+                    <td>
+                      <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="${EMAIL_BRAND.cardBackground}" style="background-color:${EMAIL_BRAND.cardBackground}; border-radius:${EMAIL_BRAND.radius}; overflow:hidden;">
+                        <tr>
+                          <td align="center" style="padding: 26px 32px 18px 32px; border-bottom: 1px solid ${EMAIL_BRAND.border}; background:#ffffff;">
+                            <img src="${logoUrl}" alt="Paris Greeters" width="220" style="display:block; width:220px; max-width:220px; height:auto; margin:0 auto;" />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 38px 48px 18px 48px; font-family:${EMAIL_BRAND.bodyFont};">
+                            <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                              <tr>
+                                <td style="font-family:${EMAIL_BRAND.bodyFont}; font-size:13px; line-height:13px; letter-spacing:2.2px; text-transform:uppercase; color:${EMAIL_BRAND.brandGreen}; font-weight:700; padding-bottom:14px;">
+                                  ${eyebrow}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style="font-family:${EMAIL_BRAND.headingFont}; font-size:36px; line-height:42px; color:${EMAIL_BRAND.textPrimary}; font-weight:700; padding-bottom:16px;">
+                                  ${title}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style="font-family:${EMAIL_BRAND.bodyFont}; font-size:17px; line-height:28px; color:${EMAIL_BRAND.textMuted}; padding-bottom:${primaryCta ? "26px" : "10px"};">
+                                  ${intro}
+                                </td>
+                              </tr>
+                              ${primaryCta ? `<tr><td>${primaryCta}</td></tr>` : ""}
+                            </table>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 10px 48px 0 48px; font-family:${EMAIL_BRAND.bodyFont};">
+                            ${mainSection}
+                          </td>
+                        </tr>
+                        ${softBox ? `<tr><td style="padding: 0 48px 0 48px;">${softBox}</td></tr>` : ""}
+                        ${detailsSection ? `<tr><td style="padding: 28px 48px 0 48px;">${detailsSection}</td></tr>` : ""}
+                        ${secondaryCta ? `<tr><td style="padding: 30px 48px 0 48px;">${secondaryCta}</td></tr>` : ""}
+                        <tr>
+                          <td style="padding: 34px 48px 36px 48px; font-family:${EMAIL_BRAND.bodyFont};">
+                            <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="border-top:1px solid ${EMAIL_BRAND.border}; border-collapse:collapse;">
+                              <tr>
+                                <td style="padding-top: 22px; font-family:${EMAIL_BRAND.bodyFont}; font-size:13px; line-height:22px; color:${EMAIL_BRAND.textFooter};">
+                                  ${footerLabel}<br />
+                                  <a href="mailto:${safeFooterEmail}" style="color:${EMAIL_BRAND.textFooter}; text-decoration:underline;">${safeFooterEmail}</a>
+                                  &nbsp;•&nbsp;
+                                  <a href="${safeFooterUrl}" target="_blank" style="color:${EMAIL_BRAND.textFooter}; text-decoration:underline;">${safeFooterUrl}</a>
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </center>
+      </body>
+    </html>
   `;
 }
 
@@ -166,7 +320,7 @@ function buildFieldGrid(fields: Array<{ label: string; value: string; background
         .map(
           (field) => `
             <tr>
-              <td style="padding: 16px 18px; border-radius: ${EMAIL_BRAND.radius}; background: ${field.background ?? EMAIL_BRAND.softGreen}; border: 1px solid ${EMAIL_BRAND.border};">
+              <td style="padding: 16px 18px; border-radius: ${EMAIL_BRAND.innerRadius}; background: ${field.background ?? EMAIL_BRAND.softGreen}; border: 1px solid ${field.background ? EMAIL_BRAND.softBorder : EMAIL_BRAND.border};">
                 <div style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: ${EMAIL_BRAND.brandGreenDark}; margin-bottom: 8px;">
                   ${field.label}
                 </div>
@@ -190,27 +344,7 @@ export function buildAdminContactRequestBody(
   const safeEmail = escapeHtml(payload.email);
   const safeSubject = escapeHtml(payload.subject);
   const safeMessage = escapeHtml(payload.message).replaceAll("\n", "<br />");
-  const emailLine = `
-    <div style="margin-top: 18px; padding: 16px 18px; border-radius: ${EMAIL_BRAND.radius}; background: ${EMAIL_BRAND.softGreen}; border: 1px solid ${EMAIL_BRAND.border};">
-      <div style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: ${EMAIL_BRAND.brandGreenDark}; margin-bottom: 8px;">
-        Email
-      </div>
-      <div style="display: flex; align-items: center; gap: 10px; color: ${EMAIL_BRAND.textPrimary};">
-        <span style="display: inline-flex; width: 18px; height: 18px; vertical-align: middle;">${buildEmailIconSvg()}</span>
-        <span style="font-size: 15px; line-height: 1.6;">${safeEmail}</span>
-      </div>
-    </div>
-  `;
-  const messageCard = `
-    <div style="margin-top: 18px; padding: 22px 22px 24px; border-radius: ${EMAIL_BRAND.radius}; background: ${EMAIL_BRAND.softSand}; border: 1px solid #ead8b7;">
-      <div style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: ${EMAIL_BRAND.brandGreenDark}; margin-bottom: 10px;">
-        Message
-      </div>
-      <div style="font-size: 16px; line-height: 1.8; color: ${EMAIL_BRAND.textPrimary};">
-        ${safeMessage}
-      </div>
-    </div>
-  `;
+  const normalizedSiteUrl = normalizeSiteUrl(config.siteUrl);
 
   return {
     from: `${config.fromName} <${config.fromEmail}>`,
@@ -227,19 +361,43 @@ export function buildAdminContactRequestBody(
       payload.message,
     ].join("\n"),
     html: buildEmailShell({
+      preheader: `Nouveau message de ${payload.name} — ${payload.subject}`,
       eyebrow: "Formulaire de contact",
       title: "Nouveau message reçu",
-      intro: "Un visiteur vient de vous écrire depuis le formulaire de contact. Vous trouverez ci-dessous ses coordonnées ainsi que le contenu de sa demande.",
-      body:
+      intro:
+        "Un visiteur vient de vous écrire depuis le formulaire de contact. Vous trouverez ci-dessous ses coordonnées ainsi que le contenu complet de sa demande.",
+      primaryCta: buildButton("Voir le site", normalizedSiteUrl, "primary"),
+      mainSection: buildSection("Coordonnées du contact", [
+        "Vous pouvez utiliser ce message pour reprendre contact directement avec la personne et traiter sa demande dans les meilleures conditions.",
+      ]),
+      softBox: buildSoftBox(
+        "Message",
+        `${safeMessage}`,
+      ),
+      detailsSection:
         buildFieldGrid([
           { label: "Nom", value: safeName },
+          { label: "Email", value: safeEmail },
           { label: "Sujet", value: safeSubject },
-        ]) + emailLine + messageCard,
+        ]) +
+        buildIconInfoRow({
+          label: "Email",
+          href: `mailto:${safeEmail}`,
+          value: safeEmail,
+          description: "Répondre directement à l’expéditeur depuis votre messagerie.",
+          icon: buildEmailIconSvg(),
+        }) +
+        buildIconInfoRow({
+          label: "Site web",
+          href: normalizedSiteUrl,
+          value: normalizedSiteUrl,
+          description: "Accéder au site Paris Greeters et retrouver le contexte de la demande.",
+          icon: buildArrowIconSvg(),
+        }),
+      secondaryCta: buildButton("Répondre au contact", `mailto:${safeEmail}`, "secondary"),
       footerLabel: "Paris Greeters",
       footerEmail: config.fromEmail,
       footerUrl: config.siteUrl,
-      ctaLabel: "Voir le site",
-      ctaHref: config.siteUrl,
     }),
     tracking: {
       loads: false,
@@ -255,14 +413,7 @@ export function buildAuthorConfirmationRequestBody(
   const safeName = escapeHtml(payload.name);
   const safeSubject = escapeHtml(payload.subject);
   const safeMessage = escapeHtml(payload.message).replaceAll("\n", "<br />");
-  const websiteCard = `
-    <div style="margin: 18px 0 0; padding: 16px 18px; border-radius: ${EMAIL_BRAND.radius}; background: ${EMAIL_BRAND.softGreen}; border: 1px solid ${EMAIL_BRAND.border};">
-      <div style="display: flex; align-items: center; gap: 10px; color: ${EMAIL_BRAND.textPrimary};">
-        <span style="display: inline-flex; width: 18px; height: 18px; vertical-align: middle;">${buildGlobeIconSvg()}</span>
-        <a href="${escapeHtml(config.siteUrl)}" style="color: ${EMAIL_BRAND.brandGreenDark}; text-decoration: none; font-size: 15px; line-height: 1.6;">${escapeHtml(config.siteUrl)}</a>
-      </div>
-    </div>
-  `;
+  const normalizedSiteUrl = normalizeSiteUrl(config.siteUrl);
 
   return {
     from: `${config.fromName} <${config.fromEmail}>`,
@@ -284,19 +435,41 @@ export function buildAuthorConfirmationRequestBody(
       config.siteUrl,
     ].join("\n"),
     html: buildEmailShell({
+      preheader: "Nous avons bien reçu votre message pour Paris Greeters.",
       eyebrow: "Confirmation",
       title: "Merci pour votre message",
       intro: `Bonjour ${safeName}, nous avons bien reçu votre demande. Merci d’avoir pris le temps de nous écrire : notre équipe reviendra vers vous avec plaisir.`,
-      body:
+      primaryCta: buildButton("Découvrir le site", normalizedSiteUrl, "primary"),
+      mainSection: buildSection("Votre demande a bien été transmise", [
+        "Nous gardons précieusement votre message et reviendrons vers vous dès que possible.",
+        "En attendant, vous pouvez découvrir l’univers Paris Greeters et préparer votre prochaine balade sur notre site.",
+      ]),
+      softBox: buildSoftBox(
+        "Copie de votre message",
+        `${safeMessage}`,
+      ),
+      detailsSection:
         buildFieldGrid([
           { label: "Sujet", value: safeSubject },
-          { label: "Copie de votre message", value: safeMessage, background: EMAIL_BRAND.softSand },
-        ]) + websiteCard,
+        ]) +
+        buildIconInfoRow({
+          label: "Email",
+          href: `mailto:${escapeHtml(config.fromEmail)}`,
+          value: escapeHtml(config.fromEmail),
+          description: "Notre adresse de contact si vous souhaitez nous écrire directement.",
+          icon: buildEmailIconSvg(),
+        }) +
+        buildIconInfoRow({
+          label: "Site web",
+          href: normalizedSiteUrl,
+          value: normalizedSiteUrl,
+          description: "Découvrir le site et préparer sa balade.",
+          icon: buildGlobeIconSvg(),
+        }),
+      secondaryCta: buildButton("Nous écrire", `mailto:${escapeHtml(config.fromEmail)}`, "secondary"),
       footerLabel: "Paris Greeters",
       footerEmail: config.fromEmail,
       footerUrl: config.siteUrl,
-      ctaLabel: "Découvrir le site",
-      ctaHref: config.siteUrl,
     }),
     tracking: {
       loads: false,
