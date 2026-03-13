@@ -1,10 +1,12 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+import asyncio
 import os
 import logging
+import requests
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Dict, List
@@ -20,6 +22,7 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+NEXT_INTERNAL_URL = os.environ['NEXT_INTERNAL_URL'].rstrip('/')
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -49,6 +52,31 @@ class ChatMessage(BaseModel):
 @api_router.get("/")
 async def root():
     return {"message": "Hello World"}
+
+
+async def fetch_next_json(path: str):
+    def _request():
+        response = requests.get(f"{NEXT_INTERNAL_URL}{path}", timeout=30)
+        response.raise_for_status()
+        return response.json()
+
+    try:
+        return await asyncio.to_thread(_request)
+    except requests.RequestException as error:
+        logger.error("Next proxy error on %s: %s", path, error)
+        raise HTTPException(status_code=502, detail=f"Next route indisponible: {path}") from error
+
+
+@api_router.get("/health")
+async def health_check():
+    payload = await fetch_next_json("/api/health")
+    return payload
+
+
+@api_router.get("/pages/public")
+async def public_pages():
+    payload = await fetch_next_json("/api/pages/public")
+    return payload
 
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
