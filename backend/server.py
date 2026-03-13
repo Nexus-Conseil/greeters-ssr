@@ -2,6 +2,7 @@ from fastapi import FastAPI, APIRouter, HTTPException, Request, Response
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
+from bson import ObjectId
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 import asyncio
 import json
@@ -355,6 +356,16 @@ async def fetch_chatbot_runtime_payload(locale: str, mode: str = "published") ->
 
 def as_string(value: Any, fallback: str = "") -> str:
     return value.strip() if isinstance(value, str) else fallback
+
+
+def sanitize_mongo_payload(value: Any):
+    if isinstance(value, ObjectId):
+        return str(value)
+    if isinstance(value, dict):
+        return {key: sanitize_mongo_payload(item) for key, item in value.items() if key != "_id"}
+    if isinstance(value, list):
+        return [sanitize_mongo_payload(item) for item in value]
+    return value
 
 
 def as_string_list(value: Any) -> List[str]:
@@ -841,7 +852,7 @@ async def map_feedbacks_by_message(session_id: str) -> Dict[str, List[Dict[str, 
 @api_router.get("/chat/session/{session_id}")
 async def get_chat_session(session_id: str):
     messages = await load_chat_message_records(session_id)
-    return {"session_id": session_id, "messages": messages}
+    return sanitize_mongo_payload({"session_id": session_id, "messages": messages})
 
 
 @api_router.post("/chat/message")
@@ -876,7 +887,7 @@ async def chat_message(payload: ChatMessage):
 async def admin_chatbot_conversations(request: Request):
     await get_authenticated_next_user(request, EDITOR_ROLES)
     conversations = await db.chat_sessions.find({}, {"_id": 0}).sort("updated_at", -1).to_list(200)
-    return conversations
+    return sanitize_mongo_payload(conversations)
 
 
 @api_router.get("/admin/chatbot/conversation/{session_id}")
@@ -887,7 +898,7 @@ async def admin_chatbot_conversation(session_id: str, request: Request):
         raise HTTPException(status_code=404, detail="Conversation introuvable.")
     messages = await load_chat_message_records(session_id)
     feedbacks = await map_feedbacks_by_message(session_id)
-    return {**session, "messages": messages, "feedbacks": feedbacks}
+    return sanitize_mongo_payload({**session, "messages": messages, "feedbacks": feedbacks})
 
 
 @api_router.post("/admin/chatbot/conversation/{session_id}/generate-reply")
@@ -911,7 +922,7 @@ async def admin_chatbot_generate_reply(session_id: str, payload: ChatbotGenerate
 async def admin_chatbot_feedbacks(request: Request):
     await get_authenticated_next_user(request, EDITOR_ROLES)
     feedbacks = await db.chat_feedbacks.find({}, {"_id": 0}).sort("created_at", -1).to_list(300)
-    return feedbacks
+    return sanitize_mongo_payload(feedbacks)
 
 
 @api_router.post("/admin/chatbot/feedback")
@@ -930,7 +941,7 @@ async def admin_chatbot_feedback(payload: ChatbotFeedbackRequest, request: Reque
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.chat_feedbacks.insert_one(dict(record))
-    return {"success": True, "feedback": record}
+    return sanitize_mongo_payload({"success": True, "feedback": record})
 
 
 @api_router.delete("/admin/chatbot/feedback/{feedback_id}")
@@ -946,7 +957,7 @@ async def admin_chatbot_feedback_delete(feedback_id: str, request: Request):
 async def admin_chatbot_improvements(request: Request):
     await get_authenticated_next_user(request, EDITOR_ROLES)
     improvements = await db.chat_improvements.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
-    return improvements
+    return sanitize_mongo_payload(improvements)
 
 
 @api_router.post("/admin/chatbot/synthesize-improvements")
@@ -976,7 +987,7 @@ async def admin_chatbot_synthesize_improvements(request: Request):
         {"id": {"$in": improvement["source_feedback_ids"]}},
         {"$set": {"improvement_id": improvement_id}},
     )
-    return {"success": True, "created": True, "improvement": improvement}
+    return sanitize_mongo_payload({"success": True, "created": True, "improvement": improvement})
 
 
 @api_router.delete("/admin/chatbot/improvement/{improvement_id}")

@@ -78,11 +78,33 @@ Déployer le site `Nexus-Conseil/greeters-ssr` branche `1303` en Next.js SSR dan
   - pictogramme site web repositionné à mi-distance entre la carte message et le bas de la carte principale
 - Régression ajoutée pour les templates email via builders TS + tests Python sans envoi réel d’email
 - Préparation merge safe documentée dans `/app/memory/MERGE_SAFE_1203_TO_1303.md`
+- Premier lot cohérent du module chatbot admin SSR :
+  - nouvelle page `/admin/chatbot` dans la coquille admin SSR
+  - nouvel item de navigation admin “Chatbot”
+  - onglets conversations, feedbacks, améliorations, consignes IA
+  - clic sur un message visiteur puis bouton “Générer une réponse” (brouillon ou version publiée)
+  - feedback métier sur les réponses assistant
+  - synthèse d’améliorations IA à partir des feedbacks
+- Consignes chatbot éditables et versionnées dans PostgreSQL/Prisma via la table dédiée `chatbot_prompt_versions`
+  - brouillon courant
+  - version publiée
+  - historique
+  - rollback
+  - route interne sécurisée pour fournir la config runtime au backend FastAPI
+- Mémoire visiteur du chatbot :
+  - cookie persistant `greeters_visitor_id` côté frontend pour 1 an
+  - session de chat persistée côté client
+  - restauration de l’historique via `/api/chat/session/{sessionId}`
+  - enrichissement de la réponse avec le contexte des échanges antérieurs du même visiteur
+- Durcissement backend chatbot :
+  - suppression défensive des `ObjectId` Mongo dans les payloads de réponse
+  - retry léger côté frontend sur la récupération initiale de session chatbot
 - Tests validés:
   - self-tests complets via preview publique
   - screenshots homepage + login admin + studio IA
   - testing agent: proxies/auth/chat/contact/pages/menu/IA validés
   - testing agent: templates email admin/auteur validés sans appel live à `/api/contact/send`
+  - testing agent: module chatbot admin SSR validé (APIs + UI), puis correctif appliqué sur la sérialisation Mongo et revalidation self-test complète
 
 ## Backlog priorisé
 ### P0
@@ -90,11 +112,15 @@ Déployer le site `Nexus-Conseil/greeters-ssr` branche `1303` en Next.js SSR dan
 - Basculer `NEXT_PUBLIC_CHAT_API_URL` vers `https://greeters.nexus-conseil.ch` dès que le DNS résout, puis `https://greeters.paris` au go-live
 - Permettre la gestion admin du destinataire du formulaire de contact (`CONTACT_TO_EMAIL`) au lieu d’un paramètre fixe
 - Permettre la gestion admin de l’URL publique utilisée dans les emails si elle doit différer selon l’environnement
+- Reprendre maintenant la coquille design admin CSR (`main`) sur l’ensemble du back-office SSR, chatbot inclus
+- Ajouter les écrans/admin manquants pour atteindre la parité CSR: forgot password, users management, documents management
 
 ### P1
 - Modulariser `/app/backend/server.py` en services/routes séparés (proxy, auth, IA, chat)
 - Remplacer le mode SSL `no-verify` par une configuration CA propre si l’environnement de déploiement le permet
 - Aligner si souhaité les flows IA côté Next interne avec la même stratégie de clé/runtime que le domaine public
+- Compléter le module chatbot admin avec des résumés de conversation, filtres avancés, et meilleure ergonomie CSR
+- Prévoir un bouton explicite “réinitialiser la conversation” côté visiteur pour repartir de zéro malgré la mémoire persistante
 
 ### P2
 - Nettoyer les artefacts et docs historiques non nécessaires au merge final

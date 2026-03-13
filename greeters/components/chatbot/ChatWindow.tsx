@@ -113,14 +113,13 @@ export default function ChatWindow({ onClose }: { onClose: () => void }) {
 
     let active = true;
 
-    fetch(`${BACKEND_URL}/api/chat/session/${sessionId}`)
-      .then(async (response) => {
+    const loadSession = async (attempt = 0): Promise<void> => {
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/chat/session/${sessionId}`);
         if (!response.ok) {
           throw new Error("Session indisponible.");
         }
-        return (await response.json()) as { messages?: Array<{ role: "user" | "assistant"; content: string }> };
-      })
-      .then((payload) => {
+        const payload = (await response.json()) as { messages?: Array<{ role: "user" | "assistant"; content: string }> };
         if (!active) {
           return;
         }
@@ -130,14 +129,21 @@ export default function ChatWindow({ onClose }: { onClose: () => void }) {
         }
         const welcome = TRANSLATIONS[language]?.welcome ?? TRANSLATIONS.fr.welcome;
         setMessages([{ role: "assistant", content: welcome }]);
-      })
-      .catch(() => {
-        if (!active) {
+      } catch {
+        if (!active && attempt > 0) {
+          return;
+        }
+        if (attempt === 0) {
+          await new Promise((resolve) => window.setTimeout(resolve, 400));
+          await loadSession(1);
           return;
         }
         const welcome = TRANSLATIONS[language]?.welcome ?? TRANSLATIONS.fr.welcome;
         setMessages([{ role: "assistant", content: welcome }]);
-      });
+      }
+    };
+
+    void loadSession();
 
     return () => {
       active = false;
