@@ -81,3 +81,7 @@ android-sdk/ greeters/node_modules/@next/swc-linux-arm64-musl/next-swc.linux-arm
 greeters/node_modules/@next/swc-linux-arm64-musl/next-swc.linux-arm64-musl.node
 greeters/node_modules/@next/swc-linux-arm64-gnu/next-swc.linux-arm64-gnu.node
 greeters/.next/dev/cache/turbopack/23c46498/00000243.sst
+-e 
+# Environment files
+*.env
+*.env.*
