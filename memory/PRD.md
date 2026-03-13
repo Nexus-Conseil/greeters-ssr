@@ -70,6 +70,8 @@ Déployer le site `Nexus-Conseil/greeters-ssr` branche `1303` en Next.js SSR dan
   - ajout d’un espace sous la carte message dans l’email admin
   - remplacement du picto SVG par un glyphe email-safe compatible Gmail
   - suppression du bloc de préheader masqué pour éliminer les artefacts visuels type `...`
+  - intégration du vrai pictogramme site web fourni par le client via `/website_picto.png`
+  - rayons harmonisés conformément au brief: 6px boutons/picto, 10px encadré secondaire, 12px carte principale
 - Régression ajoutée pour les templates email via builders TS + tests Python sans envoi réel d’email
 - Préparation merge safe documentée dans `/app/memory/MERGE_SAFE_1203_TO_1303.md`
 - Tests validés:

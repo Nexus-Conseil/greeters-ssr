@@ -91,4 +91,9 @@ def test_branding_shell_and_signature_are_consistent_with_site_style():
         assert "#f4f4f1" in html
         assert "/logo_greeters.png" in html
 
+    assert "border-radius:12px" in admin_html
+    assert "border-radius:10px" in admin_html
+    assert "/website_picto.png" in author_html
+    assert "border-radius:6px" in author_html
+
     assert "https://parisgreeters.org" not in data["author"]["text"]

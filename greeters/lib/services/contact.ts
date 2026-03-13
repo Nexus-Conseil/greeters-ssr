@@ -62,14 +62,6 @@ function buildEmailIconSvg() {
   return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4 7.5L11.058 12.086C11.648 12.469 12.352 12.469 12.942 12.086L20 7.5" stroke="#36543a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><rect x="3.15" y="5.15" width="17.7" height="13.7" rx="2.85" stroke="#36543a" stroke-width="1.7"/></svg>`;
 }
 
-function buildSiteGlyph() {
-  return `
-    <span style="display:inline-block; font-family:${EMAIL_BRAND.bodyFont}; font-size:18px; line-height:18px; color:${EMAIL_BRAND.brandGreen}; font-weight:700;">
-      ↗
-    </span>
-  `;
-}
-
 function escapeHtml(value: string) {
   return value
     .replaceAll("&", "&amp;")
@@ -220,7 +212,7 @@ function buildIconInfoRow({
   `;
 }
 
-function buildIconOnlyLink(href: string, icon: string) {
+function buildIconOnlyLink(href: string, iconUrl: string) {
   return `
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; margin-top: 14px;">
       <tr>
@@ -228,7 +220,9 @@ function buildIconOnlyLink(href: string, icon: string) {
           <a href="${escapeHtml(href)}" target="_blank" style="display:inline-block; text-decoration:none;">
             <table width="38" height="38" border="0" cellspacing="0" cellpadding="0" role="presentation" style="width:38px; height:38px; border-radius:${EMAIL_BRAND.buttonRadius}; background-color:#ffffff; border:1px solid ${EMAIL_BRAND.brandGreen};">
               <tr>
-                <td align="center" valign="middle">${icon}</td>
+                <td align="center" valign="middle" style="padding: 6px;">
+                  <img src="${escapeHtml(iconUrl)}" alt="" width="20" height="20" style="display:block; width:20px; height:20px; margin:0 auto;" />
+                </td>
               </tr>
             </table>
           </a>
@@ -436,6 +430,7 @@ export function buildAuthorConfirmationRequestBody(
 ): EmailitRequestBody {
   const safeMessage = escapeHtml(payload.message).replaceAll("\n", "<br />");
   const normalizedSiteUrl = normalizeSiteUrl(config.siteUrl);
+  const websitePictoUrl = `${normalizedSiteUrl}/website_picto.png`;
 
   return {
     from: `${config.fromName} <${config.fromEmail}>`,
@@ -461,7 +456,7 @@ export function buildAuthorConfirmationRequestBody(
         "Copie de votre message",
         `${safeMessage}`,
       ),
-      detailsSection: buildIconOnlyLink(normalizedSiteUrl, buildSiteGlyph()),
+      detailsSection: buildIconOnlyLink(normalizedSiteUrl, websitePictoUrl),
     }),
     tracking: {
       loads: false,
