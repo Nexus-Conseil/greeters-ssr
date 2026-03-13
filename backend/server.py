@@ -26,6 +26,7 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
 NEXT_INTERNAL_URL = os.environ['NEXT_INTERNAL_URL'].rstrip('/')
+CANONICAL_ROOT_DOMAIN = os.environ['CANONICAL_ROOT_DOMAIN']
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -196,7 +197,7 @@ def slugify(value: str) -> str:
 
 
 def build_locale_url(locale: str, slug: str) -> str:
-    host = "greeters.paris" if locale == DEFAULT_LOCALE else f"{locale}.greeters.paris"
+    host = CANONICAL_ROOT_DOMAIN if locale == DEFAULT_LOCALE else f"{locale}.{CANONICAL_ROOT_DOMAIN}"
     path = "/" if slug == "/" else f"/{slug.lstrip('/')}"
     return f"https://{host}{path}"
 
@@ -249,22 +250,36 @@ async def get_authenticated_next_user(request: Request, allowed_roles: set[str])
 
 async def run_structured_llm(session_id: str, system_message: str, user_message: str) -> Dict[str, Any]:
     ensure_llm_key()
-    try:
-        chat = LlmChat(
-            api_key=EMERGENT_LLM_KEY,
-            session_id=session_id,
-            system_message=system_message,
-        )
-        chat.with_model("gemini", "gemini-2.0-flash")
-        response = await chat.send_message(UserMessage(text=user_message))
-        if not response:
-            raise HTTPException(status_code=502, detail="L'IA n'a renvoyé aucun contenu exploitable.")
-        return extract_json_payload(response)
-    except HTTPException:
-        raise
-    except Exception as error:
-        logger.error("AI generation error: %s", error)
-        raise HTTPException(status_code=502, detail="L'IA n'a pas pu produire une réponse valide.") from error
+    last_error: Exception | None = None
+
+    for attempt in range(2):
+        try:
+            chat = LlmChat(
+                api_key=EMERGENT_LLM_KEY,
+                session_id=session_id,
+                system_message=system_message,
+            )
+            chat.with_model("gemini", "gemini-2.0-flash-lite")
+            response = await chat.send_message(UserMessage(text=user_message))
+            if not response:
+                raise HTTPException(status_code=502, detail="L'IA n'a renvoyé aucun contenu exploitable.")
+            return extract_json_payload(response)
+        except HTTPException:
+            raise
+        except Exception as error:
+            error_message = str(error).lower()
+            if any(keyword in error_message for keyword in ["budget", "quota", "rate limit", "too many requests", "insufficient_quota"]):
+                raise HTTPException(
+                    status_code=429,
+                    detail="Le quota IA est momentanément atteint. Merci de réessayer dans quelques instants.",
+                ) from error
+            last_error = error
+            if attempt == 0:
+                await asyncio.sleep(1)
+                continue
+
+    logger.error("AI generation error: %s", last_error)
+    raise HTTPException(status_code=502, detail="L'IA n'a pas pu produire une réponse valide. Merci de relancer l'action.") from last_error
 
 
 def as_string(value: Any, fallback: str = "") -> str:
