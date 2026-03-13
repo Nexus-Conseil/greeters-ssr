@@ -34,32 +34,122 @@ const BOOKING_LABELS: Record<string, string> = {
 
 type Message = { role: "user" | "assistant"; content: string };
 
+const VISITOR_COOKIE_NAME = "greeters_visitor_id";
+const SESSION_STORAGE_KEY = "greeters_chat_session_id";
+const VISITOR_COOKIE_TTL_DAYS = 365;
+
 function generateId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+function getCookie(name: string) {
+  if (typeof document === "undefined") {
+    return "";
+  }
+
+  return document.cookie
+    .split("; ")
+    .find((entry) => entry.startsWith(`${name}=`))
+    ?.split("=")[1] ?? "";
+}
+
+function setCookie(name: string, value: string, days: number) {
+  if (typeof document === "undefined") {
+    return;
+  }
+
+  const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
+  document.cookie = `${name}=${value}; expires=${expires}; path=/; SameSite=Lax; Secure`;
+}
+
+function getOrCreateVisitorId() {
+  const existing = getCookie(VISITOR_COOKIE_NAME);
+  if (existing) {
+    return existing;
+  }
+
+  const nextValue = generateId();
+  setCookie(VISITOR_COOKIE_NAME, nextValue, VISITOR_COOKIE_TTL_DAYS);
+  return nextValue;
+}
+
+function getOrCreateSessionId() {
+  if (typeof window === "undefined") {
+    return generateId();
+  }
+
+  const existing = window.localStorage.getItem(SESSION_STORAGE_KEY);
+  if (existing) {
+    return existing;
+  }
+
+  const nextValue = generateId();
+  window.localStorage.setItem(SESSION_STORAGE_KEY, nextValue);
+  return nextValue;
 }
 
 export default function ChatWindow({ onClose }: { onClose: () => void }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sessionId] = useState(() => generateId());
+  const [sessionId, setSessionId] = useState("");
+  const [visitorId, setVisitorId] = useState("");
   const [language, setLanguage] = useState("fr");
   const endRef = useRef<HTMLDivElement>(null);
 
   const t = TRANSLATIONS[language] ?? TRANSLATIONS.fr;
 
-  // Welcome message
   useEffect(() => {
-    const w = TRANSLATIONS[language]?.welcome ?? TRANSLATIONS.fr.welcome;
-    setMessages([{ role: "assistant", content: w }]);
+    const nextVisitorId = getOrCreateVisitorId();
+    const nextSessionId = getOrCreateSessionId();
+    setVisitorId(nextVisitorId);
+    setSessionId(nextSessionId);
   }, []);
+
+  useEffect(() => {
+    if (!sessionId || !BACKEND_URL) {
+      return;
+    }
+
+    let active = true;
+
+    fetch(`${BACKEND_URL}/api/chat/session/${sessionId}`)
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error("Session indisponible.");
+        }
+        return (await response.json()) as { messages?: Array<{ role: "user" | "assistant"; content: string }> };
+      })
+      .then((payload) => {
+        if (!active) {
+          return;
+        }
+        if (payload.messages?.length) {
+          setMessages(payload.messages.map((message) => ({ role: message.role, content: message.content })));
+          return;
+        }
+        const welcome = TRANSLATIONS[language]?.welcome ?? TRANSLATIONS.fr.welcome;
+        setMessages([{ role: "assistant", content: welcome }]);
+      })
+      .catch(() => {
+        if (!active) {
+          return;
+        }
+        const welcome = TRANSLATIONS[language]?.welcome ?? TRANSLATIONS.fr.welcome;
+        setMessages([{ role: "assistant", content: welcome }]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [language, sessionId]);
 
   // Auto-scroll
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
   const sendMessage = useCallback(async (text?: string) => {
     const msg = (text ?? input).trim();
-    if (!msg || loading) return;
+    if (!msg || loading || !sessionId) return;
     setInput("");
     setMessages((prev) => [...prev, { role: "user", content: msg }]);
     setLoading(true);
@@ -68,7 +158,7 @@ export default function ChatWindow({ onClose }: { onClose: () => void }) {
       const res = await fetch(`${BACKEND_URL}/api/chat/message`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ session_id: sessionId, message: msg, language }),
+        body: JSON.stringify({ session_id: sessionId, visitor_id: visitorId, message: msg, language }),
       });
       const data = await res.json();
       setMessages((prev) => [...prev, { role: "assistant", content: data.content }]);
@@ -77,7 +167,7 @@ export default function ChatWindow({ onClose }: { onClose: () => void }) {
     } finally {
       setLoading(false);
     }
-  }, [input, loading, sessionId, language]);
+  }, [input, loading, sessionId, visitorId, language]);
 
   const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); sendMessage(); };
 

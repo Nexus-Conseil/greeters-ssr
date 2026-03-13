@@ -27,6 +27,7 @@ db = client[os.environ['DB_NAME']]
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
 NEXT_INTERNAL_URL = os.environ['NEXT_INTERNAL_URL'].rstrip('/')
 CANONICAL_ROOT_DOMAIN = os.environ['CANONICAL_ROOT_DOMAIN']
+CHATBOT_INTERNAL_SECRET = os.environ.get('CHATBOT_INTERNAL_SECRET', '')
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -51,6 +52,18 @@ class ChatMessage(BaseModel):
     session_id: str
     message: str
     language: str = "fr"
+    visitor_id: str | None = None
+
+
+class ChatbotGenerateReplyRequest(BaseModel):
+    messageId: str
+    mode: str = "draft"
+
+
+class ChatbotFeedbackRequest(BaseModel):
+    sessionId: str
+    messageId: str
+    feedback: str
 
 
 class AiPageGeneratorRequest(BaseModel):
@@ -280,6 +293,64 @@ async def run_structured_llm(session_id: str, system_message: str, user_message:
 
     logger.error("AI generation error: %s", last_error)
     raise HTTPException(status_code=502, detail="L'IA n'a pas pu produire une réponse valide. Merci de relancer l'action.") from last_error
+
+
+async def run_text_llm(session_id: str, system_message: str, user_message: str, initial_messages: List[Dict[str, str]] | None = None) -> str:
+    ensure_llm_key()
+    last_error: Exception | None = None
+
+    for attempt in range(2):
+        try:
+            chat = LlmChat(
+                api_key=EMERGENT_LLM_KEY,
+                session_id=session_id,
+                system_message=system_message,
+                initial_messages=initial_messages or [],
+            )
+            chat.with_model("gemini", "gemini-2.0-flash-lite")
+            response = await chat.send_message(UserMessage(text=user_message))
+            if not response:
+                raise HTTPException(status_code=502, detail="L'IA n'a renvoyé aucun contenu exploitable.")
+            return response.strip()
+        except HTTPException:
+            raise
+        except Exception as error:
+            error_message = str(error).lower()
+            if any(keyword in error_message for keyword in ["budget", "quota", "rate limit", "too many requests", "insufficient_quota"]):
+                raise HTTPException(
+                    status_code=429,
+                    detail="Le quota IA est momentanément atteint. Merci de réessayer dans quelques instants.",
+                ) from error
+            last_error = error
+            if attempt == 0:
+                await asyncio.sleep(1)
+                continue
+
+    logger.error("AI text generation error: %s", last_error)
+    raise HTTPException(status_code=502, detail="L'IA n'a pas pu produire une réponse valide. Merci de relancer l'action.") from last_error
+
+
+async def fetch_chatbot_runtime_payload(locale: str, mode: str = "published") -> Dict[str, Any] | None:
+    if not CHATBOT_INTERNAL_SECRET:
+        return None
+
+    def _request():
+        response = requests.get(
+            f"{NEXT_INTERNAL_URL}/api/admin/chatbot/runtime-config",
+            params={"locale": locale, "mode": mode},
+            headers={"x-greeters-internal-secret": CHATBOT_INTERNAL_SECRET},
+            timeout=30,
+        )
+        if response.status_code == 404:
+            return None
+        response.raise_for_status()
+        return response.json()
+
+    try:
+        return await asyncio.to_thread(_request)
+    except requests.RequestException as error:
+        logger.error("Chatbot runtime config error: %s", error)
+        return None
 
 
 def as_string(value: Any, fallback: str = "") -> str:
@@ -584,10 +655,6 @@ async def ai_seo_optimizer(request: Request):
     return {"optimization": optimization}
 
 
-@api_router.api_route("/admin/{full_path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
-async def admin_nested(full_path: str, request: Request):
-    return await proxy_next_request(request.method, f"/api/admin/{full_path}", request)
-
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
     status_dict = input.model_dump()
@@ -652,27 +719,129 @@ Be warm, enthusiastic and helpful. Respond in English concisely.""",
     "pt": "Você é o assistente virtual do Paris Greeters. Responda perguntas sobre passeios gratuitos com voluntários locais em Paris. Responda de forma calorosa, útil e concisa em português.",
 }
 
-chat_sessions: Dict[str, List[Dict[str, str]]] = {}
+async def load_chat_message_records(session_id: str) -> List[Dict[str, str]]:
+    return await db.chat_messages.find(
+        {"session_id": session_id},
+        {"_id": 0, "id": 1, "role": 1, "content": 1, "timestamp": 1, "language": 1, "visitor_id": 1},
+    ).sort("timestamp", 1).to_list(200)
 
 
 async def load_chat_history(session_id: str) -> List[Dict[str, str]]:
-    records = await db.chat_messages.find(
-        {"session_id": session_id},
-        {"_id": 0, "role": 1, "content": 1},
-    ).sort("timestamp", 1).to_list(20)
+    records = await load_chat_message_records(session_id)
     return [{"role": record["role"], "content": record["content"]} for record in records]
 
 
-async def save_chat_message(session_id: str, role: str, content: str):
-    await db.chat_messages.insert_one(
-        {
-            "id": str(uuid.uuid4()),
-            "session_id": session_id,
-            "role": role,
-            "content": content,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        }
+async def save_chat_message(session_id: str, visitor_id: str | None, role: str, content: str, language: str):
+    record = {
+        "id": str(uuid.uuid4()),
+        "session_id": session_id,
+        "visitor_id": visitor_id,
+        "role": role,
+        "content": content,
+        "language": language,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.chat_messages.insert_one(record)
+    return record
+
+
+async def update_chat_session(session_id: str, visitor_id: str | None, language: str):
+    latest_message = await db.chat_messages.find_one(
+        {"session_id": session_id},
+        {"_id": 0, "content": 1, "timestamp": 1},
+        sort=[("timestamp", -1)],
     )
+    existing = await db.chat_sessions.find_one({"session_id": session_id}, {"_id": 0, "created_at": 1, "summary": 1})
+    message_count = await db.chat_messages.count_documents({"session_id": session_id})
+    now = datetime.now(timezone.utc).isoformat()
+    await db.chat_sessions.update_one(
+        {"session_id": session_id},
+        {
+            "$set": {
+                "visitor_id": visitor_id,
+                "language": language,
+                "message_count": message_count,
+                "last_message": latest_message.get("content", "") if latest_message else "",
+                "updated_at": now,
+                "summary": existing.get("summary") if existing else None,
+            },
+            "$setOnInsert": {"created_at": now},
+        },
+        upsert=True,
+    )
+
+
+async def update_chat_visitor(visitor_id: str | None, language: str, session_id: str):
+    if not visitor_id:
+        return
+    now = datetime.now(timezone.utc).isoformat()
+    await db.chat_visitors.update_one(
+        {"visitor_id": visitor_id},
+        {
+            "$set": {"preferred_locale": language, "last_seen_at": now, "last_session_id": session_id},
+            "$setOnInsert": {"created_at": now},
+        },
+        upsert=True,
+    )
+
+
+async def build_visitor_memory(visitor_id: str | None, current_session_id: str) -> str:
+    if not visitor_id:
+        return ""
+
+    records = await db.chat_messages.find(
+        {"visitor_id": visitor_id, "session_id": {"$ne": current_session_id}},
+        {"_id": 0, "role": 1, "content": 1, "timestamp": 1},
+    ).sort("timestamp", -1).to_list(6)
+
+    if not records:
+        return ""
+
+    snippets = []
+    for record in reversed(records):
+        role_label = "Visiteur" if record.get("role") == "user" else "Assistant"
+        snippets.append(f"- {role_label}: {record.get('content', '')[:280]}")
+
+    return "Contexte utile issu des échanges précédents avec ce visiteur:\n" + "\n".join(snippets)
+
+
+async def get_chatbot_system_prompt(language: str, mode: str = "published") -> str:
+    runtime_payload = await fetch_chatbot_runtime_payload(language, mode)
+    if runtime_payload and runtime_payload.get("compiledPrompt"):
+        return str(runtime_payload["compiledPrompt"])
+    return SYSTEM_PROMPTS.get(language, SYSTEM_PROMPTS["fr"])
+
+
+async def generate_chatbot_reply(session_id: str, visitor_id: str | None, language: str, user_message: str, history_messages: List[Dict[str, str]], mode: str = "published") -> str:
+    system_prompt = await get_chatbot_system_prompt(language, mode)
+    visitor_memory = await build_visitor_memory(visitor_id, session_id)
+    initial_messages: List[Dict[str, str]] = []
+    if visitor_memory:
+        initial_messages.append({"role": "system", "content": visitor_memory})
+    initial_messages.extend(history_messages[-12:])
+    return await run_text_llm(
+        session_id=f"chatbot-{mode}-{session_id}",
+        system_message=system_prompt,
+        user_message=user_message,
+        initial_messages=initial_messages,
+    )
+
+
+async def map_feedbacks_by_message(session_id: str) -> Dict[str, List[Dict[str, str]]]:
+    feedbacks = await db.chat_feedbacks.find(
+        {"session_id": session_id},
+        {"_id": 0},
+    ).sort("created_at", -1).to_list(200)
+    grouped: Dict[str, List[Dict[str, str]]] = {}
+    for feedback in feedbacks:
+        grouped.setdefault(feedback["message_id"], []).append(feedback)
+    return grouped
+
+
+@api_router.get("/chat/session/{session_id}")
+async def get_chat_session(session_id: str):
+    messages = await load_chat_message_records(session_id)
+    return {"session_id": session_id, "messages": messages}
 
 
 @api_router.post("/chat/message")
@@ -681,22 +850,14 @@ async def chat_message(payload: ChatMessage):
         return {"content": "Désolé, le service de chat n'est pas configuré."}
 
     language = payload.language if payload.language in SYSTEM_PROMPTS else "fr"
+    visitor_id = payload.visitor_id or payload.session_id
     history = await load_chat_history(payload.session_id)
-    session_history = history[-10:]
-    chat_sessions[payload.session_id] = session_history
+    session_history = history[-12:]
 
     try:
-        initial_messages = [{"role": "system", "content": SYSTEM_PROMPTS[language]}]
-        initial_messages.extend(session_history)
-
-        chat = LlmChat(
-            api_key=EMERGENT_LLM_KEY,
-            session_id=payload.session_id,
-            system_message=SYSTEM_PROMPTS[language],
-            initial_messages=initial_messages,
-        )
-        chat.with_model("gemini", "gemini-2.0-flash")
-        assistant_text = await chat.send_message(UserMessage(text=payload.message))
+        assistant_text = await generate_chatbot_reply(payload.session_id, visitor_id, language, payload.message, session_history, "published")
+    except HTTPException as error:
+        return {"content": error.detail}
     except Exception as error:
         logger.error("Chat request error: %s", error)
         return {"content": "Désolé, une erreur s'est produite. Veuillez réessayer."}
@@ -704,14 +865,132 @@ async def chat_message(payload: ChatMessage):
     if not assistant_text:
         return {"content": "Désolé, je n'ai pas pu générer de réponse."}
 
-    await save_chat_message(payload.session_id, "user", payload.message)
-    await save_chat_message(payload.session_id, "assistant", assistant_text)
-    chat_sessions[payload.session_id] = [
-        *session_history,
-        {"role": "user", "content": payload.message},
-        {"role": "assistant", "content": assistant_text},
-    ][-10:]
-    return {"content": assistant_text}
+    await save_chat_message(payload.session_id, visitor_id, "user", payload.message, language)
+    await save_chat_message(payload.session_id, visitor_id, "assistant", assistant_text, language)
+    await update_chat_session(payload.session_id, visitor_id, language)
+    await update_chat_visitor(visitor_id, language, payload.session_id)
+    return {"content": assistant_text, "visitor_id": visitor_id, "session_id": payload.session_id}
+
+
+@api_router.get("/admin/chatbot/conversations")
+async def admin_chatbot_conversations(request: Request):
+    await get_authenticated_next_user(request, EDITOR_ROLES)
+    conversations = await db.chat_sessions.find({}, {"_id": 0}).sort("updated_at", -1).to_list(200)
+    return conversations
+
+
+@api_router.get("/admin/chatbot/conversation/{session_id}")
+async def admin_chatbot_conversation(session_id: str, request: Request):
+    await get_authenticated_next_user(request, EDITOR_ROLES)
+    session = await db.chat_sessions.find_one({"session_id": session_id}, {"_id": 0})
+    if not session:
+        raise HTTPException(status_code=404, detail="Conversation introuvable.")
+    messages = await load_chat_message_records(session_id)
+    feedbacks = await map_feedbacks_by_message(session_id)
+    return {**session, "messages": messages, "feedbacks": feedbacks}
+
+
+@api_router.post("/admin/chatbot/conversation/{session_id}/generate-reply")
+async def admin_chatbot_generate_reply(session_id: str, payload: ChatbotGenerateReplyRequest, request: Request):
+    await get_authenticated_next_user(request, EDITOR_ROLES)
+    records = await load_chat_message_records(session_id)
+    target_index = next((index for index, item in enumerate(records) if item["id"] == payload.messageId), -1)
+    if target_index < 0:
+        raise HTTPException(status_code=404, detail="Message introuvable dans cette conversation.")
+    target = records[target_index]
+    if target.get("role") != "user":
+        raise HTTPException(status_code=400, detail="La génération de réponse s’effectue uniquement à partir d’un message visiteur.")
+    history = [{"role": item["role"], "content": item["content"]} for item in records[:target_index]]
+    language = target.get("language") if target.get("language") in SYSTEM_PROMPTS else "fr"
+    mode = payload.mode if payload.mode in {"draft", "published"} else "draft"
+    content = await generate_chatbot_reply(session_id, target.get("visitor_id"), language, target["content"], history, mode)
+    return {"content": content, "mode": mode, "messageId": payload.messageId}
+
+
+@api_router.get("/admin/chatbot/feedbacks")
+async def admin_chatbot_feedbacks(request: Request):
+    await get_authenticated_next_user(request, EDITOR_ROLES)
+    feedbacks = await db.chat_feedbacks.find({}, {"_id": 0}).sort("created_at", -1).to_list(300)
+    return feedbacks
+
+
+@api_router.post("/admin/chatbot/feedback")
+async def admin_chatbot_feedback(payload: ChatbotFeedbackRequest, request: Request):
+    user = await get_authenticated_next_user(request, EDITOR_ROLES)
+    message = await db.chat_messages.find_one({"id": payload.messageId, "session_id": payload.sessionId}, {"_id": 0, "content": 1})
+    if not message:
+        raise HTTPException(status_code=404, detail="Message introuvable pour ce feedback.")
+    record = {
+        "id": str(uuid.uuid4()),
+        "session_id": payload.sessionId,
+        "message_id": payload.messageId,
+        "feedback": payload.feedback.strip(),
+        "admin_id": user.get("email", user.get("id", "admin")),
+        "message_content": message.get("content"),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.chat_feedbacks.insert_one(dict(record))
+    return {"success": True, "feedback": record}
+
+
+@api_router.delete("/admin/chatbot/feedback/{feedback_id}")
+async def admin_chatbot_feedback_delete(feedback_id: str, request: Request):
+    await get_authenticated_next_user(request, EDITOR_ROLES)
+    result = await db.chat_feedbacks.delete_one({"id": feedback_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Feedback introuvable.")
+    return {"success": True}
+
+
+@api_router.get("/admin/chatbot/improvements")
+async def admin_chatbot_improvements(request: Request):
+    await get_authenticated_next_user(request, EDITOR_ROLES)
+    improvements = await db.chat_improvements.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return improvements
+
+
+@api_router.post("/admin/chatbot/synthesize-improvements")
+async def admin_chatbot_synthesize_improvements(request: Request):
+    await get_authenticated_next_user(request, ADMIN_ROLES)
+    feedbacks = await db.chat_feedbacks.find({"improvement_id": {"$exists": False}}, {"_id": 0}).sort("created_at", -1).to_list(30)
+    if not feedbacks:
+        return {"success": True, "created": False}
+
+    feedback_lines = "\n".join(f"- {feedback.get('feedback', '')}" for feedback in feedbacks)
+    summary = await run_text_llm(
+        session_id=f"chatbot-improvements-{uuid.uuid4().hex}",
+        system_message="Tu es responsable qualité du chatbot Paris Greeters. Produis une synthèse courte et exploitable en français, sous forme de consignes concrètes pour améliorer les réponses de l'assistant.",
+        user_message=feedback_lines,
+    )
+    improvement_id = str(uuid.uuid4())
+    created_at = datetime.now(timezone.utc).isoformat()
+    improvement = {
+        "id": improvement_id,
+        "feedback_summary": summary,
+        "active": True,
+        "created_at": created_at,
+        "source_feedback_ids": [feedback["id"] for feedback in feedbacks],
+    }
+    await db.chat_improvements.insert_one(dict(improvement))
+    await db.chat_feedbacks.update_many(
+        {"id": {"$in": improvement["source_feedback_ids"]}},
+        {"$set": {"improvement_id": improvement_id}},
+    )
+    return {"success": True, "created": True, "improvement": improvement}
+
+
+@api_router.delete("/admin/chatbot/improvement/{improvement_id}")
+async def admin_chatbot_delete_improvement(improvement_id: str, request: Request):
+    await get_authenticated_next_user(request, ADMIN_ROLES)
+    result = await db.chat_improvements.update_one({"id": improvement_id}, {"$set": {"active": False}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Amélioration introuvable.")
+    return {"success": True}
+
+
+@api_router.api_route("/admin/{full_path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
+async def admin_nested(full_path: str, request: Request):
+    return await proxy_next_request(request.method, f"/api/admin/{full_path}", request)
 
 # Include the router in the main app
 app.include_router(api_router)

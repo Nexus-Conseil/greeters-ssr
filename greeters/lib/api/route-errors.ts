@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 
 import { AuthError } from "@/lib/auth/permissions";
+import { ChatbotPromptServiceError } from "@/lib/services/chatbot-prompts";
 import { PagesServiceError } from "@/lib/services/pages";
 
 export function toErrorResponse(error: unknown, fallbackMessage: string) {
-  if (error instanceof AuthError || error instanceof PagesServiceError) {
+  if (error instanceof AuthError || error instanceof PagesServiceError || error instanceof ChatbotPromptServiceError) {
     return NextResponse.json({ detail: error.message }, { status: error.statusCode });
   }
 

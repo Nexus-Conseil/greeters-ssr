@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: "/admin/menu", label: "Menu" },
   { href: "/admin/ai-pages", label: "IA Pages" },
   { href: "/admin/pending", label: "Validations" },
+  { href: "/admin/chatbot", label: "Chatbot" },
 ];
 
 type AdminSidebarProps = {

@@ -236,3 +236,29 @@ model AiChatMessage {
   @@index([sessionId, createdAt])
   @@map("ai_chat_messages")
 }
+
+model ChatbotPromptVersion {
+  id                String    @id @default(uuid()) @db.Uuid
+  status            String    @default("draft")
+  versionNumber     Int       @default(1) @map("version_number")
+  assistantRole     String?   @map("assistant_role") @db.Text
+  systemPrompt      String    @map("system_prompt") @db.Text
+  toneGuidelines    String?   @map("tone_guidelines") @db.Text
+  businessRules     String?   @map("business_rules") @db.Text
+  responseLimits    String?   @map("response_limits") @db.Text
+  importantUrls     Json?     @map("important_urls")
+  bookingRules      String?   @map("booking_rules") @db.Text
+  forbiddenRules    String?   @map("forbidden_rules") @db.Text
+  outOfScopeRules   String?   @map("out_of_scope_rules") @db.Text
+  longResponseRules String?   @map("long_response_rules") @db.Text
+  brandVoiceRules   String?   @map("brand_voice_rules") @db.Text
+  languageRules     Json?     @map("language_rules")
+  notes             String?   @db.Text
+  createdBy         String?   @map("created_by") @db.Uuid
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  publishedBy       String?   @map("published_by") @db.Uuid
+  publishedAt       DateTime? @map("published_at") @db.Timestamptz(6)
+
+  @@index([status, createdAt])
+  @@map("chatbot_prompt_versions")
+}
