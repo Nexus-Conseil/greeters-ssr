@@ -73,6 +73,9 @@ Déployer le site `Nexus-Conseil/greeters-ssr` branche `1303` en Next.js SSR dan
   - intégration du vrai pictogramme site web fourni par le client via `/website_picto.png`
   - rayons harmonisés conformément au brief: 6px boutons/picto, 10px encadré secondaire, 12px carte principale
   - ajustement du logo et du pictogramme pour un rendu plus net sur écrans haute densité
+  - email auteur forcé en style non bleu/non souligné tout en gardant le lien `mailto:` dans l’email admin
+  - `reply_to` de l’email admin aligné exactement sur l’adresse email de l’auteur
+  - pictogramme site web repositionné à mi-distance entre la carte message et le bas de la carte principale
 - Régression ajoutée pour les templates email via builders TS + tests Python sans envoi réel d’email
 - Préparation merge safe documentée dans `/app/memory/MERGE_SAFE_1203_TO_1303.md`
 - Tests validés:

@@ -143,7 +143,7 @@ function buildInlineContactDetails(name: string, email: string) {
         <td style="font-family: ${EMAIL_BRAND.bodyFont}; font-size: 16px; line-height: 27px; color: ${EMAIL_BRAND.textPrimary}; padding-bottom: 24px;">
           <span style="color: ${EMAIL_BRAND.textPrimary}; text-decoration: none;">${name}</span>
           <span style="color: ${EMAIL_BRAND.textMuted};">&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-          <span style="color: ${EMAIL_BRAND.textPrimary}; text-decoration: none;">${email}</span>
+          <a href="mailto:${email}" style="color: ${EMAIL_BRAND.textPrimary} !important; text-decoration: none !important; font-weight: 400; white-space: nowrap;">${email}</a>
         </td>
       </tr>
     </table>
@@ -246,6 +246,7 @@ function buildEmailShell({
   footerEmail,
   footerUrl,
   softBoxPaddingBottom,
+  detailsSectionPaddingBottom,
 }: {
   preheader: string;
   eyebrow: string;
@@ -260,6 +261,7 @@ function buildEmailShell({
   footerEmail?: string;
   footerUrl?: string;
   softBoxPaddingBottom?: string;
+  detailsSectionPaddingBottom?: string;
 }) {
   const safeFooterEmail = footerEmail ? escapeHtml(footerEmail) : "";
   const safeFooterUrl = footerUrl ? escapeHtml(footerUrl) : "";
@@ -327,7 +329,7 @@ function buildEmailShell({
                         </tr>`
                           : ""}
                         ${softBox ? `<tr><td style="padding: 0 48px ${softBoxPaddingBottom ?? "0"} 48px;">${softBox}</td></tr>` : ""}
-                        ${detailsSection ? `<tr><td style="padding: 28px 48px 0 48px;">${detailsSection}</td></tr>` : ""}
+                        ${detailsSection ? `<tr><td style="padding: 28px 48px ${detailsSectionPaddingBottom ?? "0"} 48px;">${detailsSection}</td></tr>` : ""}
                         ${secondaryCta ? `<tr><td style="padding: 30px 48px 0 48px;">${secondaryCta}</td></tr>` : ""}
                         ${footerLabel && footerEmail && footerUrl
                           ? `<tr>
@@ -392,7 +394,7 @@ export function buildAdminContactRequestBody(
   return {
     from: `${config.fromName} <${config.fromEmail}>`,
     to: [config.toEmail],
-    reply_to: `${payload.name} <${payload.email}>`,
+    reply_to: payload.email,
     subject: payload.subject,
     text: [
       "Nouveau message",
@@ -457,6 +459,7 @@ export function buildAuthorConfirmationRequestBody(
         `${safeMessage}`,
       ),
       detailsSection: buildIconOnlyLink(normalizedSiteUrl, websitePictoUrl),
+      detailsSectionPaddingBottom: "28px",
     }),
     tracking: {
       loads: false,

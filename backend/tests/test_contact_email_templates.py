@@ -60,7 +60,9 @@ def test_admin_template_contains_contact_details_subject_and_full_message():
     assert "Message" in admin["html"]
     assert "Bonjour<br />Je veux un devis." in admin["html"]
     assert admin["subject"] == "Question tarifs"
-    assert "mailto:alice@example.com" not in admin["html"]
+    assert admin["reply_to"] == "alice@example.com"
+    assert "mailto:alice@example.com" in admin["html"]
+    assert "text-decoration: none !important" in admin["html"]
 
 
 def test_author_template_contains_warm_confirmation_and_message_copy():
@@ -97,3 +99,4 @@ def test_branding_shell_and_signature_are_consistent_with_site_style():
     assert "border-radius:6px" in author_html
 
     assert "https://parisgreeters.org" not in data["author"]["text"]
+    assert "padding: 28px 48px 28px 48px;" in author_html
