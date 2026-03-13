@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Response
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -67,6 +67,45 @@ async def fetch_next_json(path: str):
         raise HTTPException(status_code=502, detail=f"Next route indisponible: {path}") from error
 
 
+async def proxy_next_request(method: str, path: str, request: Request | None = None):
+    def _request():
+        headers = {}
+
+        if request is not None:
+            cookie_header = request.headers.get("cookie")
+            content_type = request.headers.get("content-type")
+
+            if cookie_header:
+                headers["cookie"] = cookie_header
+            if content_type:
+                headers["content-type"] = content_type
+
+        body = None
+        if request is not None and method in {"POST", "PUT", "PATCH", "DELETE"}:
+            body = request.scope.get("raw_body", b"")
+
+        response = requests.request(method, f"{NEXT_INTERNAL_URL}{path}", headers=headers, data=body, timeout=30)
+        return response
+
+    try:
+        next_response = await asyncio.to_thread(_request)
+    except requests.RequestException as error:
+        logger.error("Next proxy error on %s: %s", path, error)
+        raise HTTPException(status_code=502, detail=f"Next route indisponible: {path}") from error
+
+    proxied_response = Response(
+        content=next_response.content,
+        status_code=next_response.status_code,
+        media_type=next_response.headers.get("content-type", "application/json"),
+    )
+
+    set_cookie = next_response.headers.get("set-cookie")
+    if set_cookie:
+        proxied_response.headers["set-cookie"] = set_cookie
+
+    return proxied_response
+
+
 @api_router.get("/health")
 async def health_check():
     payload = await fetch_next_json("/api/health")
@@ -77,6 +116,23 @@ async def health_check():
 async def public_pages():
     payload = await fetch_next_json("/api/pages/public")
     return payload
+
+
+@api_router.post("/auth/login")
+async def auth_login(request: Request):
+    request.scope["raw_body"] = await request.body()
+    return await proxy_next_request("POST", "/api/auth/login", request)
+
+
+@api_router.get("/auth/me")
+async def auth_me(request: Request):
+    return await proxy_next_request("GET", "/api/auth/me", request)
+
+
+@api_router.post("/auth/logout")
+async def auth_logout(request: Request):
+    request.scope["raw_body"] = await request.body()
+    return await proxy_next_request("POST", "/api/auth/logout", request)
 
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
