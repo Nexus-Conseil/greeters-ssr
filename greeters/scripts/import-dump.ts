@@ -1,182 +1,296 @@
 import "dotenv/config";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@prisma/client";
-import * as fs from 'fs';
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  throw new Error("DATABASE_URL est manquante.");
-}
+import fs from "node:fs/promises";
+import path from "node:path";
 
-const adapter = new PrismaPg({ connectionString });
-const prisma = new PrismaClient({ adapter });
+import {
+  AiChatRole,
+  PageStatus,
+  PreviewStatus,
+  UserRole,
+  type Prisma,
+} from "@prisma/client";
 
-interface DumpData {
-  users: { rows: any[] };
-  sessions: { rows: any[] };
-  pages: { rows: any[] };
-  ai_chat_sessions?: { rows: any[] };
-  ai_chat_messages?: { rows: any[] };
+import { prisma } from "../lib/db/prisma";
+
+type DumpRow = Record<string, unknown>;
+type DumpTable = { rows?: DumpRow[] };
+type DumpPayload = Record<string, DumpTable>;
+
+const DUMP_PATH = process.argv[2] ?? path.join(process.cwd(), "dump.json");
+
+const readDump = async () => JSON.parse(await fs.readFile(DUMP_PATH, "utf-8")) as DumpPayload;
+
+const asString = (value: unknown) => (typeof value === "string" ? value : "");
+const asOptionalString = (value: unknown) => (typeof value === "string" && value.length > 0 ? value : null);
+const asNumber = (value: unknown, fallback = 0) => (typeof value === "number" ? value : fallback);
+const asOptionalNumber = (value: unknown) => (typeof value === "number" ? value : null);
+const asBoolean = (value: unknown, fallback = false) => (typeof value === "boolean" ? value : fallback);
+const asDate = (value: unknown) => (typeof value === "string" ? new Date(value) : new Date());
+const asOptionalDate = (value: unknown) => (typeof value === "string" ? new Date(value) : null);
+const asJson = (value: unknown) => (value ?? null) as Prisma.InputJsonValue;
+
+const toUserRole = (value: unknown) => {
+  switch (asString(value).toLowerCase()) {
+    case "super_admin":
+      return UserRole.SUPER_ADMIN;
+    case "admin":
+      return UserRole.ADMIN;
+    default:
+      return UserRole.EDITOR;
+  }
+};
+
+const toPageStatus = (value: unknown) => {
+  switch (asString(value).toLowerCase()) {
+    case "published":
+      return PageStatus.PUBLISHED;
+    case "pending":
+      return PageStatus.PENDING;
+    case "archived":
+      return PageStatus.ARCHIVED;
+    default:
+      return PageStatus.DRAFT;
+  }
+};
+
+const toPreviewStatus = (value: unknown) => {
+  switch (asString(value).toLowerCase()) {
+    case "validated":
+      return PreviewStatus.VALIDATED;
+    case "rejected":
+      return PreviewStatus.REJECTED;
+    case "expired":
+      return PreviewStatus.EXPIRED;
+    default:
+      return PreviewStatus.PENDING;
+  }
+};
+
+const toAiChatRole = (value: unknown) => (asString(value).toLowerCase() === "assistant" ? AiChatRole.ASSISTANT : AiChatRole.USER);
+
+const chunk = <T>(rows: T[], size = 100) => {
+  const chunks: T[][] = [];
+
+  for (let index = 0; index < rows.length; index += size) {
+    chunks.push(rows.slice(index, index + size));
+  }
+
+  return chunks;
+};
+
+async function createManyInChunks<T>(rows: T[], handler: (data: T[]) => Promise<unknown>) {
+  for (const batch of chunk(rows)) {
+    if (batch.length > 0) {
+      await handler(batch);
+    }
+  }
 }
 
 async function main() {
-  const dumpFile = process.argv[2] || '/app/dump.json';
-  const data: DumpData = JSON.parse(fs.readFileSync(dumpFile, 'utf-8'));
+  const dump = await readDump();
 
-  console.log('Starting data import...');
+  console.log(`Import du dump depuis ${DUMP_PATH}`);
+  console.log("Réinitialisation des tables cibles...");
 
-  // Import users
-  if (data.users?.rows) {
-    console.log(`Importing ${data.users.rows.length} users...`);
-    for (const user of data.users.rows) {
-      try {
-        await prisma.user.upsert({
-          where: { id: user.id },
-          update: {},
-          create: {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            passwordHash: user.password_hash,
-            role: user.role === 'super_admin' ? 'SUPER_ADMIN' : user.role === 'admin' ? 'ADMIN' : 'EDITOR',
-            createdBy: user.created_by,
-            createdAt: new Date(user.created_at),
-          },
-        });
-      } catch (err) {
-        console.error(`Error importing user ${user.email}:`, err);
-      }
-    }
-  }
+  await prisma.aiChatMessage.deleteMany();
+  await prisma.aiChatSession.deleteMany();
+  await prisma.pageEdit.deleteMany();
+  await prisma.pagePreview.deleteMany();
+  await prisma.pageVersion.deleteMany();
+  await prisma.pageContent.deleteMany();
+  await prisma.session.deleteMany();
+  await prisma.passwordReset.deleteMany();
+  await prisma.homeSection.deleteMany();
+  await prisma.menu.deleteMany();
+  await prisma.document.deleteMany();
+  await prisma.page.deleteMany();
+  await prisma.user.deleteMany();
 
-  // Import pages
-  if (data.pages?.rows) {
-    console.log(`Importing ${data.pages.rows.length} pages...`);
-    for (const page of data.pages.rows) {
-      try {
-        // Find a valid user ID for createdBy
-        const firstUser = await prisma.user.findFirst();
-        const createdBy = page.created_by || firstUser?.id;
-        
-        if (!createdBy) {
-          console.error(`No user found for page ${page.title}, skipping...`);
-          continue;
-        }
+  const users = (dump.users?.rows ?? []).map((row) => ({
+    id: asString(row.id),
+    email: asString(row.email),
+    name: asString(row.name),
+    passwordHash: asString(row.password_hash),
+    role: toUserRole(row.role),
+    createdBy: asOptionalString(row.created_by),
+    createdAt: asDate(row.created_at),
+  }));
+  await createManyInChunks(users, (data) => prisma.user.createMany({ data }));
+  console.log(`Users importés: ${users.length}`);
 
-        await prisma.page.upsert({
-          where: { 
-            id: page.id 
-          },
-          update: {},
-          create: {
-            id: page.id,
-            locale: page.locale || 'fr',
-            title: page.title,
-            slug: page.slug,
-            metaTitle: page.meta_title,
-            metaDescription: page.meta_description,
-            metaKeywords: page.meta_keywords,
-            canonicalUrl: page.canonical_url,
-            robotsDirective: page.robots_directive,
-            ogTitle: page.og_title,
-            ogDescription: page.og_description,
-            ogImageUrl: page.og_image_url,
-            ogImageAlt: page.og_image_alt,
-            twitterTitle: page.twitter_title,
-            twitterDescription: page.twitter_description,
-            twitterImageUrl: page.twitter_image_url,
-            focusKeyword: page.focus_keyword,
-            secondaryKeywords: page.secondary_keywords,
-            schemaOrgJson: page.schema_org_json,
-            imageRecommendations: page.image_recommendations,
-            sitemapPriority: page.sitemap_priority,
-            sitemapChangeFreq: page.sitemap_change_freq,
-            sections: page.sections || [],
-            status: page.status === 'published' ? 'PUBLISHED' : page.status === 'draft' ? 'DRAFT' : page.status === 'pending' ? 'PENDING' : 'ARCHIVED',
-            isInMenu: page.is_in_menu || false,
-            menuOrder: page.menu_order || 0,
-            menuLabel: page.menu_label,
-            currentVersion: page.current_version || 1,
-            publishedVersion: page.published_version,
-            createdBy: createdBy,
-            createdAt: new Date(page.created_at),
-            updatedBy: page.updated_by,
-            updatedAt: page.updated_at ? new Date(page.updated_at) : null,
-          },
-        });
-      } catch (err: any) {
-        // Handle unique constraint violation for locale+slug
-        if (err.code === 'P2002') {
-          console.log(`Page with slug "${page.slug}" already exists, skipping...`);
-        } else {
-          console.error(`Error importing page ${page.title}:`, err.message);
-        }
-      }
-    }
-  }
+  const sessions = (dump.sessions?.rows ?? []).map((row) => ({
+    id: asString(row.id),
+    userId: asString(row.user_id),
+    tokenHash: asString(row.token_hash),
+    expiresAt: asDate(row.expires_at),
+    createdAt: asDate(row.created_at),
+  }));
+  await createManyInChunks(sessions, (data) => prisma.session.createMany({ data }));
+  console.log(`Sessions importées: ${sessions.length}`);
 
-  // Import AI chat sessions
-  if (data.ai_chat_sessions?.rows) {
-    console.log(`Importing ${data.ai_chat_sessions.rows.length} AI chat sessions...`);
-    for (const session of data.ai_chat_sessions.rows) {
-      try {
-        await prisma.aiChatSession.upsert({
-          where: { id: session.id },
-          update: {},
-          create: {
-            id: session.id,
-            createdBy: session.created_by,
-            locale: session.locale || 'fr',
-            title: session.title,
-            latestDraft: session.latest_draft,
-            createdAt: new Date(session.created_at),
-            updatedAt: new Date(session.updated_at || session.created_at),
-          },
-        });
-      } catch (err) {
-        console.error(`Error importing AI session:`, err);
-      }
-    }
-  }
+  const passwordResets = (dump.password_resets?.rows ?? []).map((row) => ({
+    id: asString(row.id),
+    userId: asString(row.user_id),
+    email: asString(row.email),
+    tokenHash: asString(row.token_hash),
+    expiresAt: asDate(row.expires_at),
+    createdAt: asDate(row.created_at),
+  }));
+  await createManyInChunks(passwordResets, (data) => prisma.passwordReset.createMany({ data }));
+  console.log(`Password resets importés: ${passwordResets.length}`);
 
-  // Import AI chat messages
-  if (data.ai_chat_messages?.rows) {
-    console.log(`Importing ${data.ai_chat_messages.rows.length} AI chat messages...`);
-    for (const msg of data.ai_chat_messages.rows) {
-      try {
-        await prisma.aiChatMessage.upsert({
-          where: { id: msg.id },
-          update: {},
-          create: {
-            id: msg.id,
-            sessionId: msg.session_id,
-            role: msg.role === 'user' ? 'USER' : 'ASSISTANT',
-            content: msg.content,
-            generatedPage: msg.generated_page,
-            createdAt: new Date(msg.created_at),
-          },
-        });
-      } catch (err) {
-        console.error(`Error importing AI message:`, err);
-      }
-    }
-  }
+  const pages = (dump.pages?.rows ?? []).map((row) => ({
+    id: asString(row.id),
+    locale: asString(row.locale) || "fr",
+    title: asString(row.title),
+    slug: asString(row.slug),
+    metaTitle: asOptionalString(row.meta_title),
+    metaDescription: asOptionalString(row.meta_description),
+    metaKeywords: asOptionalString(row.meta_keywords),
+    canonicalUrl: asOptionalString(row.canonical_url),
+    robotsDirective: asOptionalString(row.robots_directive),
+    ogTitle: asOptionalString(row.og_title),
+    ogDescription: asOptionalString(row.og_description),
+    ogImageUrl: asOptionalString(row.og_image_url),
+    ogImageAlt: asOptionalString(row.og_image_alt),
+    twitterTitle: asOptionalString(row.twitter_title),
+    twitterDescription: asOptionalString(row.twitter_description),
+    twitterImageUrl: asOptionalString(row.twitter_image_url),
+    focusKeyword: asOptionalString(row.focus_keyword),
+    secondaryKeywords: asOptionalString(row.secondary_keywords),
+    schemaOrgJson: asOptionalString(row.schema_org_json),
+    imageRecommendations: asJson(row.image_recommendations ?? []),
+    sitemapPriority: asOptionalNumber(row.sitemap_priority),
+    sitemapChangeFreq: asOptionalString(row.sitemap_change_freq),
+    sections: asJson(row.sections ?? []),
+    status: toPageStatus(row.status),
+    isInMenu: asBoolean(row.is_in_menu),
+    menuOrder: asNumber(row.menu_order),
+    menuLabel: asOptionalString(row.menu_label),
+    currentVersion: asNumber(row.current_version, 1),
+    publishedVersion: asOptionalNumber(row.published_version),
+    createdBy: asString(row.created_by),
+    createdAt: asDate(row.created_at),
+    updatedBy: asOptionalString(row.updated_by),
+    updatedAt: asOptionalDate(row.updated_at),
+  }));
+  await createManyInChunks(pages, (data) => prisma.page.createMany({ data }));
+  console.log(`Pages importées: ${pages.length}`);
 
-  console.log('Import completed!');
-  
-  // Print summary
-  const usersCount = await prisma.user.count();
-  const pagesCount = await prisma.page.count();
-  const aiSessionsCount = await prisma.aiChatSession.count();
-  const aiMessagesCount = await prisma.aiChatMessage.count();
-  
-  console.log('\n=== Import Summary ===');
-  console.log(`Users: ${usersCount}`);
-  console.log(`Pages: ${pagesCount}`);
-  console.log(`AI Sessions: ${aiSessionsCount}`);
-  console.log(`AI Messages: ${aiMessagesCount}`);
+  const pageVersions = (dump.page_versions?.rows ?? []).map((row) => ({
+    id: asString(row.id),
+    pageId: asString(row.page_id),
+    versionNumber: asNumber(row.version_number, 1),
+    content: asJson(row.content ?? {}),
+    status: toPageStatus(row.status),
+    createdBy: asString(row.created_by),
+    createdAt: asDate(row.created_at),
+    approvedBy: asOptionalString(row.approved_by),
+    approvedAt: asOptionalDate(row.approved_at),
+    rejectionReason: asOptionalString(row.rejection_reason),
+  }));
+  await createManyInChunks(pageVersions, (data) => prisma.pageVersion.createMany({ data }));
+  console.log(`Versions importées: ${pageVersions.length}`);
+
+  const menus = (dump.menus?.rows ?? []).map((row) => ({
+    id: asString(row.id),
+    items: asJson(row.items ?? []),
+    updatedBy: asOptionalString(row.updated_by),
+    updatedAt: asOptionalDate(row.updated_at),
+  }));
+  await createManyInChunks(menus, (data) => prisma.menu.createMany({ data }));
+  console.log(`Menus importés: ${menus.length}`);
+
+  const documents = (dump.documents?.rows ?? []).map((row) => ({
+    id: asString(row.id),
+    filename: asString(row.filename),
+    originalFilename: asString(row.original_filename),
+    filePath: asString(row.file_path),
+    fileSize: BigInt(asNumber(row.file_size)),
+    mimeType: asString(row.mime_type),
+    category: asString(row.category),
+    description: asOptionalString(row.description),
+    uploadedBy: asString(row.uploaded_by),
+    createdAt: asDate(row.created_at),
+  }));
+  await createManyInChunks(documents, (data) => prisma.document.createMany({ data }));
+  console.log(`Documents importés: ${documents.length}`);
+
+  const homeSections = (dump.home_sections?.rows ?? []).map((row) => ({
+    id: asString(row.id),
+    sectionType: asString(row.section_type),
+    content: asJson(row.content),
+    items: asJson(row.items),
+    order: asNumber(row.order),
+    updatedAt: asDate(row.updated_at),
+  }));
+  await createManyInChunks(homeSections, (data) => prisma.homeSection.createMany({ data }));
+  console.log(`Sections home importées: ${homeSections.length}`);
+
+  const pageContents = (dump.page_contents?.rows ?? []).map((row) => ({
+    id: asString(row.id),
+    pageId: asString(row.page_id),
+    content: asJson(row.content ?? {}),
+    updatedAt: asDate(row.updated_at),
+  }));
+  await createManyInChunks(pageContents, (data) => prisma.pageContent.createMany({ data }));
+  console.log(`Contenus de page importés: ${pageContents.length}`);
+
+  const pagePreviews = (dump.page_previews?.rows ?? []).map((row) => ({
+    id: asString(row.id),
+    pageId: asString(row.page_id),
+    newContent: asJson(row.new_content ?? {}),
+    status: toPreviewStatus(row.status),
+    createdBy: asString(row.created_by),
+    createdAt: asDate(row.created_at),
+  }));
+  await createManyInChunks(pagePreviews, (data) => prisma.pagePreview.createMany({ data }));
+  console.log(`Previews importées: ${pagePreviews.length}`);
+
+  const pageEdits = (dump.page_edits?.rows ?? []).map((row) => ({
+    id: asString(row.id),
+    pageId: asString(row.page_id),
+    prompt: asString(row.prompt),
+    changesSummary: asOptionalString(row.changes_summary),
+    editorId: asOptionalString(row.editor_id),
+    editorName: asOptionalString(row.editor_name),
+    createdAt: asDate(row.created_at),
+  }));
+  await createManyInChunks(pageEdits, (data) => prisma.pageEdit.createMany({ data }));
+  console.log(`Éditions importées: ${pageEdits.length}`);
+
+  const aiChatSessions = (dump.ai_chat_sessions?.rows ?? []).map((row) => ({
+    id: asString(row.id),
+    createdBy: asString(row.created_by),
+    locale: asString(row.locale) || "fr",
+    title: asOptionalString(row.title),
+    latestDraft: asJson(row.latest_draft),
+    createdAt: asDate(row.created_at),
+    updatedAt: asDate(row.updated_at),
+  }));
+  await createManyInChunks(aiChatSessions, (data) => prisma.aiChatSession.createMany({ data }));
+  console.log(`Sessions IA importées: ${aiChatSessions.length}`);
+
+  const aiChatMessages = (dump.ai_chat_messages?.rows ?? []).map((row) => ({
+    id: asString(row.id),
+    sessionId: asString(row.session_id),
+    role: toAiChatRole(row.role),
+    content: asString(row.content),
+    generatedPage: asJson(row.generated_page),
+    createdAt: asDate(row.created_at),
+  }));
+  await createManyInChunks(aiChatMessages, (data) => prisma.aiChatMessage.createMany({ data }));
+  console.log(`Messages IA importés: ${aiChatMessages.length}`);
+
+  console.log("Import terminé avec succès.");
 }
 
 main()
-  .catch(console.error)
-  .finally(() => prisma.$disconnect());
+  .catch((error) => {
+    console.error("Échec de l'import du dump", error);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
