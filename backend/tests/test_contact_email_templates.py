@@ -55,11 +55,12 @@ def test_admin_template_contains_contact_details_subject_and_full_message():
     data = _build_email_bodies(payload)
     admin = data["admin"]
 
-    assert "Nom" in admin["html"] and "Alice Martin" in admin["html"]
-    assert "Email" in admin["html"] and "alice@example.com" in admin["html"]
+    assert "Coordonnées du contact" in admin["html"]
+    assert "Alice Martin" in admin["html"] and "alice@example.com" in admin["html"]
     assert "Message" in admin["html"]
     assert "Bonjour<br />Je veux un devis." in admin["html"]
     assert admin["subject"] == "Question tarifs"
+    assert "mailto:alice@example.com" not in admin["html"]
 
 
 def test_author_template_contains_warm_confirmation_and_message_copy():

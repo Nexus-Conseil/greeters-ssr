@@ -139,6 +139,25 @@ function buildSection(title: string, paragraphs: string[]) {
   `;
 }
 
+function buildInlineContactDetails(name: string, email: string) {
+  return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; border-top: 1px solid ${EMAIL_BRAND.border};">
+      <tr>
+        <td style="padding-top: 28px; font-family: ${EMAIL_BRAND.bodyFont}; font-size: 22px; line-height: 28px; color: ${EMAIL_BRAND.textPrimary}; font-weight: 700; padding-bottom: 12px;">
+          Coordonnées du contact
+        </td>
+      </tr>
+      <tr>
+        <td style="font-family: ${EMAIL_BRAND.bodyFont}; font-size: 16px; line-height: 27px; color: ${EMAIL_BRAND.textPrimary}; padding-bottom: 24px;">
+          <span style="color: ${EMAIL_BRAND.textPrimary}; text-decoration: none;">${name}</span>
+          <span style="color: ${EMAIL_BRAND.textMuted};">&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+          <span style="color: ${EMAIL_BRAND.textPrimary}; text-decoration: none;">${email}</span>
+        </td>
+      </tr>
+    </table>
+  `;
+}
+
 function buildSoftBox(title: string, body: string) {
   return `
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="${EMAIL_BRAND.softGreen}" style="background-color:${EMAIL_BRAND.softGreen}; border:1px solid ${EMAIL_BRAND.softBorder}; border-radius:${EMAIL_BRAND.innerRadius}; border-collapse:separate;">
@@ -240,6 +259,15 @@ function buildEmailShell({
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>${title}</title>
+        <style>
+          a[x-apple-data-detectors],
+          #MessageViewBody a,
+          u + #body a {
+            color: inherit !important;
+            text-decoration: none !important;
+            font-weight: inherit !important;
+          }
+        </style>
       </head>
       <body style="margin:0; padding:0; background-color:${EMAIL_BRAND.pageBackground};">
         <div style="display:none; max-height:0; overflow:hidden; opacity:0; mso-hide:all; visibility:hidden; font-size:1px; line-height:1px; color:${EMAIL_BRAND.pageBackground};">
@@ -347,6 +375,8 @@ export function buildAdminContactRequestBody(
   config: Pick<ContactConfig, "fromEmail" | "fromName" | "toEmail" | "siteUrl">,
 ): EmailitRequestBody {
   const safeMessage = escapeHtml(payload.message).replaceAll("\n", "<br />");
+  const safeName = escapeHtml(payload.name);
+  const safeEmail = escapeHtml(payload.email);
 
   return {
     from: `${config.fromName} <${config.fromEmail}>`,
@@ -369,15 +399,11 @@ export function buildAdminContactRequestBody(
       title: "Nouveau message reçu",
       intro:
         "Un visiteur vient de vous écrire depuis le formulaire de contact. Vous trouverez ci-dessous ses coordonnées ainsi que le contenu complet de sa demande.",
-      mainSection: buildSection("Coordonnées du contact", []),
+      mainSection: buildInlineContactDetails(safeName, safeEmail),
       softBox: buildSoftBox(
         "Message",
         `${safeMessage}`,
       ),
-      detailsSection: buildFieldGrid([
-        { label: "Nom", value: escapeHtml(payload.name) },
-        { label: "Email", value: escapeHtml(payload.email) },
-      ]),
     }),
     tracking: {
       loads: false,
