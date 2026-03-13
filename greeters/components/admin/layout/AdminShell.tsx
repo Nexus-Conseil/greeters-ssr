@@ -96,14 +96,14 @@ export const AdminShell = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <div className="dashboard-shell" data-testid="admin-shell-layout">
+    <div className="min-h-screen bg-slate-100 lg:flex" data-testid="admin-shell-layout">
       <AdminSidebar
         userName={user?.name ?? (loading ? "Chargement..." : "Session protégée")}
         userRole={user?.role ?? (loading ? "Connexion en cours" : "Accès restreint")}
         onLogout={handleLogout}
         loggingOut={loggingOut}
       />
-      <div className="dashboard-main" data-testid="admin-shell-main">
+      <div className="min-w-0 flex-1" data-testid="admin-shell-main">
         {children}
       </div>
     </div>

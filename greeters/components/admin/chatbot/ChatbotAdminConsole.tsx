@@ -421,7 +421,12 @@ export const ChatbotAdminConsole = () => {
                 <div className="dashboard-table-card p-5" data-testid="admin-chatbot-thread-card">
                   <div className="max-h-[680px] space-y-4 overflow-y-auto">
                     {conversationLoading ? <div className="dashboard-empty-state" data-testid="admin-chatbot-thread-loading">Chargement de la conversation…</div> : null}
-                    {conversationDetail.messages.map((message) => (
+                    {conversationDetail.messages.map((message, messageIndex) => {
+                      const historicalAssistantReply = message.role === "user"
+                        ? conversationDetail.messages.slice(messageIndex + 1).find((entry) => entry.role === "assistant")
+                        : null;
+
+                      return (
                       <div key={message.id} className="space-y-3" data-testid={`admin-chatbot-thread-message-${message.id}`}>
                         <div className={`rounded-2xl border px-4 py-4 text-sm leading-7 ${message.role === "user" ? "border-[#d9e7bc] bg-[#f5faeb]" : "border-slate-200 bg-slate-50"}`}>
                           <div className="flex items-center justify-between gap-3 text-xs uppercase tracking-[0.18em] text-slate-500">
@@ -457,13 +462,19 @@ export const ChatbotAdminConsole = () => {
                         )}
 
                         {generatedReply.messageId === message.id ? (
-                          <div className="rounded-2xl border border-[#cdddf4] bg-[#f2f7ff] p-4" data-testid={`admin-chatbot-generated-reply-${message.id}`}>
-                            <p className="text-xs uppercase tracking-[0.18em] text-slate-500" data-testid={`admin-chatbot-generated-reply-mode-${message.id}`}>Simulation {generatedReply.mode === "draft" ? "brouillon" : "publiée"}</p>
-                            <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-slate-900" data-testid={`admin-chatbot-generated-reply-content-${message.id}`}>{generatedReply.content}</p>
+                          <div className="grid gap-4 xl:grid-cols-2" data-testid={`admin-chatbot-response-comparator-${message.id}`}>
+                            <div className="rounded-2xl border border-slate-200 bg-white p-4" data-testid={`admin-chatbot-response-comparator-historical-${message.id}`}>
+                              <p className="text-xs uppercase tracking-[0.18em] text-slate-500" data-testid={`admin-chatbot-response-comparator-historical-label-${message.id}`}>Réponse historique</p>
+                              <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-slate-900" data-testid={`admin-chatbot-response-comparator-historical-content-${message.id}`}>{historicalAssistantReply?.content ?? "Aucune réponse historique disponible après ce message."}</p>
+                            </div>
+                            <div className="rounded-2xl border border-[#cdddf4] bg-[#f2f7ff] p-4" data-testid={`admin-chatbot-response-comparator-generated-${message.id}`}>
+                              <p className="text-xs uppercase tracking-[0.18em] text-slate-500" data-testid={`admin-chatbot-response-comparator-generated-label-${message.id}`}>Nouvelle réponse {generatedReply.mode === "draft" ? "(brouillon)" : "(publiée)"}</p>
+                              <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-slate-900" data-testid={`admin-chatbot-response-comparator-generated-content-${message.id}`}>{generatedReply.content}</p>
+                            </div>
                           </div>
                         ) : null}
                       </div>
-                    ))}
+                    )})}
                   </div>
                 </div>
               </>
