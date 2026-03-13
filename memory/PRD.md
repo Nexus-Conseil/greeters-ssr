@@ -49,17 +49,25 @@ Déployer le site `Nexus-Conseil/greeters-ssr` branche `1303` en Next.js SSR dan
   - mapping explicite quota/budget vers HTTP 429
   - retry court sur erreur transitoire
   - modèle allégé `gemini-2.0-flash-lite` pour réduire le coût
+- Refonte des emails du formulaire de contact:
+  - email admin redesigné, plus clair et plus élégant, avec coordonnées + sujet + message complet
+  - email de confirmation auteur ajouté, chaleureux et cohérent avec le style du site
+  - signature harmonisée avec Paris Greeters + email + lien vers le site
+  - URL publique d’email séparée dans `PUBLIC_SITE_URL`
+- Régression ajoutée pour les templates email via builders TS + tests Python sans envoi réel d’email
 - Préparation merge safe documentée dans `/app/memory/MERGE_SAFE_1203_TO_1303.md`
 - Tests validés:
   - self-tests complets via preview publique
   - screenshots homepage + login admin + studio IA
   - testing agent: proxies/auth/chat/contact/pages/menu/IA validés
+  - testing agent: templates email admin/auteur validés sans appel live à `/api/contact/send`
 
 ## Backlog priorisé
 ### P0
 - Remplacer la `GEMINI_API_KEY` métier par une clé Google valide si l’on veut réactiver les handlers IA natifs Next en plus du runtime public FastAPI
 - Basculer `NEXT_PUBLIC_CHAT_API_URL` vers `https://greeters.nexus-conseil.ch` dès que le DNS résout, puis `https://greeters.paris` au go-live
 - Permettre la gestion admin du destinataire du formulaire de contact (`CONTACT_TO_EMAIL`) au lieu d’un paramètre fixe
+- Permettre la gestion admin de l’URL publique utilisée dans les emails si elle doit différer selon l’environnement
 
 ### P1
 - Modulariser `/app/backend/server.py` en services/routes séparés (proxy, auth, IA, chat)

@@ -65,7 +65,7 @@ function getContactConfig(): ContactConfig {
   const fromEmail = process.env.CONTACT_FROM_EMAIL;
   const fromName = process.env.CONTACT_FROM_NAME;
   const toEmail = process.env.CONTACT_TO_EMAIL;
-  const siteUrl = process.env.NEXT_PUBLIC_CHAT_API_URL;
+  const siteUrl = process.env.PUBLIC_SITE_URL;
 
   if (!apiKey || !fromEmail || !fromName || !toEmail || !siteUrl) {
     throw new ContactServiceError(
