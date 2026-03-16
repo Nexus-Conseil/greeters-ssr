@@ -21,6 +21,7 @@ Installer ce site Next.js en SSR : https://github.com/Nexus-Conseil/greeters-ssr
 - Import complet du dump via `scripts/import-dump.ts`
 - Fallback `dump.json` désactivé (`GREETERS_USE_DUMP_FALLBACK=0`)
 - Les routes `/api` publiques passent par FastAPI dans ce workspace ; les endpoints `/api/health` et `/api/pages/public` y proxient donc l'app Next interne pour rester testables publiquement
+- Intégration sélective sécurisée de la branche `1503` : on reprend les modules admin utiles et les extensions backend associées, sans merger les artefacts `.env`, `.emergent`, tests et audits historiques
 
 ## Implémenté
 - Installation de la branche `1203` dans `/app/greeters`
@@ -37,12 +38,17 @@ Installer ce site Next.js en SSR : https://github.com/Nexus-Conseil/greeters-ssr
 - Compte admin final `florence.levot@nexus-conseil.ch` créé/mis à jour en `SUPER_ADMIN`
 - Proxy public des routes auth Next (`/api/auth/login`, `/api/auth/me`, `/api/auth/logout`) via FastAPI pour permettre le login sur le domaine public
 - Flux final admin/auth validés en API + UI (login, session, accès `/admin`, logout, 401 post-logout)
+- Merge sélectif des nouveautés utiles de `1503` : back-office admin chatbot/documents/utilisateurs + services et routes Next associées
+- Extension backend issue de `1503` intégrée : proxies/API supplémentaires pour admin, chatbot session, contact/pages/menu/IA, tout en conservant les réglages locaux Supabase/auth/chatbot
+- Schéma Prisma étendu avec `ChatbotPromptVersion` et appliqué incrémentalement via `scripts/apply-schema.cjs`
+- Chatbot frontend enrichi avec persistance de session visiteur (`localStorage`/cookie) et endpoint `/api/chat/session/{session_id}` validé
+- Validation complète post-merge `1503` : `/admin/users`, `/admin/documents`, `/admin/chatbot`, `/api/admin/users`, `/api/admin/documents`, `/api/admin/chatbot/settings`, `/api/chat/session/{session_id}`
 
 ## Backlog priorisé
 ### P0
 - Compléter les clés métier encore absentes pour les flux non-auth (Emailit contact, Gemini IA admin si ces fonctionnalités doivent être actives)
 - Basculer `NEXT_PUBLIC_CHAT_API_URL` vers `https://greeters.nexus-conseil.ch` dès que le domaine de validation résout effectivement, puis vers `https://greeters.paris` au go-live
-- Décider de la stratégie finale de merge de `1203` (idéalement ciblée)
+- Refactoriser `/app/backend/server.py` par domaines (auth proxy, chatbot, admin, pages/menu/IA) pour réduire le risque de régression future
 
 ### P1
 - Remplacer le script d'application de schéma par une stratégie de migration Prisma fully-managed si l'environnement de déploiement offre un endpoint direct compatible
@@ -57,5 +63,5 @@ Installer ce site Next.js en SSR : https://github.com/Nexus-Conseil/greeters-ssr
 ## Next tasks
 1. Fournir/configurer les clés métier encore manquantes (Emailit, Gemini admin, éventuellement ShortPixel)
 2. Basculer l'URL de chat sur le domaine de validation dès que `greeters.nexus-conseil.ch` est résolu
-3. Préparer un diff de merge “safe” de `1203`
+3. Préparer un diff de merge/documentation finale maintenant que le lot utile de `1503` est absorbé
 4. Si nécessaire, convertir la stratégie Prisma en migrations déployables classiques selon l'environnement cible
