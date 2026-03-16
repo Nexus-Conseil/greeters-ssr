@@ -12,13 +12,22 @@ async function main() {
 
   const sql = execFileSync(
     "./node_modules/.bin/prisma",
-    ["migrate", "diff", "--from-empty", "--to-schema", "prisma/schema.prisma", "--script"],
+    ["migrate", "diff", "--from-config-datasource", "--to-schema", "prisma/schema.prisma", "--script"],
     {
       cwd: process.cwd(),
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
+      env: {
+        ...process.env,
+        DATABASE_URL: directUrl,
+      },
     },
   );
+
+  if (!sql.trim()) {
+    console.log("Aucune différence de schéma à appliquer.");
+    return;
+  }
 
   const client = new Client({ connectionString: directUrl, connectionTimeoutMillis: 15000 });
 

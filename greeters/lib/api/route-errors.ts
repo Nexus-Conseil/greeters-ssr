@@ -8,6 +8,18 @@ export function toErrorResponse(error: unknown, fallbackMessage: string) {
     return NextResponse.json({ detail: error.message }, { status: error.statusCode });
   }
 
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "statusCode" in error &&
+    typeof (error as { statusCode?: unknown }).statusCode === "number" &&
+    "message" in error &&
+    typeof (error as { message?: unknown }).message === "string"
+  ) {
+    const typedError = error as { statusCode: number; message: string };
+    return NextResponse.json({ detail: typedError.message }, { status: typedError.statusCode });
+  }
+
   if (error instanceof SyntaxError) {
     return NextResponse.json({ detail: "Le corps JSON est invalide." }, { status: 400 });
   }
