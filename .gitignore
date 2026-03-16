@@ -85,3 +85,7 @@ greeters/.next/dev/cache/turbopack/23c46498/00000243.sst
 # Environment files
 *.env
 *.env.*
+-e 
+# Environment files
+*.env
+*.env.*
