@@ -63,7 +63,7 @@ Finaliser la sécurisation de `GEMINI_API_KEY` afin qu’elle ne soit plus prés
 - Le code backend et Next attendent maintenant la variable via **environnement runtime**
 - Important : dans **ce preview fork**, l’environnement shell ne contient pas actuellement `GEMINI_API_KEY` en global. Cela veut dire :
   - la configuration est désormais **propre côté fichiers**
-  - mais les fonctionnalités IA dépendront de la présence réelle du secret au runtime sur la plateforme / service final
+  - il faut distinguer le shell interactif du workspace et l’environnement runtime réel des services publics
 
 ## 6) Vérifications réalisées
 
@@ -71,15 +71,20 @@ Finaliser la sécurisation de `GEMINI_API_KEY` afin qu’elle ne soit plus prés
 - Recherche globale des occurrences `GEMINI_API_KEY|gemini` dans `/app/backend`, `/app/greeters`, `/app/frontend`, `/app/memory`
 - Vérification ciblée des fichiers `.env`, `.env.local`, services Gemini backend et services Gemini Next
 
-### Constat runtime local
+### Constat runtime local (shell du workspace)
 - `env | rg '^GEMINI_API_KEY='` → aucune variable globale visible dans le shell courant
 - `python` depuis `/app/backend` → `os.environ.get('GEMINI_API_KEY')` absent dans le shell courant
 - `node` depuis `/app/greeters` → `process.env.GEMINI_API_KEY` absent dans le shell courant
 
+### Constat runtime public
+- `GET /api/health` → OK
+- `POST /api/chat/message` → OK, réponse IA valide observée publiquement
+- Smoke test frontend sur la home → OK, chargement complet sans erreur bloquante
+
 ### Conséquence
-Le code est prêt pour des **secrets plateforme**, mais pour valider les flux IA en preview il faudra soit :
-- injecter réellement `GEMINI_API_KEY` dans l’environnement du service, soit
-- utiliser le mécanisme de secrets de la plateforme avant le prochain test fonctionnel IA
+Le shell interactif du workspace n’expose pas `GEMINI_API_KEY`, mais les tests publics montrent clairement qu’un **secret runtime est bien injecté côté service public**. Autrement dit :
+- les fichiers du workspace sont maintenant nettoyés
+- l’application publique continue de fonctionner grâce à l’injection runtime de la plateforme
 
 ## 7) Points encore ouverts / prochaine priorité
 
@@ -90,9 +95,9 @@ Le code est prêt pour des **secrets plateforme**, mais pour valider les flux IA
    - Le tester avec une vraie `GEMINI_API_KEY` injectée au runtime
 
 2. **Tester les flux IA finaux avec le vrai secret plateforme**
-   - Chatbot public
-   - Génération de page IA admin
-   - Optimisation SEO IA admin
+   - Le chatbot public est déjà confirmé OK après nettoyage
+   - Il reste à valider la génération de page IA admin
+   - Il reste à valider l’optimisation SEO IA admin
 
 3. **Vérifier si d’autres secrets métier manquent**
    - `EMAILIT_API_KEY` pour le formulaire contact
@@ -146,4 +151,5 @@ curl -X POST "$REACT_APP_BACKEND_URL/api/chat/message" \
 ## 11) Résumé ultra-court pour reprise rapide
 - Le repo est globalement stabilisé
 - La clé `GEMINI_API_KEY` a été retirée des derniers fichiers workspace où elle restait stockée (`/app/greeters/.env.local` et `/app/backend/.env.local`)
-- Le prochain dev doit surtout **injecter/tester le secret au runtime**, puis finir la migration/validation du script `generate_og_image.py` et les tests IA finaux
+- Les tests publics confirment que le secret Gemini est déjà injecté au runtime service
+- Le prochain dev doit surtout finir la migration/validation du script `generate_og_image.py`, puis valider les flux IA admin restants

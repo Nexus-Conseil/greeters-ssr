@@ -51,6 +51,7 @@ Installer ce site Next.js en SSR : https://github.com/Nexus-Conseil/greeters-ssr
 - Chatbot frontend enrichi avec persistance de session visiteur (`localStorage`/cookie) et endpoint `/api/chat/session/{session_id}` validé
 - Validation complète post-merge `1503` : `/admin/users`, `/admin/documents`, `/admin/chatbot`, `/api/admin/users`, `/api/admin/documents`, `/api/admin/chatbot/settings`, `/api/chat/session/{session_id}`
 - Sécurisation finale de `GEMINI_API_KEY` dans le workspace : suppression des clés résiduelles de `/app/greeters/.env.local` et `/app/backend/.env.local` pour ne plus laisser de secret Gemini stocké dans les fichiers du projet ; la variable doit désormais être injectée par secrets plateforme / environnement runtime
+- Validation smoke post-nettoyage : frontend public OK, `/api/health` OK, et `/api/chat/message` continue de répondre correctement, ce qui confirme qu’un secret Gemini runtime est bien injecté côté service public
 
 ## Backlog priorisé
 ### P0
