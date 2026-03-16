@@ -16,8 +16,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.4.2",
-    "@prisma/client": "^7.4.2",
+    "@prisma/client": "6.19.0",
     "@tailwindcss/postcss": "^4.2.1",
     "autoprefixer": "^10.4.27",
     "bcryptjs": "^3.0.3",
@@ -36,7 +35,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
-    "prisma": "^7.4.2",
+    "prisma": "6.19.0",
     "tsx": "^4.21.0",
     "typescript": "^5"
   }
