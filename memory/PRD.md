@@ -45,6 +45,8 @@ Installer ce site Next.js en SSR : https://github.com/Nexus-Conseil/greeters-ssr
 - Allègement du wrapper frontend `/app/frontend`: suppression du gros arbre de dépendances CRA/Shadcn désormais inutile, scripts conservés pour build/start de `/app/greeters`
 - Allègement backend `requirements.txt`: retrait des dépendances de dev et de paquets runtime non utilisés pour réduire le temps d’installation au déploiement
 - Refactor backend: `server.py` réduit à un assembleur d’app, logique déplacée dans `backend/app/core.py`, `schemas.py`, `services/*` et `routes/*`
+- Migration de la couche LLM backend vers Gemini direct (`GEMINI_API_KEY`) en supprimant `emergentintegrations` du chemin critique backend
+- Nouveau `requirements.txt` backend minimal (20 packages) validé avec `pip install --no-dependencies` pour coller au mode de build Emergent
 - Garde-fou de non-régression ajouté sur le refactor backend (`test_refactor_regression_iter6.py`)
 - Chatbot frontend enrichi avec persistance de session visiteur (`localStorage`/cookie) et endpoint `/api/chat/session/{session_id}` validé
 - Validation complète post-merge `1503` : `/admin/users`, `/admin/documents`, `/admin/chatbot`, `/api/admin/users`, `/api/admin/documents`, `/api/admin/chatbot/settings`, `/api/chat/session/{session_id}`
@@ -53,7 +55,8 @@ Installer ce site Next.js en SSR : https://github.com/Nexus-Conseil/greeters-ssr
 ### P0
 - Compléter les clés métier encore absentes pour les flux non-auth (Emailit contact, Gemini IA admin si ces fonctionnalités doivent être actives)
 - Basculer `NEXT_PUBLIC_CHAT_API_URL` vers `https://greeters.nexus-conseil.ch` dès que le domaine de validation résout effectivement, puis vers `https://greeters.paris` au go-live
-- Remplacer à terme `emergentintegrations` par une intégration plus légère si l’objectif devient l’optimisation maximale du temps d’image/install backend
+- Sortir `GEMINI_API_KEY` des fichiers `.env` versionnés vers l’injection de secrets de la plateforme
+- Si souhaité plus tard, migrer aussi le script non critique `greeters/scripts/generate_og_image.py` hors `emergentintegrations` pour supprimer totalement cette dépendance du repo
 - Vérifier le prochain déploiement Emergent après les correctifs Prisma + allègement des installs; si un échec subsiste, investiguer alors la connectivité runtime vers Supabase ou un blocage infra spécifique plutôt que le build Node
 
 ### P1
