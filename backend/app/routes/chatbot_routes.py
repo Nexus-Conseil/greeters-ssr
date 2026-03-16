@@ -3,7 +3,7 @@ import uuid
 
 from fastapi import APIRouter, HTTPException, Request
 
-from app.core import ADMIN_ROLES, EDITOR_ROLES, EMERGENT_LLM_KEY, db
+from app.core import ADMIN_ROLES, EDITOR_ROLES, GEMINI_API_KEY, db
 from app.schemas import ChatMessage, ChatbotFeedbackRequest, ChatbotGenerateReplyRequest
 from app.services.chatbot import (
     SYSTEM_PROMPTS,
@@ -31,7 +31,7 @@ async def get_chat_session(session_id: str):
 
 @router.post("/chat/message")
 async def chat_message(payload: ChatMessage):
-    if not EMERGENT_LLM_KEY:
+    if not GEMINI_API_KEY:
         return {"content": "Désolé, le service de chat n'est pas configuré."}
     language = payload.language if payload.language in SYSTEM_PROMPTS else "fr"
     visitor_id = payload.visitor_id or payload.session_id
