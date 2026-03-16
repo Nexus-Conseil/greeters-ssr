@@ -82,3 +82,7 @@ greeters/node_modules/@next/swc-linux-arm64-musl/next-swc.linux-arm64-musl.node
 greeters/node_modules/@next/swc-linux-arm64-gnu/next-swc.linux-arm64-gnu.node
 greeters/node_modules/@next/swc-linux-arm64-gnu/next-swc.linux-arm64-gnu.node
 greeters-csr/.git/objects/pack/pack-d36c2e3e0b86c82b041b2cc6d6fcc06da7bf6431.pack
+-e 
+# Environment files
+*.env
+*.env.*

@@ -21,6 +21,9 @@ type DocumentsManagerProps = {
 
 export const DocumentsManager = ({ initialDocuments }: DocumentsManagerProps) => {
   const [documents, setDocuments] = useState(initialDocuments);
+  const [drafts, setDrafts] = useState<Record<string, { category: string; description: string }>>(
+    Object.fromEntries(initialDocuments.map((document) => [document.id, { category: document.category, description: document.description ?? "" }])),
+  );
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [category, setCategory] = useState("general");
   const [description, setDescription] = useState("");
@@ -49,6 +52,7 @@ export const DocumentsManager = ({ initialDocuments }: DocumentsManagerProps) =>
         throw new Error(payload.detail ?? "Impossible d’ajouter ce document.");
       }
       setDocuments((current) => [payload.document!, ...current]);
+      setDrafts((current) => ({ ...current, [payload.document!.id]: { category: payload.document!.category, description: payload.document!.description ?? "" } }));
       setSelectedFile(null);
       setCategory("general");
       setDescription("");
@@ -73,6 +77,7 @@ export const DocumentsManager = ({ initialDocuments }: DocumentsManagerProps) =>
       return;
     }
     setDocuments((current) => current.map((document) => (document.id === documentId ? payload.document! : document)));
+    setDrafts((current) => ({ ...current, [documentId]: { category: payload.document!.category, description: payload.document!.description ?? "" } }));
     setSuccess("Document mis à jour.");
   }
 
@@ -85,6 +90,7 @@ export const DocumentsManager = ({ initialDocuments }: DocumentsManagerProps) =>
       return;
     }
     setDocuments((current) => current.filter((document) => document.id !== documentId));
+    setDrafts((current) => Object.fromEntries(Object.entries(current).filter(([id]) => id !== documentId)));
     setSuccess("Document supprimé.");
   }
 
@@ -129,6 +135,10 @@ export const DocumentsManager = ({ initialDocuments }: DocumentsManagerProps) =>
           <div className="mt-4 space-y-4">
             {documents.map((document) => (
               <div key={document.id} className="rounded-xl border border-slate-200 p-4" data-testid={`admin-documents-row-${document.id}`}>
+                {(() => {
+                  const draft = drafts[document.id] ?? { category: document.category, description: document.description ?? "" };
+                  return (
+                    <>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <a href={document.filePath} target="_blank" rel="noreferrer" className="font-medium text-slate-900 underline decoration-slate-300 underline-offset-4" data-testid={`admin-documents-name-${document.id}`}>{document.originalFilename}</a>
@@ -137,10 +147,13 @@ export const DocumentsManager = ({ initialDocuments }: DocumentsManagerProps) =>
                   <button type="button" className="rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50" onClick={() => void deleteDocument(document.id)} data-testid={`admin-documents-delete-button-${document.id}`}>Supprimer</button>
                 </div>
                 <div className="mt-4 grid gap-3 md:grid-cols-[220px_minmax(0,1fr)_auto]">
-                  <input className="rounded-xl border border-slate-200 px-4 py-3 text-sm" defaultValue={document.category} onBlur={(event) => void updateDocument(document.id, { category: event.target.value, description: document.description ?? "" })} data-testid={`admin-documents-category-edit-${document.id}`} />
-                  <input className="rounded-xl border border-slate-200 px-4 py-3 text-sm" defaultValue={document.description ?? ""} onBlur={(event) => void updateDocument(document.id, { category: document.category, description: event.target.value })} data-testid={`admin-documents-description-edit-${document.id}`} />
+                  <input className="rounded-xl border border-slate-200 px-4 py-3 text-sm" value={draft.category} onChange={(event) => setDrafts((current) => ({ ...current, [document.id]: { ...draft, category: event.target.value } }))} onBlur={() => void updateDocument(document.id, draft)} data-testid={`admin-documents-category-edit-${document.id}`} />
+                  <input className="rounded-xl border border-slate-200 px-4 py-3 text-sm" value={draft.description} onChange={(event) => setDrafts((current) => ({ ...current, [document.id]: { ...draft, description: event.target.value } }))} onBlur={() => void updateDocument(document.id, draft)} data-testid={`admin-documents-description-edit-${document.id}`} />
                   <a href={document.filePath} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-lg bg-slate-100 px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200" data-testid={`admin-documents-download-button-${document.id}`}>Télécharger</a>
                 </div>
+                    </>
+                  );
+                })()}
               </div>
             ))}
           </div>
