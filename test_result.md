@@ -101,3 +101,84 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Tester le frontend public de l'application sur l'URL preview https://nextjs-gemini.preview.emergentagent.com. Contexte : je viens de finaliser un nettoyage sécurité de GEMINI_API_KEY dans les fichiers locaux du workspace. Je veux uniquement une validation smoke test frontend."
+
+frontend:
+  - task: "Homepage loads correctly"
+    implemented: true
+    working: true
+    file: "/app/greeters/app/page.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ Smoke test passed. Homepage loads with HTTP 200 status. Page has 32,264 characters of content. All critical components visible and functional."
+
+  - task: "TopBar visibility"
+    implemented: true
+    working: true
+    file: "/app/greeters/components/public/layout/TopBar.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ TopBar is visible with CTA button 'RÉSERVER UNE BALADE' and language selector flags working correctly."
+
+  - task: "Header visibility"
+    implemented: true
+    working: true
+    file: "/app/greeters/components/public/layout/Header.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ Header element found and visible with navigation menu (ACCUEIL, RENCONTREZ UN GREETER, LIVRE D'OR, FAIRE UN DON, GALERIE, ACTUALITÉS, DEVENEZ BÉNÉVOLE)."
+
+  - task: "Hero section and main content"
+    implemented: true
+    working: true
+    file: "/app/greeters/components/public/home/HomePage.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ Hero section visible with h1 'Venez en visiteur, repartez en ami', Eiffel Tower hero image, and main content container properly rendered. Chatbot widget also loaded."
+
+  - task: "No blocking errors"
+    implemented: true
+    working: true
+    file: "N/A"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ No visible error elements in DOM. No critical console errors detected. Only non-critical Cloudflare RUM network request (expected behavior). GEMINI_API_KEY security cleanup did not affect frontend rendering."
+
+metadata:
+  created_by: "testing_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: true
+  test_date: "2026-03-16"
+
+test_plan:
+  current_focus:
+    - "Homepage smoke test completed"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "testing"
+    message: "Smoke test completed successfully on public URL https://nextjs-gemini.preview.emergentagent.com. All critical components (TopBar, Header, Hero, Main content) are rendering correctly. No blocking errors found. The GEMINI_API_KEY security cleanup did not impact frontend public rendering. Screenshot captured showing full homepage with Paris Greeters branding, navigation, hero image, and chatbot widget."

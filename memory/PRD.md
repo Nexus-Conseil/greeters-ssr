@@ -50,12 +50,12 @@ Installer ce site Next.js en SSR : https://github.com/Nexus-Conseil/greeters-ssr
 - Garde-fou de non-régression ajouté sur le refactor backend (`test_refactor_regression_iter6.py`)
 - Chatbot frontend enrichi avec persistance de session visiteur (`localStorage`/cookie) et endpoint `/api/chat/session/{session_id}` validé
 - Validation complète post-merge `1503` : `/admin/users`, `/admin/documents`, `/admin/chatbot`, `/api/admin/users`, `/api/admin/documents`, `/api/admin/chatbot/settings`, `/api/chat/session/{session_id}`
+- Sécurisation finale de `GEMINI_API_KEY` dans le workspace : suppression des clés résiduelles de `/app/greeters/.env.local` et `/app/backend/.env.local` pour ne plus laisser de secret Gemini stocké dans les fichiers du projet ; la variable doit désormais être injectée par secrets plateforme / environnement runtime
 
 ## Backlog priorisé
 ### P0
 - Compléter les clés métier encore absentes pour les flux non-auth (Emailit contact, Gemini IA admin si ces fonctionnalités doivent être actives)
 - Basculer `NEXT_PUBLIC_CHAT_API_URL` vers `https://greeters.nexus-conseil.ch` dès que le domaine de validation résout effectivement, puis vers `https://greeters.paris` au go-live
-- Sortir `GEMINI_API_KEY` des fichiers `.env` versionnés vers l’injection de secrets de la plateforme
 - Si souhaité plus tard, migrer aussi le script non critique `greeters/scripts/generate_og_image.py` hors `emergentintegrations` pour supprimer totalement cette dépendance du repo
 - Vérifier le prochain déploiement Emergent après les correctifs Prisma + allègement des installs; si un échec subsiste, investiguer alors la connectivité runtime vers Supabase ou un blocage infra spécifique plutôt que le build Node
 
@@ -72,5 +72,6 @@ Installer ce site Next.js en SSR : https://github.com/Nexus-Conseil/greeters-ssr
 ## Next tasks
 1. Fournir/configurer les clés métier encore manquantes (Emailit, Gemini admin, éventuellement ShortPixel)
 2. Basculer l'URL de chat sur le domaine de validation dès que `greeters.nexus-conseil.ch` est résolu
-3. Préparer un diff de merge/documentation finale maintenant que le lot utile de `1503` est absorbé
-4. Si nécessaire, convertir la stratégie Prisma en migrations déployables classiques selon l'environnement cible
+3. Migrer `greeters/scripts/generate_og_image.py` pour supprimer le dernier usage résiduel de l'ancien flux Gemini image et aligner totalement le repo sur l'injection runtime de `GEMINI_API_KEY`
+4. Préparer un diff de merge/documentation finale maintenant que le lot utile de `1503` est absorbé
+5. Si nécessaire, convertir la stratégie Prisma en migrations déployables classiques selon l'environnement cible
