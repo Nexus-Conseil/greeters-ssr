@@ -53,6 +53,6 @@
   "seed_data_creation": "Used transient session_id TEST_deployment_readiness for chatbot API smoke call.",
   "retest_needed": true,
   "should_main_agent_self_test": false,
-  "context_for_next_testing_agent": "Validated on https://greeters-preview.preview.emergentagent.com. / and /contact return 200 and chatbot UI responds. Blocking gap: /api/health and /api/pages/public return 404 from public URL. Re-run pytest and playwright after routing fix.",
-  "rca of the issue": "Reproduction: call GET https://greeters-preview.preview.emergentagent.com/api/health and GET /api/pages/public -> both 404. Expected behavior from migrated Next app is 200 with JSON payload. Likely cause: ingress/proxy still forwarding /api to FastAPI backend instead of Next route handlers, so Next API readiness endpoints are not publicly exposed. Secondary risk from logs: repeated Prisma P1001 (DB unreachable 127.0.0.1:1) can be hidden by fallback rendering paths on SSR pages."
+  "context_for_next_testing_agent": "Validated on https://nextjs-gemini.preview.emergentagent.com. / and /contact return 200 and chatbot UI responds. Blocking gap: /api/health and /api/pages/public return 404 from public URL. Re-run pytest and playwright after routing fix.",
+  "rca of the issue": "Reproduction: call GET https://nextjs-gemini.preview.emergentagent.com/api/health and GET /api/pages/public -> both 404. Expected behavior from migrated Next app is 200 with JSON payload. Likely cause: ingress/proxy still forwarding /api to FastAPI backend instead of Next route handlers, so Next API readiness endpoints are not publicly exposed. Secondary risk from logs: repeated Prisma P1001 (DB unreachable 127.0.0.1:1) can be hidden by fallback rendering paths on SSR pages."
 }

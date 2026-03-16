@@ -30,6 +30,6 @@
   "seed_data_creation": "Session chatbot de test créée: TEST_REFACTOR_<random> via /api/chat/message.",
   "retest_needed": false,
   "should_main_agent_self_test": true,
-  "context_for_next_testing_agent": "Tests exécutés sur https://greeters-preview.preview.emergentagent.com. Backend pytest (5/5 pass) couvre /api/, /api/health, /api/auth/login, /api/chat/message + persistance /api/chat/session/{id}, et / public. UI Playwright: homepage chargée, chatbot ouvert + message envoyé/réponse reçue, login admin réussi et dashboard accessible.",
+  "context_for_next_testing_agent": "Tests exécutés sur https://nextjs-gemini.preview.emergentagent.com. Backend pytest (5/5 pass) couvre /api/, /api/health, /api/auth/login, /api/chat/message + persistance /api/chat/session/{id}, et / public. UI Playwright: homepage chargée, chatbot ouvert + message envoyé/réponse reçue, login admin réussi et dashboard accessible.",
   "rca of the issue": "Aucun incident reproduit dans ce scope; pas de RCA corrective requise."
 }

@@ -1,0 +1,148 @@
+<analysis>**original_problem_statement**: The user wants to install a Next.js Server-Side Rendered (SSR) site from the GitHub repository , specifically using the  branch.
+
+Over the course of the session, the user expanded the requirements to include:
+- Making the application fully functional, which involved setting up a proper database and importing data.
+- Fixing numerous bugs, including a non-functional chatbot, UI glitches, and critical server/client hydration errors.
+- Merging new features from another branch (), which added new admin panels and backend logic.
+- Preparing the application for production deployment by fixing build errors, optimizing performance, and refactoring the codebase for maintainability.
+- Migrating all AI features from a generic integration library to direct Gemini API calls for performance and dependency reduction.
+- Securing API keys by removing them from version-controlled files.
+
+**User's preferred language**: French. The next agent MUST communicate in French.
+
+**what currently exists?**
+The Next.js project from the specified repository has been successfully set up in the  directory. It is no longer a simple clone but a heavily modified and stabilized version that integrates features from branches  and . The application is connected to a live Supabase PostgreSQL database, which has been populated with data from a  file provided by the user.
+
+The architecture consists of the Next.js app () and a parallel FastAPI backend () that serves as a public-facing proxy and handles AI functionalities. The backend has been significantly refactored from a single file into a modular structure (, ) and now uses direct HTTP calls to the Gemini API for all AI tasks. Deployment build issues have been resolved, and dependencies have been rationalized to improve build times.
+
+**Last working item**:
+-   **Last item agent was working**: The agent was executing a multi-part task to finalize the production readiness of the backend:
+    1.  Securing the  by removing it from versioned  files, ensuring it's loaded from platform secrets.
+    2.  Migrating the final script () that still used an old integration library ().
+    3.  Performing a final rationalization of the backend AI and admin routes to reduce complexity.
+-   **Status**: IN PROGRESS
+-   **Agent Testing Done**: N
+-   **Which testing method agent to use?**: both
+-   **User Testing Done**: N
+
+**All Pending/In progress Issue list**:
+There are no pending issues. The current work is focused on completing the in-progress task.
+
+**In progress Task List**:
+-   **Task 1: Complete Gemini API secure integration and backend rationalization (P0)**
+    -   **Where to resume**:
+        1.  The  has been removed from  and . The next step is to ensure the backend and scripts can correctly load this key from the environment variables provided by the deployment platform.
+        2.  Migrate the Python script . This involves replacing the call to  with a direct HTTP call to the Gemini API, thus completely removing the old dependency from the project.
+        3.  Continue the backend refactoring by further modularizing the remaining AI and admin routes in the FastAPI application as requested.
+    -   **What will be achieved with this?**: This will result in a more secure application with no hardcoded secrets, a smaller build footprint due to fewer dependencies, and a more maintainable backend codebase.
+    -   **Status**: IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?**: both
+    -   **Blocked on something**: No.
+
+**Upcoming and Future Tasks**
+-   **Upcoming Tasks:**
+    -   (P1) Add backend proxies for remaining Next.js API routes that need public exposure (e.g., ). This is necessary due to the workspace's proxy architecture.
+    -   (P1) Obtain missing API keys for the contact form (, etc.) from the user to make the feature fully functional.
+-   **Future Tasks:**
+    -   (P2) Conduct a final performance audit (Lighthouse) on a production build to definitively resolve the Largest Contentful Paint (LCP) concerns.
+    -   (P3) Update the  environment variable to the final production domain () when the site goes live.
+
+**Completed work in this session**
+-   **Infrastructure & Setup:**
+    -   Installed the Next.js SSR application from the  branch into .
+    -   Migrated the data source from a local  file to a production-ready Supabase PostgreSQL database. This included creating custom scripts (, ) to handle Prisma migrations and data import against Supabase's connection pooler.
+-   **Feature Integration & Refactoring:**
+    -   Selectively merged new admin features (for users, documents, and chatbot) from the  branch.
+    -   Refactored the monolithic  into a modular FastAPI application with separate routers, services, and schemas.
+    -   Migrated all backend AI features from the  library to direct, lightweight HTTP calls to the Google Gemini API.
+-   **Bug Fixes & Stabilization:**
+    -   Fixed critical Next.js hydration errors affecting the main layout components (, , etc.).
+    -   Resolved a major deployment build failure by downgrading Prisma to a version compatible with the environment's Node.js version.
+    -   Fixed various UI and functional bugs in the chatbot.
+-   **Optimization:**
+    -   Significantly optimized deployment build times by cleaning unused dependencies from both the backend () and the frontend wrapper ().
+
+**Code Architecture**
+
+
+**Key Technical Concepts**
+-   **Frontend**: Next.js 14 (App Router), React, TypeScript, Tailwind CSS.
+-   **Backend**: FastAPI (Python), used for AI services and as a public-facing proxy.
+-   **Database**: PostgreSQL (hosted on Supabase), with Prisma as the ORM.
+-   **Architecture**: The setup uses a wrapper pattern where a root  project installs and runs the main Next.js application located in . A critical architectural detail is that public requests to  are routed to the FastAPI backend, which then proxies calls to the internal Next.js API as needed. This requires explicit proxy configuration for any Next.js API route that must be publicly accessible.
+-   **AI Integration**: All AI-powered features now use direct HTTP requests to the Gemini API, managed through a central service in .
+
+**key DB schema**
+-   : Stores user information, including roles (, , ).
+-   , : Manages CMS pages and their version history.
+-   , : Defines navigation and homepage content structure.
+-   , : Logs chatbot conversations.
+-   : Stores versions of the chatbot's system prompt (added from branch ).
+
+**changes in tech stack**
+-   **Database**: Shifted from a JSON file-based data source to a live PostgreSQL database on Supabase.
+-   **LLM Integration**: Migrated from the  library to direct Google Gemini API calls, removing a heavy dependency.
+
+**All files of reference**
+-   : This file now contains all logic for interacting with the Gemini API.
+-   : Essential for applying database schema changes due to Supabase/Prisma compatibility issues in this environment.
+-   : This file must be updated to expose any new Next.js API routes to the public.
+-   : Note the downgraded Prisma versions () to ensure build compatibility. Do not upgrade without checking the Node.js version of the deployment environment.
+-   : This has been heavily pruned and should be managed carefully to keep build times low.
+
+**key api endpoints**
+-   **Public-Facing (FastAPI)**:
+    -   : Handles chatbot interactions.
+    -   : Endpoints for AI-powered admin tools.
+    -   , : Proxies to the internal Next.js API handlers.
+-   **Internal (Next.js)**:
+    -   : NextAuth.js routes for authentication.
+    -   : API routes supporting the admin dashboard features.
+
+**Critical Info for New Agent**
+-   **API Proxy**: Remember that all public  traffic hits the FastAPI backend first. To expose a new Next.js API route, you MUST add a proxy rule in .
+-   **Database Migrations**: Do not use . Always use the custom script  to apply schema changes to the Supabase database.
+-   **API Keys**: The  is no longer in  files. It is expected as an environment variable from the platform. Ensure it is available before testing any AI features.
+-   **Prisma Version**: The Prisma packages in  are intentionally pinned to an older version () to prevent deployment build failures. Do not upgrade them without verifying compatibility with the production Node.js environment.
+
+**documents and test reports created in this job**
+-   
+
+**Last 10 User Messages and any pending HUMAN messages**
+1.  **User**: Remove  from versioned .env files and pass it via platform secrets. Migrate  to remove . Rationalize remaining AI/admin routes. *(Status: IN PROGRESS)*
+2.  **User**: Provided a new Gemini API key: . *(Status: COMPLETED, key was validated and is in use)*
+3.  **User**: Provided another key to test. *(Status: COMPLETED, key was invalid)*
+4.  **User**: Provided another key to test. *(Status: COMPLETED, key was invalid)*
+5.  **User**: Provided another key to test. *(Status: COMPLETED, key was invalid)*
+6.  **User**: Provided another key to test. *(Status: COMPLETED, key was invalid)*
+7.  **User**: Chose Option A (migrate to direct Gemini) and provided the first (invalid) key. *(Status: COMPLETED)*
+8.  **User**: Asked for an explanation of  and the migration options. *(Status: COMPLETED)*
+9.  **User**: Asked if  is still needed. *(Status: COMPLETED)*
+10. **User**: Confirmed refactoring choices (). *(Status: COMPLETED)*
+
+**Project Health Check:**
+-   **Broken**:
+    -   The contact form is non-functional because it is missing the required .
+    -   The  script is non-functional until it is migrated to use the Gemini API directly.
+-   **Mocked**: None.
+
+**3rd Party Integrations**
+-   **Supabase (PostgreSQL)**: The primary database for the application. Requires a user-provided connection string.
+-   **Google Gemini**: Powers all LLM features (chatbot, admin tools). Requires a User API Key ().
+-   **NextAuth.js**: Handles user authentication.
+
+**Testing status**
+-   **Testing agent used after significant changes**: YES
+-   **Troubleshoot agent used after agent stuck in loop**: NO
+-   **Test files created**:
+    -   
+    -   
+-   **Known regressions**: None identified, but the recent refactoring requires careful regression testing of all AI and admin features.
+
+**Credentials to test flow:**
+-   **Admin User**:  / 
+
+**What agent forgot to execute**
+The agent is in the middle of a multi-step task requested by the user. The remaining parts of that task are:
+-   Migrate  to remove the final  dependency.
+-   Perform a final rationalization of the backend AI/admin routes.</analysis>

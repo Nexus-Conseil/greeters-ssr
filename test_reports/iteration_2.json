@@ -39,6 +39,6 @@
   "seed_data_creation": "Created transient chat sessions with TEST_ prefix via API test payloads.",
   "retest_needed": false,
   "should_main_agent_self_test": true,
-  "context_for_next_testing_agent": "Chatbot flow retested on https://greeters-preview.preview.emergentagent.com with data-testid selectors: chat-button -> chat-window -> chat-input -> chat-send-button. Assistant response returned successfully and no runtime page errors detected.",
+  "context_for_next_testing_agent": "Chatbot flow retested on https://nextjs-gemini.preview.emergentagent.com with data-testid selectors: chat-button -> chat-window -> chat-input -> chat-send-button. Assistant response returned successfully and no runtime page errors detected.",
   "rca of the issue": "Previously hidden chatbot was re-enabled via NEXT_PUBLIC_CHAT_API_URL gate in ChatBotLoader. Reproduction for this run: load homepage, wait for deferred client render (~3-4s idle callback), verify chat button appears, open chat window, send message, verify assistant response and backend POST /api/chat/message=200."
 }

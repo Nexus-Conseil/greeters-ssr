@@ -8,6 +8,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(ROOT_DIR / ".env")
+load_dotenv(ROOT_DIR / ".env.local")
 
 logging.basicConfig(
     level=logging.INFO,

@@ -32,6 +32,6 @@
   "seed_data_creation": "Session chatbot de test créée: TEST_MERGE_1503_<random> (via /api/chat/message).",
   "retest_needed": false,
   "should_main_agent_self_test": true,
-  "context_for_next_testing_agent": "Tous les checks demandés dans cette itération passent sur https://greeters-preview.preview.emergentagent.com avec le compte final admin. Le test de régression backend est prêt dans /app/backend/tests/test_admin_merge_1503_regression.py.",
+  "context_for_next_testing_agent": "Tous les checks demandés dans cette itération passent sur https://nextjs-gemini.preview.emergentagent.com avec le compte final admin. Le test de régression backend est prêt dans /app/backend/tests/test_admin_merge_1503_regression.py.",
   "rca of the issue": "N/A - aucun échec détecté dans le périmètre demandé."
 }

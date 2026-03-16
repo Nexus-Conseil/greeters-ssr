@@ -29,6 +29,6 @@
   "seed_data_creation": "No new seed data created in this run.",
   "retest_needed": false,
   "should_main_agent_self_test": true,
-  "context_for_next_testing_agent": "Public validation target used: https://greeters-preview.preview.emergentagent.com. Verified with final admin account florence.levot@nexus-conseil.ch: login 200, me 200, logout 200 then me 401, and /admin UI shows Florence Levot with role SUPER_ADMIN.",
+  "context_for_next_testing_agent": "Public validation target used: https://nextjs-gemini.preview.emergentagent.com. Verified with final admin account florence.levot@nexus-conseil.ch: login 200, me 200, logout 200 then me 401, and /admin UI shows Florence Levot with role SUPER_ADMIN.",
   "rca of the issue": "N/A - no failures in requested scope. A first UI check captured transient sidebar loading text ('Connexion en cours'), resolved within polling window; session values updated correctly to SUPER_ADMIN."
 }
