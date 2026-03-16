@@ -102,7 +102,44 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Tester le frontend public de l'application sur l'URL preview https://nextjs-gemini.preview.emergentagent.com. Contexte : je viens de finaliser un nettoyage sécurité de GEMINI_API_KEY dans les fichiers locaux du workspace. Je veux uniquement une validation smoke test frontend."
+user_problem_statement: "Tester le backend public de l'application Greeters sur https://nextjs-gemini.preview.emergentagent.com. Contexte : nettoyage sécurité de GEMINI_API_KEY dans les fichiers locaux du workspace. Je veux un contrôle backend ciblé, sans modifier le code."
+
+backend:
+  - task: "Health endpoint availability"
+    implemented: true
+    working: true
+    file: "N/A (Next.js API route)"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ GET /api/health retourne status 'ok' avec HTTP 200. Service 'greeters-next' operational. Response: {status: ok, service: greeters-next, timestamp: 2026-03-16T15:13:55.431Z}"
+
+  - task: "Backend public reachability"
+    implemented: true
+    working: true
+    file: "N/A (Infrastructure)"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ Backend public reste joignable après nettoyage sécurité. Testé /api/health (200) et /api/status (200). Infrastructure stable."
+
+  - task: "Chat message API functionality"
+    implemented: true
+    working: true
+    file: "/app/backend/app/routes/chatbot_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ POST /api/chat/message fonctionne normalement. Payload test retourne réponse IA valide (99 chars): 'Bonjour ! 👋 Ravi de vous accueillir. Comment puis-je vous aider à découvrir Paris avec un Greeter ?'. Le flux chat N'EST PAS impacté par le nettoyage GEMINI_API_KEY local - la clé doit être configurée au niveau runtime production."
 
 frontend:
   - task: "Homepage loads correctly"
@@ -174,7 +211,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Homepage smoke test completed"
+    - "Backend security smoke test completed"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -182,3 +219,5 @@ test_plan:
 agent_communication:
   - agent: "testing"
     message: "Smoke test completed successfully on public URL https://nextjs-gemini.preview.emergentagent.com. All critical components (TopBar, Header, Hero, Main content) are rendering correctly. No blocking errors found. The GEMINI_API_KEY security cleanup did not impact frontend public rendering. Screenshot captured showing full homepage with Paris Greeters branding, navigation, hero image, and chatbot widget."
+  - agent: "testing"  
+    message: "Security smoke test backend completed. Résultats inattendus mais positifs: 1) GET /api/health ✅ OK (status: ok), 2) Backend public ✅ joignable, 3) POST /api/chat/message ✅ FONCTIONNEL avec réponse IA valide. CONCLUSION IMPORTANTE: Le flux chat fonctionne normalement - la GEMINI_API_KEY doit être configurée au niveau runtime/production, non impactée par le nettoyage des fichiers locaux. Backend sain et opérationnel."
